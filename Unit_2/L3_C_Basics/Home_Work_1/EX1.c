@@ -8,9 +8,9 @@
 #include <stdio.h>
 
 int main(){
-	printf("%s","##########Console-output###\n");
-	printf("%s","C Programming\n");
-	printf("%s","###########################");
+	printf("##########Console-output###\n");
+	printf("C Programming");
+	printf("\n###########################");
 	return 0;
 }
 
