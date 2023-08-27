@@ -10,7 +10,6 @@
 #include "uart.h"
 
 uint8_t buffer[100]="learn-in-depth:Mohamed";
-static int y;
 
 void main(void){
 	static int x=1;
