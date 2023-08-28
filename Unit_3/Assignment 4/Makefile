@@ -1,27 +1,23 @@
 #@copy-right: moahmedhassan_
 CC=arm-none-eabi-
-CFLAGS=-gdwarf-2 -g -mcpu=cortex-m3
+CFLAGS=-gdwarf-2 -g -mcpu=cortex-m4
 INCS=-I .
 LIBS=
 SRC=$(wildcard *.c)
 OBJ=$(SRC:.c=.o)
-ASS=$(wildcard *.s)
-ASSOBJ=$(ASS:.s=.o)
-PROJ_NAME=Toggle_Led
+PROJ_NAME=Toggle_PF3
 
 all: $(PROJ_NAME).bin
 	@echo "===== Program Build Succeeded ====="
 
-%.o: %.s 
-	$(CC)as $(CFLAGS) $< -o $@
-	
-%.o:  %.c
+%.o: %.c
 	$(CC)gcc -c $(CFLAGS) $(INCS) $< -o $@
 
-$(PROJ_NAME).elf: $(ASSOBJ) $(OBJ)
-	$(CC)ld  -T linker_script.ld $(LIBS) $(ASSOBJ) $(OBJ) -o $@  -Map=Map_File.map
+$(PROJ_NAME).elf: $(OBJ)
+	$(CC)ld -T linker_script.ld $(LIBS) $(OBJ) -o $@ -Map=Map_File.map
+	cp $@ $(PROJ_NAME).axf
 
-$(PROJ_NAME).bin: $(PROJ_NAME).elf	
+$(PROJ_NAME).bin: $(PROJ_NAME).elf
 	$(CC)objcopy -O binary $< $@
 
 clean_all:
