@@ -33,8 +33,8 @@ STATE_FUNC(PS_READING){
 STATE_FUNC(PS_WAITING){
 	//Pressure Sensor State
 	PS_State = PS_WAITING_;
-	// Wait for data
-	Delay(1000);
+	// Wait for data 3 seconds
+	Delay(3); 
 	//Change State
 	PS_StateFuncPtr = STATE_NAME(PS_READING);
 }

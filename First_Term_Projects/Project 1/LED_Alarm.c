@@ -33,8 +33,8 @@ STATE_FUNC(LA_ALARM_ON){
 STATE_FUNC(LA_WAITING){
 	//Alarm Sensor State
 	LA_State = LA_WAITING_;
-	// Wait for data
-	Delay(500);
+	// Wait for alarm 10 seconds
+	Delay(10);
 	//Change State
 	LA_StateFuncPtr = STATE_NAME(LA_ALARM_OFF);
 }

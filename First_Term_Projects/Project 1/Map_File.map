@@ -21,7 +21,7 @@ SRAM             0x20000000         0x00005000
 Linker script and memory map
 
 
-.text           0x00000000      0x3f8
+.text           0x00000000      0x404
  *(.vectors)
  .vectors       0x00000000       0x1c startup.o
                 0x00000000                vectors
@@ -40,49 +40,49 @@ Linker script and memory map
  .text          0x0000015c       0x50 Pressure_Controller.o
                 0x0000015c                ST_PC_HIGH_PRESSURE_DETECTION
                 0x0000018c                PC_HighPressureDetected
- .text          0x000001ac       0x90 Pressure_Sensor.o
+ .text          0x000001ac       0x8c Pressure_Sensor.o
                 0x000001ac                ST_PS_INIT
                 0x000001d0                ST_PS_READING
                 0x00000200                ST_PS_WAITING
-                0x00000228                PS_SetPressureValue
- .text          0x0000023c       0xc4 driver.o
-                0x0000023c                Delay
-                0x0000025c                getPressureVal
-                0x00000274                Set_Alarm_actuator
-                0x000002b0                GPIO_INITIALIZATION
- .text          0x00000300       0x78 main.o
-                0x00000300                setup
-                0x00000344                main
- .text          0x00000378       0x80 startup.o
-                0x00000378                Reset_Handler
-                0x000003ec                MM_Fault_Handler
-                0x000003ec                Bus_Fault_Handler
-                0x000003ec                Default_Handler
-                0x000003ec                Usage_Fault_Handler
-                0x000003ec                Hard_Fault_Handler
-                0x000003ec                NMI_Handler
+                0x00000224                PS_SetPressureValue
+ .text          0x00000238       0xd4 driver.o
+                0x00000238                Delay
+                0x00000268                getPressureVal
+                0x00000280                Set_Alarm_actuator
+                0x000002bc                GPIO_INITIALIZATION
+ .text          0x0000030c       0x78 main.o
+                0x0000030c                setup
+                0x00000350                main
+ .text          0x00000384       0x80 startup.o
+                0x00000384                Reset_Handler
+                0x000003f8                MM_Fault_Handler
+                0x000003f8                Bus_Fault_Handler
+                0x000003f8                Default_Handler
+                0x000003f8                Usage_Fault_Handler
+                0x000003f8                Hard_Fault_Handler
+                0x000003f8                NMI_Handler
  *(.rodata)
-                0x000003f8                _E_TEXT = .
+                0x00000404                _E_TEXT = .
 
-.glue_7         0x000003f8        0x0
- .glue_7        0x000003f8        0x0 linker stubs
+.glue_7         0x00000404        0x0
+ .glue_7        0x00000404        0x0 linker stubs
 
-.glue_7t        0x000003f8        0x0
- .glue_7t       0x000003f8        0x0 linker stubs
+.glue_7t        0x00000404        0x0
+ .glue_7t       0x00000404        0x0 linker stubs
 
-.vfp11_veneer   0x000003f8        0x0
- .vfp11_veneer  0x000003f8        0x0 linker stubs
+.vfp11_veneer   0x00000404        0x0
+ .vfp11_veneer  0x00000404        0x0 linker stubs
 
-.v4_bx          0x000003f8        0x0
- .v4_bx         0x000003f8        0x0 linker stubs
+.v4_bx          0x00000404        0x0
+ .v4_bx         0x00000404        0x0 linker stubs
 
-.iplt           0x000003f8        0x0
- .iplt          0x000003f8        0x0 Alarm_Driver.o
+.iplt           0x00000404        0x0
+ .iplt          0x00000404        0x0 Alarm_Driver.o
 
-.rel.dyn        0x000003f8        0x0
- .rel.iplt      0x000003f8        0x0 Alarm_Driver.o
+.rel.dyn        0x00000404        0x0
+ .rel.iplt      0x00000404        0x0 Alarm_Driver.o
 
-.data           0x20000000        0x0 load address 0x000003f8
+.data           0x20000000        0x0 load address 0x00000404
                 0x20000000                _S_DATA = .
  *(.data)
  .data          0x20000000        0x0 Alarm_Driver.o
@@ -95,10 +95,10 @@ Linker script and memory map
                 0x20000000                . = ALIGN (0x4)
                 0x20000000                _E_DATA = .
 
-.igot.plt       0x20000000        0x0 load address 0x000003f8
+.igot.plt       0x20000000        0x0 load address 0x00000404
  .igot.plt      0x20000000        0x0 Alarm_Driver.o
 
-.bss            0x20000000     0x1028 load address 0x000003f8
+.bss            0x20000000     0x1028 load address 0x00000404
                 0x20000000                _S_BSS = .
  *(.bss)
  .bss           0x20000000        0x0 Alarm_Driver.o
@@ -135,32 +135,32 @@ LOAD main.o
 LOAD startup.o
 OUTPUT(First_Term_Project_1.elf elf32-littlearm)
 
-.debug_info     0x00000000      0x8e9
+.debug_info     0x00000000      0x907
  .debug_info    0x00000000      0x164 Alarm_Driver.o
  .debug_info    0x00000164      0x10a LED_Alarm.o
  .debug_info    0x0000026e      0x10a Pressure_Controller.o
  .debug_info    0x00000378      0x140 Pressure_Sensor.o
- .debug_info    0x000004b8       0xff driver.o
- .debug_info    0x000005b7      0x1ac main.o
- .debug_info    0x00000763      0x186 startup.o
+ .debug_info    0x000004b8      0x10d driver.o
+ .debug_info    0x000005c5      0x1ac main.o
+ .debug_info    0x00000771      0x196 startup.o
 
 .debug_abbrev   0x00000000      0x4e7
  .debug_abbrev  0x00000000       0xbd Alarm_Driver.o
  .debug_abbrev  0x000000bd       0x80 LED_Alarm.o
  .debug_abbrev  0x0000013d       0xb6 Pressure_Controller.o
- .debug_abbrev  0x000001f3       0xcc Pressure_Sensor.o
- .debug_abbrev  0x000002bf       0xb5 driver.o
- .debug_abbrev  0x00000374       0xab main.o
- .debug_abbrev  0x0000041f       0xc8 startup.o
+ .debug_abbrev  0x000001f3       0xb6 Pressure_Sensor.o
+ .debug_abbrev  0x000002a9       0xc4 driver.o
+ .debug_abbrev  0x0000036d       0xab main.o
+ .debug_abbrev  0x00000418       0xcf startup.o
 
-.debug_loc      0x00000000      0x550
+.debug_loc      0x00000000      0x580
  .debug_loc     0x00000000      0x168 Alarm_Driver.o
  .debug_loc     0x00000168       0x84 LED_Alarm.o
  .debug_loc     0x000001ec       0x70 Pressure_Controller.o
- .debug_loc     0x0000025c       0xe0 Pressure_Sensor.o
- .debug_loc     0x0000033c      0x140 driver.o
- .debug_loc     0x0000047c       0x58 main.o
- .debug_loc     0x000004d4       0x7c startup.o
+ .debug_loc     0x0000025c      0x110 Pressure_Sensor.o
+ .debug_loc     0x0000036c      0x140 driver.o
+ .debug_loc     0x000004ac       0x58 main.o
+ .debug_loc     0x00000504       0x7c startup.o
 
 .debug_aranges  0x00000000       0xe0
  .debug_aranges
@@ -182,26 +182,26 @@ OUTPUT(First_Term_Project_1.elf elf32-littlearm)
  .debug_line    0x00000000       0x7a Alarm_Driver.o
  .debug_line    0x0000007a       0x59 LED_Alarm.o
  .debug_line    0x000000d3       0x79 Pressure_Controller.o
- .debug_line    0x0000014c       0x7a Pressure_Sensor.o
- .debug_line    0x000001c6       0x69 driver.o
+ .debug_line    0x0000014c       0x79 Pressure_Sensor.o
+ .debug_line    0x000001c5       0x6a driver.o
  .debug_line    0x0000022f       0xa7 main.o
  .debug_line    0x000002d6       0x5d startup.o
 
-.debug_str      0x00000000      0x457
- .debug_str     0x00000000      0x1e1 Alarm_Driver.o
+.debug_str      0x00000000      0x460
+ .debug_str     0x00000000      0x1d8 Alarm_Driver.o
                                 0x1ff (size before relaxing)
- .debug_str     0x000001e1       0x79 LED_Alarm.o
+ .debug_str     0x000001d8       0x79 LED_Alarm.o
                                 0x1cc (size before relaxing)
- .debug_str     0x0000025a       0x89 Pressure_Controller.o
+ .debug_str     0x00000251       0x89 Pressure_Controller.o
                                 0x1e5 (size before relaxing)
- .debug_str     0x000002e3       0x8f Pressure_Sensor.o
+ .debug_str     0x000002da       0x8f Pressure_Sensor.o
                                 0x1eb (size before relaxing)
- .debug_str     0x00000372       0x4c driver.o
-                                0x1a8 (size before relaxing)
- .debug_str     0x000003be       0x12 main.o
+ .debug_str     0x00000369       0x54 driver.o
+                                0x1b0 (size before relaxing)
+ .debug_str     0x000003bd       0x12 main.o
                                 0x259 (size before relaxing)
- .debug_str     0x000003d0       0x87 startup.o
-                                0x1e3 (size before relaxing)
+ .debug_str     0x000003cf       0x91 startup.o
+                                0x1ed (size before relaxing)
 
 .comment        0x00000000       0x7e
  .comment       0x00000000       0x7e Alarm_Driver.o
@@ -230,11 +230,11 @@ OUTPUT(First_Term_Project_1.elf elf32-littlearm)
  .ARM.attributes
                 0x00000132       0x33 startup.o
 
-.debug_frame    0x00000000      0x338
+.debug_frame    0x00000000      0x340
  .debug_frame   0x00000000       0xc8 Alarm_Driver.o
  .debug_frame   0x000000c8       0x64 LED_Alarm.o
  .debug_frame   0x0000012c       0x4c Pressure_Controller.o
- .debug_frame   0x00000178       0x88 Pressure_Sensor.o
- .debug_frame   0x00000200       0xa0 driver.o
- .debug_frame   0x000002a0       0x48 main.o
- .debug_frame   0x000002e8       0x50 startup.o
+ .debug_frame   0x00000178       0x90 Pressure_Sensor.o
+ .debug_frame   0x00000208       0xa0 driver.o
+ .debug_frame   0x000002a8       0x48 main.o
+ .debug_frame   0x000002f0       0x50 startup.o

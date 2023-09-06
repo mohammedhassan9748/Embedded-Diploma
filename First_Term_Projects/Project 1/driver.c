@@ -2,7 +2,8 @@
 
 void Delay(int nCount)
 {
-	for(; nCount != 0; nCount--);
+	unsigned int counter = (unsigned int)(nCount*(1000000/4));
+	for(; counter != 0; counter--);
 }
 
 int getPressureVal(){

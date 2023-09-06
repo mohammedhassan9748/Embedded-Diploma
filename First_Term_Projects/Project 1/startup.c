@@ -1,6 +1,6 @@
 #include "Platform_Types.h"
 
-extern uint32_t stack_top;
+extern vuint32_t stack_top;
 extern int main(void);
 
 void Reset_Handler(void);
@@ -14,13 +14,13 @@ void Usage_Fault_Handler(void) __attribute__((weak,alias("Default_Handler")));;
 
 
 void (*const vectors[])() __attribute__((section(".vectors")))= {
-	(uint32_t*) &stack_top,
-	&Reset_Handler,
-	&NMI_Handler,
-	&Hard_Fault_Handler,
-	&MM_Fault_Handler,
-	&Bus_Fault_Handler,
-	&Usage_Fault_Handler
+	(uint32_t)&stack_top,
+	(uint32_t)&Reset_Handler,
+	(uint32_t)&NMI_Handler,
+	(uint32_t)&Hard_Fault_Handler,
+	(uint32_t)&MM_Fault_Handler,
+	(uint32_t)&Bus_Fault_Handler,
+	(uint32_t)&Usage_Fault_Handler
 };
 
 extern uint32_t _E_TEXT;
