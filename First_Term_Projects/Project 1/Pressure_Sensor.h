@@ -14,9 +14,9 @@
 #include "Platform_Types.h"
 
 enum{
-	PS_INIT,
-	PS_READING,
-	PS_WAITING
+	PS_INIT_,
+	PS_READING_,
+	PS_WAITING_
 }PS_State;
 
 STATE_FUNC(PS_INIT);

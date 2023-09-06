@@ -16,9 +16,9 @@
 #define LA_Alarm_Duration 60
 
 enum{
-	LA_ALARM_OFF,
-	LA_ALARM_ON,
-	LA_WAITING
+	LA_ALARM_OFF_,
+	LA_ALARM_ON_,
+	LA_WAITING_
 }LA_State;
 
 STATE_FUNC(LA_ALARM_OFF);

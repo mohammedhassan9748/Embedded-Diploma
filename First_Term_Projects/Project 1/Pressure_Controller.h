@@ -16,7 +16,7 @@
 
 // Define Status
 enum {
-	PC_HIGH_PRESSURE_DETECTION,
+	PC_HIGH_PRESSURE_DETECTION_,
 }PC_State;
 
 // Declare Status Functions CA

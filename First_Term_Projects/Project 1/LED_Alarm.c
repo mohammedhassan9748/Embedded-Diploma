@@ -13,7 +13,7 @@ void (*LA_StateFuncPtr)();
 
 STATE_FUNC(LA_ALARM_OFF){
 	//Alarm Sensor State
-	LA_State = LA_ALARM_OFF;
+	LA_State = LA_ALARM_OFF_;
 	//Stop Alarm
 	LA_StopAlarm();
 	//Change State
@@ -23,7 +23,7 @@ STATE_FUNC(LA_ALARM_OFF){
 }
 STATE_FUNC(LA_ALARM_ON){
 	//Alarm Sensor State
-	LA_State = LA_ALARM_ON;
+	LA_State = LA_ALARM_ON_;
 	//Start Alarm
 	LA_StartAlarm();
 	//Change State
@@ -32,7 +32,7 @@ STATE_FUNC(LA_ALARM_ON){
 }
 STATE_FUNC(LA_WAITING){
 	//Alarm Sensor State
-	LA_State = LA_WAITING;
+	LA_State = LA_WAITING_;
 	// Wait for data
 	Delay(500);
 	//Change State

@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes'?>
 <WORKSPACE>
  <FRAME activewindow="0">
-  <PLACEMENT>2c0000000200000003000000ffffffffffffffffffffffffffffffffd803000045010000870700002a050000</PLACEMENT>
+  <PLACEMENT>2c00000002000000030000000083ffff0083ffffffffffffffffffff7201000028000000a40500000d040000</PLACEMENT>
   <WINDOW type="default" module="ISIS">
-   <editor metric="0" gridmajor="2540000" mode="00000000" zoom="0" scale="118" flipped="0" gridminor="254000" gridmode="32" snapidx="2" snap="254000" xcursor="16" orgmode="0" snaprange="127000">
+   <editor metric="0" gridmajor="2540000" mode="00000000" zoom="-1" scale="118" flipped="0" gridminor="254000" gridmode="32" snapidx="2" snap="254000" xcursor="16" orgmode="0" snaprange="127000">
     <world y1="-8890000" x1="-12700000" y2="8890000" x2="12700000"/>
-    <centre x="-5588000" y="-246825"/>
+    <centre x="0" y="10762"/>
     <origin x="0" y="0"/>
    </editor>
   </WINDOW>
@@ -18,19 +18,20 @@
   </editor>
  </MODULE>
  <MODULE name="ISIS">
-  <editor metric="0" gridmajor="2540000" mode="00000000" zoom="0" scale="118" flipped="0" gridminor="254000" gridmode="32" snapidx="2" snap="254000" xcursor="16" orgmode="0" snaprange="127000">
+  <editor metric="0" gridmajor="2540000" mode="00000000" zoom="-1" scale="118" flipped="0" gridminor="254000" gridmode="32" snapidx="2" snap="254000" xcursor="16" orgmode="0" snaprange="127000">
    <world y1="-8890000" x1="-12700000" y2="8890000" x2="12700000"/>
-   <centre x="-5588000" y="-246825"/>
+   <centre x="0" y="10762"/>
    <origin x="0" y="0"/>
   </editor>
  </MODULE>
  <MODULE name="VSMDEBUG">
   <PWI>
-   <POPUP w="800" x="48" flags="00000002" y="160" h="200" pid="0" iid="-1">
+   <POPUP w="800" x="324" flags="00000002" y="199" h="200" pid="0" iid="-1">
     <PROPERTIES>
-     <ITEM name="Message Column Width">661</ITEM>
+     <ITEM name="Message Column Width">540</ITEM>
      <ITEM name="ShowGrid">No</ITEM>
      <ITEM name="Source Column Width">100</ITEM>
+     <ITEM name="Time Column Width">120</ITEM>
      <ITEM name="Version">100</ITEM>
     </PROPERTIES>
    </POPUP>
@@ -361,22 +362,22 @@
      <ITEM name="TopLineAddress">E000E000</ITEM>
     </PROPERTIES>
    </POPUP>
-   <POPUP w="772" x="52" flags="0000000a" y="296" h="643" pid="100" iid="1">
+   <POPUP w="1177" x="12" flags="0000800b" y="113" h="837" pid="100" iid="1">
     <PROPERTIES/>
    </POPUP>
-   <POPUP w="590" x="1078" flags="0000000a" y="194" h="356" pid="101" iid="1">
+   <POPUP w="590" x="1193" flags="0000000b" y="193" h="356" pid="101" iid="1">
     <PROPERTIES>
-     <ITEM name="Address Column Width">93</ITEM>
+     <ITEM name="Address Column Width">148</ITEM>
      <ITEM name="AutoResize">No</ITEM>
      <ITEM name="Gridlines">Yes</ITEM>
-     <ITEM name="Name Column Width">108</ITEM>
+     <ITEM name="Name Column Width">127</ITEM>
      <ITEM name="ShowAddresses">Yes</ITEM>
      <ITEM name="ShowGlobals">Yes</ITEM>
      <ITEM name="ShowPreviousValues">No</ITEM>
      <ITEM name="ShowTypes">No</ITEM>
      <ITEM name="ShowWatchPoint">No</ITEM>
      <ITEM name="TriggerMode">0</ITEM>
-     <ITEM name="Value Column Width">252</ITEM>
+     <ITEM name="Value Column Width">260</ITEM>
      <ITEM name="Version">100</ITEM>
      <ITEM name="nItems">0</ITEM>
     </PROPERTIES>
@@ -384,7 +385,7 @@
    <POPUP w="30" x="748" flags="00000008" y="860" h="20" pid="102" iid="1">
     <PROPERTIES/>
    </POPUP>
-   <POPUP w="320" x="1498" flags="0000000a" y="482" h="240" pid="104" iid="1">
+   <POPUP w="320" x="1292" flags="0000000b" y="528" h="240" pid="104" iid="1">
     <PROPERTIES/>
    </POPUP>
    <POPUP w="22" x="788" flags="00000008" y="900" h="18" pid="350" iid="1">
@@ -393,6 +394,7 @@
   </PWI>
   <BREAKPOINT LINE="15" ENABLED="FALSE" FILE="main.c" ADDRESS="4294967295" PROJECT="-1"/>
   <BREAKPOINT LINE="21" FILE="main.c" ADDRESS="4294967295" PROJECT="-1"/>
+  <BREAKPOINT LINE="45" FILE="startup.c" ADDRESS="4294967295" PROJECT="-1"/>
   <BREAKPOINT LINE="46" FILE="startup.c" ADDRESS="4294967295" PROJECT="-1"/>
  </MODULE>
 </WORKSPACE>

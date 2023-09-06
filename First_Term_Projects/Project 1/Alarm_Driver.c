@@ -15,30 +15,30 @@ STATE_FUNC(AD_INIT){
 	//Init
 	//------
 	//Alarm Sensor State
-	AD_State = AD_INIT;
+	AD_State = AD_INIT_;
 	//Change State
 	AD_StateFuncPtr = STATE_NAME(AD_WAITING);
 }
 
 STATE_FUNC(AD_WAITING){
 	//Alarm Sensor State
-	AD_State = AD_WAITING;
+	AD_State = AD_WAITING_;
 }
 
 STATE_FUNC(AD_LED_OFF){
 	//Alarm Sensor State
-	AD_State = AD_LED_OFF;
+	AD_State = AD_LED_OFF_;
 	//Start Alarm
-	Set_Alarm_actuator(0);
+	Set_Alarm_actuator(1);
 	//Change State
 	AD_StateFuncPtr = STATE_NAME(AD_WAITING);
 }
 
 STATE_FUNC(AD_LED_ON){
 	//Alarm Sensor State
-	AD_State = AD_LED_ON;
+	AD_State = AD_LED_ON_;
 	//Start Alarm
-	Set_Alarm_actuator(1);
+	Set_Alarm_actuator(0);
 	//Change State
 	AD_StateFuncPtr = STATE_NAME(AD_WAITING);
 }

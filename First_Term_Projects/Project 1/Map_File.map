@@ -187,20 +187,20 @@ OUTPUT(First_Term_Project_1.elf elf32-littlearm)
  .debug_line    0x0000022f       0xa7 main.o
  .debug_line    0x000002d6       0x5d startup.o
 
-.debug_str      0x00000000      0x3c7
- .debug_str     0x00000000      0x1b5 Alarm_Driver.o
-                                0x1fb (size before relaxing)
- .debug_str     0x000001b5       0x52 LED_Alarm.o
-                                0x1c9 (size before relaxing)
- .debug_str     0x00000207       0x6d Pressure_Controller.o
-                                0x1e4 (size before relaxing)
- .debug_str     0x00000274       0x6e Pressure_Sensor.o
-                                0x1e8 (size before relaxing)
- .debug_str     0x000002e2       0x4c driver.o
+.debug_str      0x00000000      0x457
+ .debug_str     0x00000000      0x1e1 Alarm_Driver.o
+                                0x1ff (size before relaxing)
+ .debug_str     0x000001e1       0x79 LED_Alarm.o
+                                0x1cc (size before relaxing)
+ .debug_str     0x0000025a       0x89 Pressure_Controller.o
+                                0x1e5 (size before relaxing)
+ .debug_str     0x000002e3       0x8f Pressure_Sensor.o
+                                0x1eb (size before relaxing)
+ .debug_str     0x00000372       0x4c driver.o
                                 0x1a8 (size before relaxing)
- .debug_str     0x0000032e       0x12 main.o
-                                0x24e (size before relaxing)
- .debug_str     0x00000340       0x87 startup.o
+ .debug_str     0x000003be       0x12 main.o
+                                0x259 (size before relaxing)
+ .debug_str     0x000003d0       0x87 startup.o
                                 0x1e3 (size before relaxing)
 
 .comment        0x00000000       0x7e

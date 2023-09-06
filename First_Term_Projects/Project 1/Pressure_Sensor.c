@@ -17,13 +17,13 @@ STATE_FUNC(PS_INIT){
 	//Init
 	//------
 	//Pressure Sensor State
-	PS_State = PS_INIT;
+	PS_State = PS_INIT_;
 	//Change State
 	PS_StateFuncPtr = STATE_NAME(PS_READING);
 }
 STATE_FUNC(PS_READING){
 	//Pressure Sensor State
-	PS_State = PS_READING;
+	PS_State = PS_READING_;
 	//get pressure value
 	PS_pVal = getPressureVal();
 	//Change State
@@ -32,7 +32,7 @@ STATE_FUNC(PS_READING){
 }
 STATE_FUNC(PS_WAITING){
 	//Pressure Sensor State
-	PS_State = PS_WAITING;
+	PS_State = PS_WAITING_;
 	// Wait for data
 	Delay(1000);
 	//Change State

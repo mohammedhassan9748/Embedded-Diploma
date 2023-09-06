@@ -14,10 +14,10 @@
 #include "Platform_Types.h"
 
 enum{
-	AD_INIT,
-	AD_WAITING,
-	AD_LED_OFF,
-	AD_LED_ON
+	AD_INIT_,
+	AD_WAITING_,
+	AD_LED_OFF_,
+	AD_LED_ON_
 }AD_State;
 
 STATE_FUNC(AD_INIT);

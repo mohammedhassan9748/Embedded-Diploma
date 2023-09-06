@@ -18,7 +18,7 @@
 
 //STATE CONNECTIONS
 
-// Pressure Sensor =====> Main Program
+// Pressure Sensor =====> Pressure Controller
 uint32_t PS_SetPressureValue(void);
 
 // Pressure Controller =====> LED Alarm

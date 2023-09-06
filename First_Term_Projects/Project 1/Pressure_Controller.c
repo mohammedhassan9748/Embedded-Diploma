@@ -16,7 +16,7 @@ void (*PC_StateFuncPtr)();
 
 STATE_FUNC(PC_HIGH_PRESSURE_DETECTION){
 	//Pressure Sensor State
-	PC_State = PC_HIGH_PRESSURE_DETECTION;
+	PC_State = PC_HIGH_PRESSURE_DETECTION_;
 	// get pressure value
 	PC_pVal = PS_SetPressureValue();
 	//Change State

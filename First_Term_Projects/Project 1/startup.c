@@ -14,7 +14,7 @@ void Usage_Fault_Handler(void) __attribute__((weak,alias("Default_Handler")));;
 
 
 void (*const vectors[])() __attribute__((section(".vectors")))= {
-	(uint32_t) &stack_top,
+	(uint32_t*) &stack_top,
 	&Reset_Handler,
 	&NMI_Handler,
 	&Hard_Fault_Handler,
