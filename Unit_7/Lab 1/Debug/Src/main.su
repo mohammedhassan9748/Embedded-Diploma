@@ -1,0 +1,4 @@
+main.c:24:6:Clock_Init	4	static
+main.c:30:6:PushButtons_Init	16	static
+main.c:41:6:LEDs_Init	16	static
+main.c:55:5:main	16	static
