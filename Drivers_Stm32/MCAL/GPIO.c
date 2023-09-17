@@ -72,9 +72,6 @@ static uint8_t Get_CRx_Position(uint16_t PinNumber){
 *
 * @brief 			- Initializes GPIOx PINy according to the specified parameters in PinConfig.
 *
-* @param [in] 		- GPIOx_Ptr: Pointer to GPIO_Typedef structure that holds the port registers and
-* 					  x can be (A->E) to select GPIO peripheral desired.
-*
 * @param [in] 		- GPIO_PinConfigPtr: Pointer to the GPIO_PinConfig_t structure that holds
 * 					  the configuration information for the pin of the desired peripheral.
 *
@@ -83,11 +80,11 @@ static uint8_t Get_CRx_Position(uint16_t PinNumber){
 * Note				-
 *
 */
-void MCAL_GPIO_Init(GPIO_Typedef* GPIOx_Ptr, GPIO_PinConfig_t* GPIO_PinConfigPtr){
+void MCAL_GPIO_Init(GPIO_PinConfig_t* GPIO_PinConfigPtr){
 
 	//Pointer holds the configuration register address either High or Low depends on PinNo
 	vuint32_t* GPIO_CRx = NULL_PTR;
-	GPIO_CRx = ((GPIO_PinConfigPtr->GPIO_PinNo < GPIO_PIN_8)?&(GPIOx_Ptr->CRL):&(GPIOx_Ptr->CRH));
+	GPIO_CRx = ((GPIO_PinConfigPtr->GPIO_PinNo < GPIO_PIN_8)?&(GPIO_PinConfigPtr->GPIO_Port->CRL):&(GPIO_PinConfigPtr->GPIO_Port->CRH));
 
 	//MODE & CNF Variable (Initialized by it's default reset value)
 	uint8_t PinConfig_Value = 0x4;
@@ -126,14 +123,14 @@ void MCAL_GPIO_Init(GPIO_Typedef* GPIOx_Ptr, GPIO_PinConfig_t* GPIO_PinConfigPtr
 			if(GPIO_PinConfigPtr->GPIO_Mode == GPIO_MODE_INPUT_PU)
 			{
 				//Set output data register ODR because pull up specified
-				GPIOx_Ptr->ODR |= (GPIO_PinConfigPtr->GPIO_PinNo);
+				GPIO_PinConfigPtr->GPIO_Port->ODR |= (GPIO_PinConfigPtr->GPIO_PinNo);
 			}
 
 			//Check if Input with pull-down
 			else
 			{
 				//Clear output data register ODR because pull down specified
-				GPIOx_Ptr->ODR |= (GPIO_PinConfigPtr->GPIO_PinNo);
+				GPIO_PinConfigPtr->GPIO_Port->ODR |= (GPIO_PinConfigPtr->GPIO_PinNo);
 			}
 		}
 
@@ -204,20 +201,18 @@ void MCAL_GPIO_DeInit(GPIO_Typedef* GPIOx_Ptr){
 *
 * @brief 			- Read specific Pin
 *
-* @param [in] 		- GPIOx_Ptr: Pointer to GPIO_Typedef structure that holds the port registers and
-* 					  x can be (A->E) to select GPIO peripheral desired.
-*
-* @param [in] 		- PinNo: Set pin according to @ref GPIO_Pins_Define
+* @param [in] 		- GPIO_PinConfigPtr: Pointer to the GPIO_PinConfig_t structure that holds
+* 					  the configuration information for the pin of the desired peripheral.
 *
 * @retval 			- The input pin value (two values based on @ref GPIO_PinState_Define).
 *
 * Note				-
 *
 */
-uint8_t MCAL_GPIO_ReadPin(GPIO_Typedef* GPIOx_Ptr, uint16_t PinNo){
+uint8_t MCAL_GPIO_ReadPin(GPIO_PinConfig_t* GPIO_PinConfigPtr){
 
 	//Check if pin state is one.
-	if(GPIOx_Ptr->IDR & PinNo){
+	if(GPIO_PinConfigPtr->GPIO_Port->IDR & GPIO_PinConfigPtr->GPIO_PinNo){
 		return (uint8_t)GPIO_PIN_SET;
 	}
 
@@ -254,10 +249,8 @@ uint16_t MCAL_GPIO_ReadPort(GPIO_Typedef* GPIOx_Ptr){
 *
 * @brief 			- Write on specific pin in the specified port
 *
-* @param [in] 		- GPIOx_Ptr: Pointer to GPIO_Typedef structure that holds the port registers and
-* 					  x can be (A->E) to select GPIO peripheral desired.
-*
-* @param [in] 		- PinNo: Set pin according to @ref GPIO_Pins_Define.
+* @param [in] 		- GPIO_PinConfigPtr: Pointer to the GPIO_PinConfig_t structure that holds
+* 					  the configuration information for the pin of the desired peripheral.
 *
 * @param [in] 		- PinValue: To write the desired pin value
 * 					  (two values based on @ref GPIO_PinState_Define).
@@ -267,21 +260,19 @@ uint16_t MCAL_GPIO_ReadPort(GPIO_Typedef* GPIOx_Ptr){
 * Note				-
 *
 */
-void MCAL_GPIO_WritePin(GPIO_Typedef* GPIOx_Ptr, uint16_t PinNo, uint8_t PinValue){
+void MCAL_GPIO_WritePin(GPIO_PinConfig_t* GPIO_PinConfigPtr, uint8_t PinValue){
 
 	//Check if sent pin state is one.
-	if(PinValue == GPIO_PIN_SET){
-		//GPIOx_Ptr->ODR |= PinNo;
-		//or
-		GPIOx_Ptr->BSRR = PinNo;
+	if(PinValue == GPIO_PIN_SET)
+	{
+
+		GPIO_PinConfigPtr->GPIO_Port->BSRR = GPIO_PinConfigPtr->GPIO_PinNo;
 	}
 
 	//Check if sent pin state is zero.
 	else
 	{
-		//GPIOx_Ptr->ODR &= ~PinNo;
-		//or
-		GPIOx_Ptr->BRR = PinNo;
+		GPIO_PinConfigPtr->GPIO_Port->BRR = GPIO_PinConfigPtr->GPIO_PinNo;
 	}
 
 }
@@ -313,20 +304,18 @@ void MCAL_GPIO_WritePort(GPIO_Typedef* GPIOx_Ptr, uint16_t PortValue){
 *
 * @brief 			- Toggle specific pin in the specified port
 *
-* @param [in] 		- GPIOx_Ptr: Pointer to GPIO_Typedef structure that holds the port registers and
-* 					  x can be (A->E) to select GPIO peripheral desired.
+* @param [in] 		- GPIO_PinConfigPtr: Pointer to the GPIO_PinConfig_t structure that holds
+* 					  the configuration information for the pin of the desired peripheral.
 *
-* @param [in] 		- PinNo: Set pin according to @ref GPIO_Pins_Define.
-
 * @retval 			- None.
 *
 * Note				-
 *
 */
-void MCAL_GPIO_TogglePin(GPIO_Typedef* GPIOx_Ptr, uint16_t PinNo){
+void MCAL_GPIO_TogglePin(GPIO_PinConfig_t* GPIO_PinConfigPtr){
 
 	//Toggle the specified pin
-	GPIOx_Ptr->ODR ^= PinNo;
+	GPIO_PinConfigPtr->GPIO_Port->ODR ^= GPIO_PinConfigPtr->GPIO_PinNo;
 }
 
 /**================================================================
@@ -334,11 +323,9 @@ void MCAL_GPIO_TogglePin(GPIO_Typedef* GPIOx_Ptr, uint16_t PinNo){
 *
 * @brief 			- Lock specific pin in the specified port (Allow the IO configuration to be frozen)
 *
-* @param [in] 		- GPIOx_Ptr: Pointer to GPIO_Typedef structure that holds the port registers and
-* 					  x can be (A->E) to select GPIO peripheral desired.
+* @param [in] 		- GPIO_PinConfigPtr: Pointer to the GPIO_PinConfig_t structure that holds
+* 					  the configuration information for the pin of the desired peripheral.
 *
-* @param [in] 		- PinNo: Set pin according to @ref GPIO_Pins_Define.
-
 * @retval 			- Ok flag if pin configuration is locked or error if pin configuration is not locked
 *					  (two values based on @ref GPIO_LockState_Define)..
 *
@@ -346,11 +333,11 @@ void MCAL_GPIO_TogglePin(GPIO_Typedef* GPIOx_Ptr, uint16_t PinNo){
 * 					  possible to modify the value of the port bit until the next reset
 *
 */
-uint8_t MCAL_GPIO_LockPin(GPIO_Typedef* GPIOx_Ptr, uint16_t PinNo){
+uint8_t MCAL_GPIO_LockPin(GPIO_PinConfig_t* GPIO_PinConfigPtr){
 
 	//Bits 15:0 LCKy: Port x Lock bit y (y= 0 .. 15)
 	//These bits are read write but can only be written when the LCKK bit is 0.
-	GPIOx_Ptr->LCKR |= PinNo;
+	GPIO_PinConfigPtr->GPIO_Port->LCKR |= GPIO_PinConfigPtr->GPIO_PinNo;
 
 	//Bit 16 LCKK[16]: Lock key
 	//This bit can be read anytime. It can only be modified using the Lock Key Writing Sequence.
@@ -359,15 +346,15 @@ uint8_t MCAL_GPIO_LockPin(GPIO_Typedef* GPIOx_Ptr, uint16_t PinNo){
 
 	//LOCK key writing sequence:
 	//Write 1
-	SET_BIT(GPIOx_Ptr->LCKR,16);
+	SET_BIT(GPIO_PinConfigPtr->GPIO_Port->LCKR,16);
 	//Write 0
-	CLEAR_BIT(GPIOx_Ptr->LCKR,16);
+	CLEAR_BIT(GPIO_PinConfigPtr->GPIO_Port->LCKR,16);
 	//Write 1
-	SET_BIT(GPIOx_Ptr->LCKR,16);
+	SET_BIT(GPIO_PinConfigPtr->GPIO_Port->LCKR,16);
 	//Read 0
-	READ_BIT(GPIOx_Ptr->LCKR,16);
+	READ_BIT(GPIO_PinConfigPtr->GPIO_Port->LCKR,16);
 	//Read 1 (this read is optional but confirms that the lock is active)
-	if(READ_BIT(GPIOx_Ptr->LCKR,16))
+	if(READ_BIT(GPIO_PinConfigPtr->GPIO_Port->LCKR,16))
 	{
 		return (uint8_t)GPIO_PINCCONFIG_LOCKED;
 	}

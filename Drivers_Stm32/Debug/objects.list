@@ -1,3 +1,6 @@
+"HAL/LCD.o"
+"HAL/SevenSegment.o"
+"HAL/keypad.o"
 "MCAL/GPIO.o"
 "Src/main.o"
 "Src/syscalls.o"

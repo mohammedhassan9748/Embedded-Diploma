@@ -20,6 +20,11 @@
 #include "../Services/Platform_Types.h"
 #include "../Services/stm32f103c6.h"
 #include "../MCAL/Inc/GPIO.h"
+#include "../HAL/Inc/LCD.h"
+#include "../HAL/Inc/keypad.h"
+#include "../HAL/Inc/SevenSegment.h"
+
+uint8_t CharToPrint;
 
 void Clock_Init(void){
 	//Enable CLock on Port A and Port B
@@ -27,53 +32,38 @@ void Clock_Init(void){
 	RCC_GPIOB_CLK_EN();
 }
 
-void PushButtons_Init(void){
-	/* GPIOA Configure Pin1 */
-	GPIO_PinConfig_t PortA_Pin1_Config= {GPIO_PIN_1,GPIO_MODE_INPUT_FLO,GPIO_OUTPUT_SPEED_NONE};
-	MCAL_GPIO_Init(GPIOA,&PortA_Pin1_Config);
-
-	/* GPIOA Configure Pin13 */
-	GPIO_PinConfig_t PortA_Pin13_Config= {GPIO_PIN_13,GPIO_MODE_INPUT_FLO,GPIO_OUTPUT_SPEED_NONE};
-	MCAL_GPIO_Init(GPIOA,&PortA_Pin13_Config);
-
-}
-
-void LEDs_Init(void){
-	/* GPIOB Configure Pin1 */
-	GPIO_PinConfig_t PortB_Pin1_Config= {GPIO_PIN_1,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
-	MCAL_GPIO_Init(GPIOB,&PortB_Pin1_Config);
-	MCAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET); // Led is OFF
-
-	/* GPIOB Configure Pin13 */
-	GPIO_PinConfig_t PortB_Pin13_Config= {GPIO_PIN_13,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
-	MCAL_GPIO_Init(GPIOB,&PortB_Pin13_Config);
-	MCAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_SET); // Led is OFF
-
-}
-
-
 int main(void)
 {
-    /* Initialization and Setup */
 	Clock_Init();
-	PushButtons_Init();
-	LEDs_Init();
 
-	while(1){
-		//Check if Button1 is Pressed
-		if(MCAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1) == GPIO_PIN_CLEAR){
-			//Toggle LED (PinB1)
-			MCAL_GPIO_TogglePin(GPIOB, GPIO_PIN_1);
-			//Wait for Button Release
-			while(MCAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1) == GPIO_PIN_CLEAR);
-		}
+	GPIO_PinConfig_t LED = {GPIOA,GPIO_PIN_15,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
+	MCAL_GPIO_Init(&LED);
 
-		//Check if Button is Pressed (PinA13)
-		if(MCAL_GPIO_ReadPin(GPIOA, GPIO_PIN_13) == GPIO_PIN_SET){
-			//Toggle LED (PinB13)
-			MCAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
-			//Delay
-			for (int delay = 0 ; delay < 10000 ; delay ++);
+	HAL_LCD_Init();
+	HAL_KEYPAD_Init();
+	HAL_7_SEGMENT_Init();
+
+	HAL_LCD_WriteString("Mohamed");
+    /* Replace with your application code */
+
+
+    while (1)
+    {
+
+		CharToPrint = HAL_KEYPAD_GetButtonPressed();
+
+		switch(CharToPrint){
+			case KEYPAD_BUTTON_NOT_PRESSED:
+				break;
+			case '?':
+				HAL_7_SEGMENT_Replay();
+				HAL_LCD_ClearScreen();
+				break;
+			default:
+				HAL_7_SEGMENT_Increment();
+				MCAL_GPIO_TogglePin(&LED);
+				HAL_LCD_WriteChar(CharToPrint);
+				break;
 		}
-	}
+    }
 }

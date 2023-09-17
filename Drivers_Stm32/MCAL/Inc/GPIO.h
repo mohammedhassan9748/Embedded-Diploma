@@ -77,7 +77,7 @@
 0: Pin state is zero.
 1: Pin state is one.
 */
-#define GPIO_PIN_CLEAR				0	//Pin state is zero.
+#define GPIO_PIN_CLEAR					0	//Pin state is zero.
 #define GPIO_PIN_SET					1 	//Pin state is one.
 
 			/* @ref GPIO_LockState_Define */
@@ -93,6 +93,8 @@
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
 typedef struct{
+	GPIO_Typedef* GPIO_Port;  		// Specifies the GPIO Port of the pin being initialized
+							  	  	// This parameter can be a value of GPIO in stm32f103c6.h
 
 	uint16_t GPIO_PinNo;  			// Specifies the GPIO Pins to be configured
 						  	  	    // This parameter can be a value of @ref GPIO_Pins_Define
@@ -111,19 +113,19 @@ typedef struct{
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
 //Initialization & DeInitialization APIs
-void MCAL_GPIO_Init(GPIO_Typedef* GPIOx_Ptr, GPIO_PinConfig_t* GPIO_PinConfigPtr);
+void MCAL_GPIO_Init(GPIO_PinConfig_t* GPIO_PinConfigPtr);
 void MCAL_GPIO_DeInit(GPIO_Typedef* GPIOx_Ptr);
 
 //Read APIs
-uint8_t MCAL_GPIO_ReadPin(GPIO_Typedef* GPIOx_Ptr, uint16_t PinNo);
+uint8_t MCAL_GPIO_ReadPin(GPIO_PinConfig_t* GPIO_PinConfigPtr);
 uint16_t MCAL_GPIO_ReadPort(GPIO_Typedef* GPIOx_Ptr);
 
 //Write APIs
-void MCAL_GPIO_WritePin(GPIO_Typedef* GPIOx_Ptr, uint16_t PinNo, uint8_t PinValue);
+void MCAL_GPIO_WritePin(GPIO_PinConfig_t* GPIO_PinConfigPtr, uint8_t PinValue);
 void MCAL_GPIO_WritePort(GPIO_Typedef* GPIOx_Ptr, uint16_t PortValue);
 
-void MCAL_GPIO_TogglePin(GPIO_Typedef* GPIOx_Ptr, uint16_t PinNo);
+void MCAL_GPIO_TogglePin(GPIO_PinConfig_t* GPIO_PinConfigPtr);
 
-uint8_t MCAL_GPIO_LockPin(GPIO_Typedef* GPIOx_Ptr, uint16_t PinNo);
+uint8_t MCAL_GPIO_LockPin(GPIO_PinConfig_t* GPIO_PinConfigPtr);
 
 #endif /* MCAL_INC_GPIO_H_ */
