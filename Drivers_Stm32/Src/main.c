@@ -20,32 +20,42 @@
 #include "../Services/Platform_Types.h"
 #include "../Services/stm32f103c6.h"
 #include "../MCAL/Inc/GPIO.h"
+#include "../MCAL/Inc/EXTI.h"
 #include "../HAL/Inc/LCD.h"
 #include "../HAL/Inc/keypad.h"
 #include "../HAL/Inc/SevenSegment.h"
 
-uint8_t CharToPrint;
+
+GPIO_PinConfig_t LED = {GPIOA,GPIO_PIN_15,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
 
 void Clock_Init(void){
 	//Enable CLock on Port A and Port B
 	RCC_GPIOA_CLK_EN();
 	RCC_GPIOB_CLK_EN();
+	RCC_AFIO_CLK_EN();
+}
+
+void PrintHandlerLCD(void){
+	HAL_LCD_WriteString("IRQ EXTI9 happened ;)");
+	MCAL_GPIO_TogglePin(&LED);
 }
 
 int main(void)
 {
 	Clock_Init();
 
-	GPIO_PinConfig_t LED = {GPIOA,GPIO_PIN_15,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
 	MCAL_GPIO_Init(&LED);
+
+	EXTI_PinConfig_t Button = {EXTIPA0,EXTI_TRIGGER_RISING,EXTI_IRQ_ENABLE,PrintHandlerLCD};
+	MCAL_EXTI_Init(&Button);
 
 	HAL_LCD_Init();
 	HAL_KEYPAD_Init();
 	HAL_7_SEGMENT_Init();
 
-	HAL_LCD_WriteString("Mohamed");
     /* Replace with your application code */
 
+	uint8_t CharToPrint;
 
     while (1)
     {
@@ -61,7 +71,6 @@ int main(void)
 				break;
 			default:
 				HAL_7_SEGMENT_Increment();
-				MCAL_GPIO_TogglePin(&LED);
 				HAL_LCD_WriteChar(CharToPrint);
 				break;
 		}

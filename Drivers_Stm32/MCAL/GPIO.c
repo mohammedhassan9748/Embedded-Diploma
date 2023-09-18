@@ -143,6 +143,7 @@ void MCAL_GPIO_Init(GPIO_PinConfig_t* GPIO_PinConfigPtr){
 	}
 
 	//Write on CRx register to configure pin -> x is (H or L)
+	(*GPIO_CRx) &= ~(PinConfig_Value<<Get_CRx_Position(GPIO_PinConfigPtr->GPIO_PinNo));
 	(*GPIO_CRx) |= (PinConfig_Value<<Get_CRx_Position(GPIO_PinConfigPtr->GPIO_PinNo));
 
 	return;
