@@ -235,7 +235,7 @@ OPTIONS:
 2: Both Rising and Falling is the trigger of this external interrupt
 */
 #define EXTI_TRIGGER_RISING 					0
-#define EXTI_TRIGGER_FALLNG 					1
+#define EXTI_TRIGGER_FALLING 					1
 #define EXTI_TRIGGER_RISING_FALLING 			2
 
 			/* @ref EXTI_Enable_Define */

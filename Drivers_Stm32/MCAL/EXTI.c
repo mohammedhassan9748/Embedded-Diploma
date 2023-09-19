@@ -133,7 +133,7 @@ void MCAL_EXTI_Init(EXTI_PinConfig_t* EXTI_PinConfigPtr){
 			EXTI->RTSR |=  (1<<EXTI_PinConfigPtr->EXTI_Pin.EXTI_Input_Line);
 			break;
 
-		case EXTI_TRIGGER_FALLNG:
+		case EXTI_TRIGGER_FALLING:
 			EXTI->FTSR |=  (1<<EXTI_PinConfigPtr->EXTI_Pin.EXTI_Input_Line);
 			break;
 
