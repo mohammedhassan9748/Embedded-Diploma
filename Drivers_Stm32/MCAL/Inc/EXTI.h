@@ -282,8 +282,5 @@ typedef struct{
 void MCAL_EXTI_Init(EXTI_PinConfig_t* EXTI_PinConfigPtr);
 void MCAL_EXTI_DeInit(void);
 
-//Read APIs
-
-
 
 #endif /* INC_EXTI_H_ */

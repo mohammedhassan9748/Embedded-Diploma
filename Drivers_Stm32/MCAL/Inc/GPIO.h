@@ -94,16 +94,16 @@
 
 typedef struct{
 	GPIO_Typedef* GPIO_Port;  		// Specifies the GPIO Port of the pin being initialized
-							  	  	// This parameter can be a value of GPIO in stm32f103c6.h
+							  	  	// This parameter must be a value of GPIO Peripheral Instants in stm32f103c6.h.
 
 	uint16_t GPIO_PinNo;  			// Specifies the GPIO Pins to be configured
-						  	  	    // This parameter can be a value of @ref GPIO_Pins_Define
+						  	  	    // This parameter must be a value of @ref GPIO_Pins_Define
 
 	uint8_t  GPIO_Mode;   			// Specifies the operating mode for the selected pins
-						  	  	  	// This parameter can be a value of @ref GPIO_Mode_Define
+						  	  	  	// This parameter must be a value of @ref GPIO_Mode_Define
 
 	uint8_t  GPIO_Output_Speed;   	// Specifies the speed for the selected pins
-								    // This parameter can be a value of @ref GPIO_OutputSpeed_Define
+								    // This parameter must be a value of @ref GPIO_OutputSpeed_Define
 
 
 }GPIO_PinConfig_t;

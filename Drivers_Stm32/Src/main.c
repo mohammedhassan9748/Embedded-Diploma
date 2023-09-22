@@ -21,66 +21,46 @@
 #include "../Services/stm32f103c6.h"
 #include "../MCAL/Inc/GPIO.h"
 #include "../MCAL/Inc/EXTI.h"
+#include "../MCAL/Inc/USART.h"
 #include "../HAL/Inc/LCD.h"
 #include "../HAL/Inc/keypad.h"
 #include "../HAL/Inc/SevenSegment.h"
 
-
-GPIO_PinConfig_t LED = {GPIOA,GPIO_PIN_15,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
+uint16_t character;
+UART_Config_t uart1;
 
 void my_wait(uint64_t x){
 	for(int i=0;i<x;i++)
 		for(int j=0;j<255;j++);
 }
 
-void Clock_Init(void){
-	//Enable CLock on Port A and Port B
-	RCC_GPIOA_CLK_EN();
-	RCC_GPIOB_CLK_EN();
-	RCC_AFIO_CLK_EN();
-}
+void UART1_IRQ_CallBack(void)
+{
 
-void PrintHandlerLCD(void){
-	HAL_LCD_WriteString("IRQ EXTI9 happened _|- ");
+	MCAL_UART_Receive(&uart1, &character, UART_Polling_Disable);
+	MCAL_UART_Transmit(&uart1, &character, UART_Polling_Enable);
+
 }
 
 int main(void)
 {
-	Clock_Init();
 
-	MCAL_GPIO_Init(&LED);
+	uart1.USARTx = USART1;
+	uart1.USART_Mode = USART_MODE_TX_RX;
+	uart1.USART_BaudRate = USART_BAUDRATE_115200;
+	uart1.USART_WordLength = USART_WORD_LENGTH_8;
+	uart1.USART_Parity = USART_PARITY_DISABLE;
+	uart1.USART_StopBits = USART_STOP_BIT_1;
+	uart1.USART_FlowControl = USART_FLOW_CONTROL_DISABLE;
+	uart1.USART_IRQ_EN = USART_IE_RXNE;
+	uart1.IRQ_CallBackPtr =UART1_IRQ_CallBack;
 
-	HAL_LCD_Init();
-	HAL_KEYPAD_Init();
-	HAL_7_SEGMENT_Init();
-
-	EXTI_PinConfig_t Button = {EXTIPA11,EXTI_TRIGGER_RISING_FALLING,EXTI_IRQ_ENABLE,PrintHandlerLCD};
-	MCAL_EXTI_Init(&Button);
-    /* Replace with your application code */
-
-	uint8_t CharToPrint;
+	MCAL_UART_Init(&uart1);
+	MCAL_UART_GPIO_SetPins(&uart1);
 
     while (1)
     {
-    	my_wait(3000);
 
-    	MCAL_GPIO_TogglePin(&LED);
-
-
-		CharToPrint = HAL_KEYPAD_GetButtonPressed();
-
-		switch(CharToPrint){
-			case KEYPAD_BUTTON_NOT_PRESSED:
-				break;
-			case '?':
-				HAL_7_SEGMENT_Replay();
-				HAL_LCD_ClearScreen();
-				break;
-			default:
-				HAL_7_SEGMENT_Increment();
-				MCAL_GPIO_TogglePin(&LED);
-				HAL_LCD_WriteChar(CharToPrint);
-				break;
-		}
     }
+
 }

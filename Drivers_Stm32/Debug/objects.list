@@ -3,6 +3,8 @@
 "HAL/keypad.o"
 "MCAL/EXTI.o"
 "MCAL/GPIO.o"
+"MCAL/RCC.o"
+"MCAL/USART.o"
 "Src/main.o"
 "Src/syscalls.o"
 "Src/sysmem.o"
