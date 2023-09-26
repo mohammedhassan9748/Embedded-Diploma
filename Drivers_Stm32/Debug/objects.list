@@ -4,6 +4,7 @@
 "MCAL/EXTI.o"
 "MCAL/GPIO.o"
 "MCAL/RCC.o"
+"MCAL/SPI.o"
 "MCAL/USART.o"
 "Src/main.o"
 "Src/syscalls.o"

@@ -70,7 +70,7 @@ static uint8_t Get_CRx_Position(uint16_t PinNumber){
 /**================================================================
 * @Fn				- MCAL_GPIO_Init
 *
-* @brief 			- Initializes GPIOx PINy according to the specified parameters in PinConfig.
+* @brief 			- Initializes GPIOx PINy according to the specified parameters in GPIO_PinConfig_t.
 *
 * @param [in] 		- GPIO_PinConfigPtr: Pointer to the GPIO_PinConfig_t structure that holds
 * 					  the configuration information for the pin of the desired peripheral.

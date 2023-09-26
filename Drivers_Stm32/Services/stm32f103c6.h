@@ -49,6 +49,10 @@
 #define USART2_BASE							0x40004400
 #define USART3_BASE							0x40004800
 
+						/* SPI */
+						/*-----*/
+#define SPI2_BASE							0x40003800
+
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //							Base addresses for APB2 Bus Peripherals
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
@@ -78,6 +82,10 @@
 						/* USART */
 						/*-------*/
 #define USART1_BASE							0x40013800
+
+						/* SPI */
+						/*-----*/
+#define SPI1_BASE							0x40013000
 
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
@@ -154,14 +162,28 @@ typedef struct{
 			/* USART */
 			/*-------*/
 typedef struct{
-	vuint32_t SR;		// 0x00
-	vuint32_t DR; 	// 0x04
-	vuint32_t BRR;	// 0x08
-	vuint32_t CR1;	// 0x0C
-	vuint32_t CR2;	// 0x10
-	vuint32_t CR3;	// 0x14
-	vuint32_t GTPR;	// 0x18
+	vuint32_t SR;			// 0x00
+	vuint32_t DR; 			// 0x04
+	vuint32_t BRR;			// 0x08
+	vuint32_t CR1;			// 0x0C
+	vuint32_t CR2;			// 0x10
+	vuint32_t CR3;			// 0x14
+	vuint32_t GTPR;			// 0x18
 }USART_Typedef;
+
+			/* SPI */
+			/*-----*/
+typedef struct{
+	vuint32_t CR1;			// 0x00
+	vuint32_t CR2; 			// 0x04
+	vuint32_t SR;			// 0x08
+	vuint32_t DR;			// 0x0C
+	vuint32_t CRCPR;		// 0x10
+	vuint32_t RXCRCR;		// 0x14
+	vuint32_t TXCRCR;		// 0x18
+	vuint32_t I2SCFGR;		// 0x1C
+	vuint32_t I2SPR;		// 0x20
+}SPI_Typedef;
 
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
@@ -194,6 +216,10 @@ typedef struct{
 #define USART2 					((USART_Typedef*)USART2_BASE)
 #define USART3 					((USART_Typedef*)USART3_BASE)
 
+					/* SPI */
+					/*-----*/
+#define SPI1					((SPI_Typedef*)SPI1_BASE)
+#define SPI2					((SPI_Typedef*)SPI2_BASE)
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //								NVIC Interrupt Enable Macros:
@@ -201,76 +227,69 @@ typedef struct{
 
 				/* NVIC INTERRUPT ENABLE */
 				/*-----------------------*/
-#define NVIC_IRQ6_EN()				(NVIC_ISER0 |= (1<<6))
-#define NVIC_IRQ7_EN()				(NVIC_ISER0 |= (1<<7))
-#define NVIC_IRQ8_EN()				(NVIC_ISER0 |= (1<<8))
-#define NVIC_IRQ9_EN()				(NVIC_ISER0 |= (1<<9))
-#define NVIC_IRQ10_EN()				(NVIC_ISER0 |= (1<<10))
-#define NVIC_IRQ23_EN()				(NVIC_ISER0 |= (1<<23))
-#define NVIC_IRQ37_EN()				(NVIC_ISER1 |= (1<<5))
-#define NVIC_IRQ38_EN()				(NVIC_ISER1 |= (1<<6))
-#define NVIC_IRQ39_EN()				(NVIC_ISER1 |= (1<<7))
-#define NVIC_IRQ40_EN()				(NVIC_ISER1 |= (1<<8))
+#define NVIC_IRQ6_EN()				(NVIC_ISER0 |= (1<<6))		//EXTI0
+#define NVIC_IRQ7_EN()				(NVIC_ISER0 |= (1<<7))		//EXTI1
+#define NVIC_IRQ8_EN()				(NVIC_ISER0 |= (1<<8))		//EXTI2
+#define NVIC_IRQ9_EN()				(NVIC_ISER0 |= (1<<9))		//EXTI3
+#define NVIC_IRQ10_EN()				(NVIC_ISER0 |= (1<<10))		//EXTI4
+#define NVIC_IRQ23_EN()				(NVIC_ISER0 |= (1<<23))		//EXTI9_5
+
+#define NVIC_IRQ35_EN()				(NVIC_ISER1 |= (1<<3))		//SPI1
+#define NVIC_IRQ36_EN()				(NVIC_ISER1 |= (1<<4))		//SPI2
+#define NVIC_IRQ37_EN()				(NVIC_ISER1 |= (1<<5))		//USART1
+#define NVIC_IRQ38_EN()				(NVIC_ISER1 |= (1<<6))		//USART2
+#define NVIC_IRQ39_EN()				(NVIC_ISER1 |= (1<<7))		//USART3
+#define NVIC_IRQ40_EN()				(NVIC_ISER1 |= (1<<8))		//EXTI15_10
 
 
 				/* NVIC INTERRUPT DISABLE */
 				/*-------------------------*/
-#define NVIC_IRQ6_DIS()				(NVIC_ICER0 |= (1<<6))
-#define NVIC_IRQ7_DIS()				(NVIC_ICER0 |= (1<<7))
-#define NVIC_IRQ8_DIS()				(NVIC_ICER0 |= (1<<8))
-#define NVIC_IRQ9_DIS()				(NVIC_ICER0 |= (1<<9))
-#define NVIC_IRQ10_DIS()			(NVIC_ICER0 |= (1<<10))
-#define NVIC_IRQ23_DIS()			(NVIC_ICER0 |= (1<<23))
-#define NVIC_IRQ37_DIS()			(NVIC_ICER1 |= (1<<5))
-#define NVIC_IRQ38_DIS()			(NVIC_ICER1 |= (1<<6))
-#define NVIC_IRQ39_DIS()			(NVIC_ICER1 |= (1<<7))
-#define NVIC_IRQ40_DIS()			(NVIC_ICER1 |= (1<<8))
+#define NVIC_IRQ6_DIS()				(NVIC_ICER0 |= (1<<6))		//EXTI0
+#define NVIC_IRQ7_DIS()				(NVIC_ICER0 |= (1<<7))		//EXTI1
+#define NVIC_IRQ8_DIS()				(NVIC_ICER0 |= (1<<8))		//EXTI2
+#define NVIC_IRQ9_DIS()				(NVIC_ICER0 |= (1<<9))		//EXTI3
+#define NVIC_IRQ10_DIS()			(NVIC_ICER0 |= (1<<10))		//EXTI4
+#define NVIC_IRQ23_DIS()			(NVIC_ICER0 |= (1<<23))		//EXTI9_5
+
+#define NVIC_IRQ35_DIS()			(NVIC_ICER1 |= (1<<3))		//SPI1
+#define NVIC_IRQ36_DIS()			(NVIC_ICER1 |= (1<<4))		//SPI2
+#define NVIC_IRQ37_DIS()			(NVIC_ICER1 |= (1<<5))		//USART1
+#define NVIC_IRQ38_DIS()			(NVIC_ICER1 |= (1<<6))		//USART2
+#define NVIC_IRQ39_DIS()			(NVIC_ICER1 |= (1<<7))		//USART3
+#define NVIC_IRQ40_DIS()			(NVIC_ICER1 |= (1<<8))		//EXTI15_10
 
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //								RCC Clock Enable Macros:
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
-				/* RCC AFIO CLK ENABLE */
-				/*---------------------*/
+					/* RCC AFIO CLK ENABLE */
+					/*---------------------*/
 #define RCC_AFIO_CLK_EN()			(RCC->APB2ENR |= (1<<0))
 
-				/* RCC GPIO CLK ENABLE */
-				/*---------------------*/
+					/* RCC GPIO CLK ENABLE */
+					/*---------------------*/
 #define RCC_GPIOA_CLK_EN()			(RCC->APB2ENR |= (1<<2))
 #define RCC_GPIOB_CLK_EN()			(RCC->APB2ENR |= (1<<3))
 #define RCC_GPIOC_CLK_EN()			(RCC->APB2ENR |= (1<<4))
 #define RCC_GPIOD_CLK_EN()			(RCC->APB2ENR |= (1<<5))
 #define RCC_GPIOE_CLK_EN()			(RCC->APB2ENR |= (1<<6))
 
-				/* RCC GPIO CLK ENABLE */
-				/*---------------------*/
+					/* RCC USART CLK ENABLE */
+					/*----------------------*/
 #define RCC_USART1_CLK_EN()			(RCC->APB2ENR |= (1<<14))
 #define RCC_USART2_CLK_EN()			(RCC->APB1ENR |= (1<<17))
 #define RCC_USART3_CLK_EN()			(RCC->APB1ENR |= (1<<18))
 
+					/* RCC SPI CLK ENABLE */
+					/*--------------------*/
+#define RCC_SPI1_CLK_EN()			(RCC->APB2ENR |= (1<<12))
+#define RCC_SPI2_CLK_EN()			(RCC->APB1ENR |= (1<<14))
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //									Generic Macros:
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
-	//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-//
-	//					IVT					  //
-	//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-//
-
-//EXTI
-#define EXTI0_IRQ					(uint8_t)6
-#define EXTI1_IRQ					(uint8_t)7
-#define EXTI2_IRQ					(uint8_t)8
-#define EXTI3_IRQ					(uint8_t)9
-#define EXTI4_IRQ					(uint8_t)10
-#define EXTI9_5_IRQ					(uint8_t)23
-#define EXTI15_10_IRQ				(uint8_t)40
-
-//USART
-#define USART0_IRQ					(uint8_t)37
-#define USART1_IRQ					(uint8_t)38
-#define USART2_IRQ					(uint8_t)39
 
 
 #endif /* MCAL_INC_STM32F103C6_H_ */

@@ -94,11 +94,12 @@ static void EXTI_NVIC_DIS(const uint8_t Input_Line_Number){
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
 /**================================================================
-* @Fn				- MCAL_EXTI_DeInit
+* @Fn				- MCAL_EXTI_Init
 *
-* @brief 			- DeInitializes all EXTI Register, including disabling NVIC Interrupt Controller.
+* @brief 			- Initializes EXTI Channel according to the specified parameters in EXTI_PinConfig_t.
 *
-* @param [in] 		- None.
+* @param [in] 		- EXTI_PinConfigPtr: Pointer to the EXTI_PinConfig_t structure that holds
+* 					  the configuration information for the EXTI of the desired.
 *
 * @retval 			- None.
 *

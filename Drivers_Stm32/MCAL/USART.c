@@ -38,7 +38,7 @@ void (*g_IRQ_CallBackPtr[3])(void);
 void MCAL_UART_Init(UART_Config_t* UART_ConfigPtr){
 
 	/*
-	* 1) Enable the USART Clock according to the Channel Selected & get Clock Frequencys.
+	* 1) Enable the USART Clock according to the Channel Selected & get Clock Frequencies.
 	*/
 	uint32_t PCLKx;
 	if(UART_ConfigPtr->USARTx == USART1)
@@ -152,6 +152,8 @@ void MCAL_UART_DeInit(UART_Config_t* UART_ConfigPtr){
 		CLEAR_BIT(RCC->APB2RSTR,14);
 
 		NVIC_IRQ37_DIS();
+
+		g_IRQ_CallBackPtr[0] = NULL_PTR;
 	}
 	//Else if USARTx to DeInitialize is USART2
 	else if(UART_ConfigPtr->USARTx == USART2)
@@ -161,6 +163,8 @@ void MCAL_UART_DeInit(UART_Config_t* UART_ConfigPtr){
 		CLEAR_BIT(RCC->APB1RSTR,17);
 
 		NVIC_IRQ38_DIS();
+
+		g_IRQ_CallBackPtr[1] = NULL_PTR;
 	}
 	//Else USARTx to DeInitialize is USART3
 	else
@@ -170,6 +174,8 @@ void MCAL_UART_DeInit(UART_Config_t* UART_ConfigPtr){
 		CLEAR_BIT(RCC->APB1RSTR,18);
 
 		NVIC_IRQ39_DIS();
+
+		g_IRQ_CallBackPtr[2] = NULL_PTR;
 	}
 
 }
@@ -177,7 +183,7 @@ void MCAL_UART_DeInit(UART_Config_t* UART_ConfigPtr){
 /**================================================================
 * @Fn				- MCAL_UART_GPIO_SetPins
 *
-* @brief 			- Initializes UART (Supported for Asynchronous Initialization Only).
+* @brief 			- Set the TX,RX,CTS & RTS of the required peripheral in GPIO.
 *
 * @param [in] 		- UART_ConfigPtr: Pointer to the UART_Config_t structure that holds
 * 					  the configuration information for the UARTx of the desired peripheral.

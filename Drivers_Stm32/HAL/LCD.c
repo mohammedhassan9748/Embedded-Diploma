@@ -24,6 +24,7 @@
 //									Global Variables
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
+//Initializing LCD Pins
 static GPIO_PinConfig_t g_LCD_RS = {LCD_RS_PORT,LCD_RS_PIN,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
 static GPIO_PinConfig_t g_LCD_EN = {LCD_EN_PORT,LCD_EN_PIN,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
 

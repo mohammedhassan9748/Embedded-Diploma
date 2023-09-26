@@ -74,8 +74,8 @@
 /*
  * OPTIONS:
  * --------
-1: USART_PARITY_DISABLE					1 Start bit, 8 Data bits, n Stop bit
-2: USART_PARITY_EVEN					1 Start bit, 9 Data bits, n Stop bit
+1: USART_PARITY_DISABLE
+2: USART_PARITY_EVEN
 2: USART_PARITY_ODD
 */
 #define USART_PARITY_DISABLE			(uint32_t)(0<<10)
@@ -100,10 +100,10 @@
 /*
  * OPTIONS:
  * --------
-1: USART_STOPBIT_1						00: 1 Stop bit
-2: USART_STOPBIT_0_5					01: 0.5 Stop bit
-3: USART_STOPBIT_2						10: 2 Stop bits
-4: USART_STOPBIT_1_5					11: 1.5 Stop bit
+1: USART_FLOW_CONTROL_DISABLE
+2: USART_FLOW_CONTROL_RTS
+3: USART_FLOW_CONTROL_CTS
+4: USART_FLOW_CONTROL_RTS_CTS
 */
 #define USART_FLOW_CONTROL_DISABLE		(uint32_t)(0)
 #define USART_FLOW_CONTROL_RTS			(uint32_t)(1<<8)
@@ -116,8 +116,9 @@
  * --------
 1: USART_IE_DISABLE
 2: USART_IE_TXE
-3: USART_STOPBIT_2
-4: USART_STOPBIT_1_5
+3: USART_IE_TXC
+4: USART_IE_RXNE
+5: USART_IE_PE
 */
 #define USART_IE_DISABLE				(uint32_t)(0)
 #define USART_IE_TXE					(uint32_t)(1<<7) 	// Transmitter Empty interrupt enable
@@ -134,25 +135,25 @@ typedef struct{
 	USART_Typedef* USARTx;			// Specifies the the required channel for USART.
 									// This parameter must be a value of USART Peripheral Instants in stm32f103c6.h.
 
-	uint8_t USART_Mode;  			// Specifies the TX/RX Enable or Disable.
-							  	  	// This parameter must be a value of @ref USART_MODE_Define.
+	uint32_t USART_Mode;  			// Specifies the TX/RX Enable or Disable.
+							  	  	// This parameter must be a value of @ref USART_Mode_Define.
 
 	uint32_t USART_BaudRate;  		// Specifies the Baud Rate for the USART Communication.
-						  	  	    // This parameter must be a value of @ref USART_BAUDRATE_Define.
+						  	  	    // This parameter must be a value of @ref USART_BaudRate_Define.
 
-	uint8_t  USART_WordLength;   	// Specifies the number of data bits transmitted or received in a frame.
-						  	  	  	// This parameter must be a value of @ref USART_WORDLENGTH_Define.
+	uint32_t  USART_WordLength;   	// Specifies the number of data bits transmitted or received in a frame.
+						  	  	  	// This parameter must be a value of @ref USART_WordLength_Define.
 
-	uint8_t  USART_Parity;   		// Specifies the parity bit.
+	uint32_t  USART_Parity;   		// Specifies the parity bit.
 								    // This parameter must be a value of @ref USART_Parity_Define.
 
-	uint8_t  USART_StopBits;   		// Specifies the number of stop bits transmitted or received in a frame.
+	uint32_t  USART_StopBits;   		// Specifies the number of stop bits transmitted or received in a frame.
 								    // This parameter must be a value of @ref USART_StopBits_Define.
 
-	uint8_t  USART_FlowControl;   	// Specifies the flow control (RTS/CTS) Enable or Disable.
+	uint32_t  USART_FlowControl;   	// Specifies the flow control (RTS/CTS) Enable or Disable.
 								    // This parameter must be a value of @ref USART_FlowControl_Define.
 
-	uint8_t  USART_IRQ_EN;   		// Enable or Disable IRQ for TX/RX - PR - TC.
+	uint32_t  USART_IRQ_EN;   		// Enable or Disable IRQ for TX/RX - PR - TC.
 									// This parameter must be a value of @ref USART_IRQ_EN_Define.
 
 	void (*IRQ_CallBackPtr)(void);	// Set the C Function that will be called once IRQ happen.
