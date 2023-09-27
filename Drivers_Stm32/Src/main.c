@@ -36,69 +36,81 @@
 */
 #define MCU_Act_As_Slave
 
-uint16_t character;
-UART_Config_t uart1;
+#ifdef MCU_Act_As_Slave
+uint8_t PrintFlag=0;
+uint16_t keypressed_received;
+#endif
 SPI_Config_t  spi1;
 GPIO_PinConfig_t nss1;
 GPIO_PinConfig_t led = {GPIOB,GPIO_PIN_0,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
 
+
 void SPI1_IRQ_CallBack(void)
 {
 #ifdef MCU_Act_As_Slave
-	//Receive UART - Send UART
-
-	//Receive SPI in MCU2 from SPI in MCU1
-	MCAL_SPI_TX_RX(&spi1, &character, UART_Polling_Disable);
-	if(character == 'm')
-		MCAL_GPIO_TogglePin(&led);
-	MCAL_UART_Transmit(&uart1, &character, UART_Polling_Enable);
-
-#endif
-}
-
-void UART1_IRQ_CallBack(void)
-{
-
-#ifdef MCU_Act_As_Master
-
-	//Receive UART - Send UART for Terminal in MCU1
-	MCAL_UART_Receive(&uart1, &character, UART_Polling_Disable);
-	MCAL_UART_Transmit(&uart1, &character, UART_Polling_Enable);
-
-	//Send SPI - Receive SPI
+	PrintFlag=1;
 	MCAL_GPIO_WritePin(&nss1, GPIO_PIN_CLEAR);
-	MCAL_SPI_TX_RX(&spi1, &character, UART_Polling_Enable);
-	MCAL_GPIO_WritePin(&nss1, GPIO_PIN_SET);
-
+	MCAL_SPI_TX_RX(&spi1, &keypressed_received, SPI_Polling_Disable);
+	if(keypressed_received == 0x31)
+		MCAL_GPIO_TogglePin(&led);
+	MCAL_GPIO_WritePin(&nss1,GPIO_PIN_SET);
 #endif
-
 }
+
+void setup(void);
+
 
 int main(void)
 {
+	setup();
+	#ifdef MCU_Act_As_Master
+	uint16_t keypressed;
+	#endif
 
-	uart1.USARTx 			= USART1;
-	uart1.USART_BaudRate 	= USART_BAUDRATE_115200;
-	uart1.USART_WordLength 	= USART_WORD_LENGTH_8;
-	uart1.USART_Parity 		= USART_PARITY_DISABLE;
-	uart1.USART_StopBits 	= USART_STOP_BIT_1;
-	uart1.USART_FlowControl = USART_FLOW_CONTROL_DISABLE;
+    while(1)
+    {
+		#ifdef MCU_Act_As_Master
+		keypressed = HAL_KEYPAD_GetButtonPressed();
+		if(keypressed != KEYPAD_BUTTON_NOT_PRESSED)
+		{
+			MCAL_GPIO_WritePin(&nss1, GPIO_PIN_CLEAR);
+			MCAL_SPI_TX_RX(&spi1,&keypressed,SPI_Polling_Enable);
+			MCAL_GPIO_WritePin(&nss1, GPIO_PIN_SET);
+		}
+		#endif
 
-#ifdef MCU_Act_As_Master
-	uart1.USART_Mode 		= USART_MODE_TX_RX;
-	uart1.USART_IRQ_EN 		= USART_IE_RXNE;
-	uart1.IRQ_CallBackPtr 	= UART1_IRQ_CallBack;
-#endif
+		#ifdef MCU_Act_As_Slave
+		if(PrintFlag == 1)
+		{
+			switch(keypressed_received){
+				case KEYPAD_BUTTON_NOT_PRESSED:
+					break;
+				case '?':
+					HAL_LCD_ClearScreen();
+					break;
+				default:
+					HAL_LCD_WriteChar(keypressed_received);
+					break;
+			}
+			PrintFlag = 0;
+		}
 
-#ifdef MCU_Act_As_Slave
-	uart1.USART_Mode 		= USART_MODE_TX;
-	uart1.USART_IRQ_EN 		= USART_IE_DISABLE;
-	uart1.IRQ_CallBackPtr 	= NULL_PTR;
-#endif
+		#endif
+    }
+}
 
-	MCAL_UART_Init(&uart1);
-	MCAL_UART_GPIO_SetPins(&uart1);
+//==================================================================================================================================//
+//==================================================================================================================================//
+//==================================================================================================================================//
+//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-//
+//															Functions														    	//
+//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-//
+//==================================================================================================================================//
+//==================================================================================================================================//
+//==================================================================================================================================//
 
+void setup(void)
+{
 	//Common Configuration for master & slave
 	spi1.SPIx = SPI1;
 	spi1.SPI_ClkPhase = SPI_2ND_EDGE_CAPTURE_STROBE;
@@ -121,6 +133,7 @@ int main(void)
 	nss1.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_10MHZ;
 	MCAL_GPIO_Init(&nss1);
 	MCAL_GPIO_WritePin(&nss1, GPIO_PIN_SET);
+	HAL_KEYPAD_Init();
 #endif
 
 #ifdef MCU_Act_As_Slave
@@ -130,14 +143,9 @@ int main(void)
 	spi1.SPI_IRQ_EN = SPI_IE_RXNE;
 	spi1.IRQ_CallBackPtr = SPI1_IRQ_CallBack;
 	MCAL_GPIO_Init(&led);
+	HAL_LCD_Init();
 #endif
 
 	MCAL_SPI_Init(&spi1);
 	MCAL_SPI_GPIO_SetPins(&spi1);
-
-
-    while (1)
-    {
-    }
-
 }
