@@ -212,11 +212,11 @@ void MCAL_SPI_Receive (SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Pol
 //Wait For All Transmission Complete API
 void MCAL_SPI_TX_RX(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Polling_Mechanism_t Polling_Status);
 
-// Get the NSS SPIx Pin Data
-GPIO_PinConfig_t MCAL_SPI_GetNss__SPI1__Pin(void);
+//Send String
+void MCAL_SPI_sendString(SPI_Config_t* SPI_ConfigPtr, uint8_t* Str);
 
-// Get the NSS SPIx Pin Data
-GPIO_PinConfig_t MCAL_SPI_GetNss__SPI2__Pin(void);
+//Receive String
+void MCAL_SPI_receiveString(SPI_Config_t* SPI_ConfigPtr, uint8_t* Str);
 
 
 #endif /* INC_SPI_H_ */

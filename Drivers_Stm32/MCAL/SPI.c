@@ -438,17 +438,67 @@ void MCAL_SPI_TX_RX(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Pollin
 
 }
 
-// Get the NSS SPIx Pin Data
-GPIO_PinConfig_t MCAL_SPI_GetNss__SPI1__Pin(void)
+/**================================================================
+* @Fn				- MCAL_SPI_sendString
+*
+* @brief 			- This API is used for sending a string using polling technique.
+*
+* @param [in] 		- SPI_ConfigPtr: Pointer to the SPI_Config_t structure that holds
+* 					  the configuration information for the SPIx of the desired peripheral.
+*
+* @param [in] 		- Str: Pointer to the data neded to be sent to other device.
+*
+* @retval 			- None.
+*
+* Note				- Supports polling technique only - cannot be used with interrupts.
+*
+*/
+void MCAL_SPI_sendString(SPI_Config_t* SPI_ConfigPtr, uint8_t* Str)
 {
-	return g_NSS_Pin[0];
+
+	uint8_t i = 0;
+	uint16_t DataTemp;
+	while(Str[i] != '\0')
+	{
+		DataTemp = Str[i];
+		MCAL_SPI_TX_RX(SPI_ConfigPtr,&DataTemp,SPI_Polling_Enable);
+		i++;
+	}
+	return;
+
 }
 
-// Get the NSS SPIx Pin Data
-GPIO_PinConfig_t MCAL_SPI_GetNss__SPI2__Pin(void)
+/**================================================================
+* @Fn				- MCAL_SPI_receiveString
+*
+* @brief 			- This API is used for receiving a string using polling technique.
+*
+* @param [in] 		- SPI_ConfigPtr: Pointer to the SPI_Config_t structure that holds
+* 					  the configuration information for the SPIx of the desired peripheral.
+*
+* @param [in] 		- Str: Pointer to the data neded to be received to the device device.
+*
+* @retval 			- None.
+*
+* Note				- Supports polling technique only - cannot be used with interrupts.
+*
+*/
+void MCAL_SPI_receiveString(SPI_Config_t* SPI_ConfigPtr, uint8_t* Str)
 {
-	return g_NSS_Pin[1];
+
+	uint8_t i = 0;
+	uint16_t DataTemp;
+	MCAL_SPI_TX_RX(SPI_ConfigPtr,&DataTemp,SPI_Polling_Enable);
+	while(DataTemp != '#')
+	{
+		Str[i] = DataTemp;
+		MCAL_SPI_TX_RX(SPI_ConfigPtr,&DataTemp,SPI_Polling_Enable);
+		i++;
+	}
+	Str[i] = '\0';
+
 }
+
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //										ISRs Definitions
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-

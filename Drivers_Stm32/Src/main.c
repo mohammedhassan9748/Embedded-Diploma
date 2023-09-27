@@ -34,68 +34,48 @@
  * 1) MCU_Act_As_Master
  * 2) MCU_Act_As_Slave
 */
-#define MCU_Act_As_Slave
+#define MCU_Act_As_Master
 
-#ifdef MCU_Act_As_Slave
-uint8_t PrintFlag=0;
-uint16_t keypressed_received;
-#endif
+//Common global variables
 SPI_Config_t  spi1;
+
+//Master Global Variables
+#ifdef MCU_Act_As_Master
 GPIO_PinConfig_t nss1;
-GPIO_PinConfig_t led = {GPIOB,GPIO_PIN_0,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
-
-
-void SPI1_IRQ_CallBack(void)
-{
-#ifdef MCU_Act_As_Slave
-	PrintFlag=1;
-	MCAL_GPIO_WritePin(&nss1, GPIO_PIN_CLEAR);
-	MCAL_SPI_TX_RX(&spi1, &keypressed_received, SPI_Polling_Disable);
-	if(keypressed_received == 0x31)
-		MCAL_GPIO_TogglePin(&led);
-	MCAL_GPIO_WritePin(&nss1,GPIO_PIN_SET);
 #endif
-}
+
+//Slave Global Variables
+#ifdef MCU_Act_As_Slave
+uint8_t PrintFlag=1;
+//GPIO_PinConfig_t led = {GPIOB,GPIO_PIN_0,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
+#endif
 
 void setup(void);
-
+void WaitForSlaveSetup(void);
 
 int main(void)
 {
 	setup();
+
 	#ifdef MCU_Act_As_Master
-	uint16_t keypressed;
+		WaitForSlaveSetup();
+		MCAL_GPIO_WritePin(&nss1, GPIO_PIN_CLEAR);
+		MCAL_SPI_sendString(&spi1,"I am Micro1 ;)#");
+		MCAL_GPIO_WritePin(&nss1, GPIO_PIN_SET);
+	#endif
+
+	#ifdef MCU_Act_As_Slave
+		uint8_t Buffer[100];
+		MCAL_SPI_receiveString(&spi1,Buffer);
+		if(PrintFlag == 1)
+		{
+			HAL_LCD_WriteString(Buffer);
+			PrintFlag = 0;
+		}
 	#endif
 
     while(1)
     {
-		#ifdef MCU_Act_As_Master
-		keypressed = HAL_KEYPAD_GetButtonPressed();
-		if(keypressed != KEYPAD_BUTTON_NOT_PRESSED)
-		{
-			MCAL_GPIO_WritePin(&nss1, GPIO_PIN_CLEAR);
-			MCAL_SPI_TX_RX(&spi1,&keypressed,SPI_Polling_Enable);
-			MCAL_GPIO_WritePin(&nss1, GPIO_PIN_SET);
-		}
-		#endif
-
-		#ifdef MCU_Act_As_Slave
-		if(PrintFlag == 1)
-		{
-			switch(keypressed_received){
-				case KEYPAD_BUTTON_NOT_PRESSED:
-					break;
-				case '?':
-					HAL_LCD_ClearScreen();
-					break;
-				default:
-					HAL_LCD_WriteChar(keypressed_received);
-					break;
-			}
-			PrintFlag = 0;
-		}
-
-		#endif
     }
 }
 
@@ -126,26 +106,32 @@ void setup(void)
 	spi1.SPI_SlaveSelect = SPI_SS_SOFTWARE_SET;
 	spi1.SPI_IRQ_EN = SPI_IE_DISABLE;
 	spi1.IRQ_CallBackPtr = NULL_PTR;
-
+	//Slave Select pin cofiguration
 	nss1.GPIO_Port = GPIOA;
 	nss1.GPIO_PinNo = GPIO_PIN_4;
 	nss1.GPIO_Mode = GPIO_MODE_OUTPUT_PP;
 	nss1.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_10MHZ;
 	MCAL_GPIO_Init(&nss1);
 	MCAL_GPIO_WritePin(&nss1, GPIO_PIN_SET);
-	HAL_KEYPAD_Init();
 #endif
 
 #ifdef MCU_Act_As_Slave
 	spi1.SPI_CommMode = SPI_FULL_DUPLEX;
 	spi1.SPI_Mode = SPI_MODE_SLAVE;
 	spi1.SPI_SlaveSelect = SPI_SS_HARDWARE_SLAVE;
-	spi1.SPI_IRQ_EN = SPI_IE_RXNE;
-	spi1.IRQ_CallBackPtr = SPI1_IRQ_CallBack;
-	MCAL_GPIO_Init(&led);
+	spi1.SPI_IRQ_EN = SPI_IE_DISABLE;
+	spi1.IRQ_CallBackPtr = NULL_PTR;
+	//MCAL_GPIO_Init(&led);
 	HAL_LCD_Init();
 #endif
 
 	MCAL_SPI_Init(&spi1);
 	MCAL_SPI_GPIO_SetPins(&spi1);
 }
+
+
+void WaitForSlaveSetup(void){
+	for(int i=0;i<550;i++)
+		for(int i=0;i<255;i++);
+}
+
