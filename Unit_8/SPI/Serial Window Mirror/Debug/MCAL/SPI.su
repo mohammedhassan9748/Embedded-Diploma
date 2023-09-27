@@ -1,0 +1,10 @@
+SPI.c:39:6:MCAL_SPI_Init	24	static
+SPI.c:138:6:MCAL_SPI_DeInit	16	static
+SPI.c:183:6:MCAL_SPI_GPIO_SetPins	56	static
+SPI.c:361:6:MCAL_SPI_Transmit	24	static
+SPI.c:399:6:MCAL_SPI_Receive	24	static
+SPI.c:432:6:MCAL_SPI_TX_RX	24	static
+SPI.c:442:18:MCAL_SPI_GetNss__SPI1__Pin	16	static
+SPI.c:448:18:MCAL_SPI_GetNss__SPI2__Pin	16	static
+SPI.c:456:6:SPI1_IRQHandler	8	static
+SPI.c:462:6:SPI2_IRQHandler	8	static

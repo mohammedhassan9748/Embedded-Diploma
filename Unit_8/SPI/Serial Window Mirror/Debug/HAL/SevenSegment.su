@@ -1,0 +1,4 @@
+SevenSegment.c:48:6:HAL_7_SEGMENT_Init	8	static
+SevenSegment.c:76:6:HAL_7_SEGMENT_WriteData	16	static
+SevenSegment.c:101:6:HAL_7_SEGMENT_Increment	8	static
+SevenSegment.c:128:6:HAL_7_SEGMENT_Replay	8	static
