@@ -59,7 +59,7 @@ void MCAL_SPI_Init(SPI_Config_t* SPI_ConfigPtr){
 	* NOTE: We aim only for bits 15 and 10 (BIDIMODE & RXONLY), therefore we masked them since they contain another bits
 	* in the definition for discrimination.
 	*/
-	SPIx_CR1_temp |= (SPI_ConfigPtr->SPI_CommMode & 0x8400);
+	SPIx_CR1_temp |= (SPI_ConfigPtr->SPI_CommMode & 0xC400);
 
 	/*
 	* 4) Check if Master Mode is Selected to define the serial clock baud rate.
@@ -163,7 +163,6 @@ void MCAL_SPI_DeInit(SPI_Config_t* SPI_ConfigPtr){
 		//Null the global ptr to function
 		g_IRQ_CallBackPtr[1] = NULL_PTR;
 	}
-
 }
 
 /**================================================================
@@ -258,7 +257,8 @@ void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr){
 	}
 	else
 	{
-		if(SPI_ConfigPtr->SPI_CommMode == SPI_HALF_DUPLEX || SPI_ConfigPtr->SPI_CommMode == SPI_SIMPLEX_TX_ONLY)
+		if(SPI_ConfigPtr->SPI_CommMode == SPI_HALF_DUPLEX_TX || SPI_ConfigPtr->SPI_CommMode == SPI_HALF_DUPLEX_RX
+				|| SPI_ConfigPtr->SPI_CommMode == SPI_SIMPLEX_TX_ONLY)
 		{
 			//Do Nothing
 			//MOSI on the Slave Device won't be configured at all.
@@ -277,7 +277,8 @@ void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr){
 	//Check if the MISO on the Master or Slave Device won't be configured at all first and if not, configure it as it should be.
 	if(SPI_ConfigPtr->SPI_Mode == SPI_MODE_MASTER)
 	{
-		if(SPI_ConfigPtr->SPI_CommMode == SPI_HALF_DUPLEX || SPI_ConfigPtr->SPI_CommMode == SPI_SIMPLEX_TX_ONLY)
+		if(SPI_ConfigPtr->SPI_CommMode == SPI_HALF_DUPLEX_TX || SPI_ConfigPtr->SPI_CommMode == SPI_HALF_DUPLEX_RX
+				|| SPI_ConfigPtr->SPI_CommMode == SPI_SIMPLEX_TX_ONLY)
 		{
 			//Do Nothing
 			//MISO on the Master Device won't be configured at all.
@@ -298,8 +299,8 @@ void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr){
 		}
 		else
 		{
-			MISO.GPIO_Mode = GPIO_MODE_INPUT_FLO;
-			MISO.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_NONE;
+			MISO.GPIO_Mode = GPIO_MODE_AF_OUTPUT_PP;
+			MISO.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_10MHZ;
 			MCAL_GPIO_Init(&MISO);
 		}
 
@@ -359,14 +360,6 @@ void MCAL_SPI_Transmit(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Pol
 		//wait for transmit data register to be empty
 		while( ! ( (SPI_ConfigPtr->SPIx->SR) & (1<<1) ) );
 
-	//Check if Half-Duplex Mode was configured
-	if (SPI_ConfigPtr->SPI_CommMode == SPI_HALF_DUPLEX)
-	{
-		while(READ_BIT(SPI_ConfigPtr->SPIx->SR,7));
-		CLEAR_BIT(SPI_ConfigPtr->SPIx->CR1,6);
-		SET_BIT(SPI_ConfigPtr->SPIx->CR1,14);
-		SET_BIT(SPI_ConfigPtr->SPIx->CR1,6);
-	}
 	//Send the data to the Tx Buffer
 	SPI_ConfigPtr->SPIx->DR = (*pTxBuffer);
 
@@ -397,14 +390,6 @@ void MCAL_SPI_Receive(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Poll
 		//wait for receive data register to be empty
 		while( ! ( (SPI_ConfigPtr->SPIx->SR) & (1<<0) ) );
 
-	//Check if Half-Duplex Mode was configured
-	if (SPI_ConfigPtr->SPI_CommMode == SPI_HALF_DUPLEX)
-	{
-		while(READ_BIT(SPI_ConfigPtr->SPIx->SR,7));
-		CLEAR_BIT(SPI_ConfigPtr->SPIx->CR1,6);
-		CLEAR_BIT(SPI_ConfigPtr->SPIx->CR1,14);
-		SET_BIT(SPI_ConfigPtr->SPIx->CR1,6);
-	}
 	//Send the data to the Tx Buffer
 	(*pTxBuffer) = (uint16_t)SPI_ConfigPtr->SPIx->DR;
 

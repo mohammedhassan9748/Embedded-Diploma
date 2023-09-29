@@ -31,146 +31,106 @@
 /*Choose the desired operation in SPI of you current MCU
  * OPTIONS:
  * --------
- * 1) MCU_1
- * 2) MCU_2
+ * 1) MCU_Act_As_Master
+ * 2) MCU_Act_As_Slave
 */
-//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
-//										FUNCTIONS
-//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
-void CloseALL(void);
+#define MCU_Act_As_Slave
+
+//Common global variables
+SPI_Config_t  spi1;
+
+//Master Global Variables
+#ifdef MCU_Act_As_Master
+GPIO_PinConfig_t nss1;
+#endif
+
+//Slave Global Variables
+#ifdef MCU_Act_As_Slave
+uint8_t PrintFlag=1;
+//GPIO_PinConfig_t led = {GPIOB,GPIO_PIN_0,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
+#endif
+
 void setup(void);
-void SetColor(uint8_t i);
-void NextColor(void);
-void SendColor(void);
-void UART1_IRQ_CallBack(void);
+void WaitForSlaveSetup(void);
 
-//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
-//									GLOBAL VARIABLES
-//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
-uint16_t Led_Number = '0';
-UART_Config_t uart1;
-EXTI_PinConfig_t Button_changeColor;
-EXTI_PinConfig_t Button_sendColor;
-GPIO_PinConfig_t LED1 = {GPIOB,GPIO_PIN_3,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
-GPIO_PinConfig_t LED2 = {GPIOB,GPIO_PIN_4,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
-GPIO_PinConfig_t LED3 = {GPIOB,GPIO_PIN_5,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
-GPIO_PinConfig_t LED4 = {GPIOB,GPIO_PIN_6,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
-GPIO_PinConfig_t LED5 = {GPIOB,GPIO_PIN_7,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
-GPIO_PinConfig_t LED6 = {GPIOB,GPIO_PIN_8,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
-
-//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
-//										MAIN
-//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 int main(void)
 {
 	setup();
-    while (1);
+
+	#ifdef MCU_Act_As_Master
+		WaitForSlaveSetup();
+		MCAL_GPIO_WritePin(&nss1, GPIO_PIN_CLEAR);
+		MCAL_SPI_sendString(&spi1,"I am Micro1 ;)#");
+		MCAL_GPIO_WritePin(&nss1, GPIO_PIN_SET);
+	#endif
+
+	#ifdef MCU_Act_As_Slave
+		uint8_t Buffer[100];
+		MCAL_SPI_receiveString(&spi1,Buffer);
+		if(PrintFlag == 1)
+		{
+			HAL_LCD_WriteString(Buffer);
+			PrintFlag = 0;
+		}
+	#endif
+
+    while(1)
+    {
+    }
 }
 
-//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
-//								FUNCTIONS IMPLEMENTATION
-//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
-void CloseALL(void)
-{
-	MCAL_GPIO_WritePin(&LED1, GPIO_PIN_SET);
-	MCAL_GPIO_WritePin(&LED2, GPIO_PIN_SET);
-	MCAL_GPIO_WritePin(&LED3, GPIO_PIN_SET);
-	MCAL_GPIO_WritePin(&LED4, GPIO_PIN_SET);
-	MCAL_GPIO_WritePin(&LED5, GPIO_PIN_SET);
-	MCAL_GPIO_WritePin(&LED6, GPIO_PIN_SET);
-}
+//==================================================================================================================================//
+//==================================================================================================================================//
+//==================================================================================================================================//
+//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-//
+//															Functions														    	//
+//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-//
+//==================================================================================================================================//
+//==================================================================================================================================//
+//==================================================================================================================================//
 
 void setup(void)
 {
+	//Common Configuration for master & slave
+	spi1.SPIx = SPI1;
+	spi1.SPI_ClkPhase = SPI_2ND_EDGE_CAPTURE_STROBE;
+	spi1.SPI_ClkPolarity = SPI_CLOCK_IDLE_HIGH;
+	spi1.SPI_DataSize = SPI_DATA_SIZE_8;
+	spi1.SPI_FrameFormat = SPI_FRAME_FORMAT_MSB;
+	spi1.SPI_PreScaler = SPI_PRESCALER_DIVISOR_8;
 
-	//EXTI Config
-	Button_changeColor.EXTI_Pin = EXTIPA1;
-	Button_changeColor.EXTI_Trigger = EXTI_TRIGGER_RISING;
-	Button_changeColor.EXTI_Enable = EXTI_IRQ_ENABLE;
-	Button_changeColor.IRQ_CallBackPtr = NextColor;
-	Button_sendColor.EXTI_Pin = EXTIPB0;
-	Button_sendColor.EXTI_Trigger = EXTI_TRIGGER_FALLING;
-	Button_sendColor.EXTI_Enable = EXTI_IRQ_ENABLE;
-	Button_sendColor.IRQ_CallBackPtr = SendColor;
-	//UART Config
-	uart1.USARTx 			= USART1;
-	uart1.USART_BaudRate 	= USART_BAUDRATE_115200;
-	uart1.USART_WordLength 	= USART_WORD_LENGTH_8;
-	uart1.USART_Parity 		= USART_PARITY_DISABLE;
-	uart1.USART_StopBits 	= USART_STOP_BIT_1;
-	uart1.USART_FlowControl = USART_FLOW_CONTROL_DISABLE;
-	uart1.USART_Mode 		= USART_MODE_TX_RX;
-	uart1.USART_IRQ_EN 		= USART_IE_RXNE;
-	uart1.IRQ_CallBackPtr 	= UART1_IRQ_CallBack;
 
-	//GPIO Init
-	MCAL_GPIO_Init(&LED1);
-	MCAL_GPIO_Init(&LED2);
-	MCAL_GPIO_Init(&LED3);
-	MCAL_GPIO_Init(&LED4);
-	MCAL_GPIO_Init(&LED5);
-	MCAL_GPIO_Init(&LED6);
-	CloseALL();
-	//EXTI Init
-	MCAL_EXTI_Init(&Button_changeColor);
-	MCAL_EXTI_Init(&Button_sendColor);
-	//UART Init
-	MCAL_UART_Init(&uart1);
-	MCAL_UART_GPIO_SetPins(&uart1);
-}
+#ifdef MCU_Act_As_Master
+	spi1.SPI_CommMode = SPI_HALF_DUPLEX_TX;
+	spi1.SPI_Mode = SPI_MODE_MASTER;
+	spi1.SPI_SlaveSelect = SPI_SS_SOFTWARE_SET;
+	spi1.SPI_IRQ_EN = SPI_IE_DISABLE;
+	spi1.IRQ_CallBackPtr = NULL_PTR;
+	//Slave Select pin cofiguration
+	nss1.GPIO_Port = GPIOA;
+	nss1.GPIO_PinNo = GPIO_PIN_4;
+	nss1.GPIO_Mode = GPIO_MODE_OUTPUT_PP;
+	nss1.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_10MHZ;
+	MCAL_GPIO_Init(&nss1);
+	MCAL_GPIO_WritePin(&nss1, GPIO_PIN_SET);
+#endif
 
-void SetColor(uint8_t i)
-{
-	switch(i){
-		case '1':
-			CloseALL();
-			MCAL_GPIO_WritePin(&LED1, GPIO_PIN_CLEAR);
-			break;
-		case '2':
-			CloseALL();
-			MCAL_GPIO_WritePin(&LED2, GPIO_PIN_CLEAR);
-			break;
-		case '3':
-			CloseALL();
-			MCAL_GPIO_WritePin(&LED3, GPIO_PIN_CLEAR);
-			break;
-		case '4':
-			CloseALL();
-			MCAL_GPIO_WritePin(&LED4, GPIO_PIN_CLEAR);
-			break;
-		case '5':
-			CloseALL();
-			MCAL_GPIO_WritePin(&LED5, GPIO_PIN_CLEAR);
-			break;
-		case '6':
-			CloseALL();
-			MCAL_GPIO_WritePin(&LED6, GPIO_PIN_CLEAR);
-			break;
-	}
-}
+#ifdef MCU_Act_As_Slave
+	spi1.SPI_CommMode = SPI_HALF_DUPLEX_RX;
+	spi1.SPI_Mode = SPI_MODE_SLAVE;
+	spi1.SPI_SlaveSelect = SPI_SS_HARDWARE_SLAVE;
+	spi1.SPI_IRQ_EN = SPI_IE_DISABLE;
+	spi1.IRQ_CallBackPtr = NULL_PTR;
+	//MCAL_GPIO_Init(&led);
+	HAL_LCD_Init();
+#endif
 
-//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
-//										CallBacks
-//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
-void NextColor(void)
-{
-	Led_Number++;
-	if(Led_Number == '7')
-		Led_Number = '1';
-	SetColor(Led_Number);
-}
-
-void SendColor(void)
-{
-	MCAL_UART_Transmit(&uart1, &Led_Number, UART_Polling_Enable);
-}
-
-void UART1_IRQ_CallBack(void)
-{
-	MCAL_UART_Receive(&uart1, &Led_Number, UART_Polling_Disable);
-	SetColor(Led_Number);
+	MCAL_SPI_Init(&spi1);
+	MCAL_SPI_GPIO_SetPins(&spi1);
 }
 
 
-
-
+void WaitForSlaveSetup(void){
+	for(int i=0;i<550;i++)
+		for(int i=0;i<255;i++);
+}

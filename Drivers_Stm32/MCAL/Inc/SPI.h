@@ -47,7 +47,8 @@
 4:  SPI_SIMPLEX_MASTER_RX_SLAVE_TX		Data Wires: 1 unidirectional wire used by master for receiving only - by slave for transmitting only
 */
 #define SPI_FULL_DUPLEX					(uint16_t)((0<<15) | (0<<10) | (1<<1))
-#define SPI_HALF_DUPLEX					(uint16_t) (1<<15)
+#define SPI_HALF_DUPLEX_TX				(uint16_t)((1<<15) | (1<<14))
+#define SPI_HALF_DUPLEX_RX				(uint16_t)((1<<15) | (0<<14))
 #define SPI_SIMPLEX_TX_ONLY				(uint16_t)((0<<15) | (0<<10) | (1<<2))
 #define SPI_SIMPLEX_RX_ONLY				(uint16_t)((0<<15) | (1<<10))
 
