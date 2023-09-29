@@ -1,0 +1,10 @@
+LCD.c:56:13:LCD_wait	16	static
+LCD.c:66:13:LCD_Config	8	static
+LCD.c:102:13:LCD_Kick	8	static
+LCD.c:119:13:LCD_WriteChar	16	static
+LCD.c:179:6:HAL_LCD_Init	8	static
+LCD.c:215:6:HAL_LCD_WriteCommand	16	static
+LCD.c:271:6:HAL_LCD_ClearScreen	8	static
+LCD.c:294:6:HAL_LCD_WriteChar	16	static
+LCD.c:326:6:HAL_LCD_WriteString	16	static
+LCD.c:351:6:HAL_LCD_GoToXY	16	static

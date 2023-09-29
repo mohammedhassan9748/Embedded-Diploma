@@ -1,0 +1,7 @@
+main.c:64:5:main	8	static
+main.c:73:6:CloseALL	8	static
+main.c:83:6:setup	8	static
+main.c:122:6:SetColor	16	static
+main.c:155:6:NextColor	8	static
+main.c:163:6:SendColor	8	static
+main.c:168:6:UART1_IRQ_CallBack	8	static
