@@ -81,27 +81,32 @@ static uint8_t Get_CRx_Position(uint16_t PinNumber){
 *
 */
 void MCAL_GPIO_Init(GPIO_PinConfig_t* GPIO_PinConfigPtr){
-
+	static uint8_t GPIO_CLK_InitFlag[5] = {0,0,0,0,0};
 	//Check port selected to enable it's clock
-	if(GPIO_PinConfigPtr->GPIO_Port == GPIOA)
+	if((GPIO_PinConfigPtr->GPIO_Port == GPIOA) && (GPIO_CLK_InitFlag[0] != 1))
 	{
 		RCC_GPIOA_CLK_EN();
+		GPIO_CLK_InitFlag[0] = 1;
 	}
-	else if(GPIO_PinConfigPtr->GPIO_Port == GPIOB)
+	else if((GPIO_PinConfigPtr->GPIO_Port == GPIOB) && (GPIO_CLK_InitFlag[1] != 1))
 	{
 		RCC_GPIOB_CLK_EN();
+		GPIO_CLK_InitFlag[1] = 1;
 	}
-	else if(GPIO_PinConfigPtr->GPIO_Port == GPIOC)
+	else if((GPIO_PinConfigPtr->GPIO_Port == GPIOC) && (GPIO_CLK_InitFlag[2] != 1))
 	{
 		RCC_GPIOC_CLK_EN();
+		GPIO_CLK_InitFlag[2] = 1;
 	}
-	else if(GPIO_PinConfigPtr->GPIO_Port == GPIOD)
+	else if((GPIO_PinConfigPtr->GPIO_Port == GPIOD) && (GPIO_CLK_InitFlag[3] != 1))
 	{
 		RCC_GPIOD_CLK_EN();
+		GPIO_CLK_InitFlag[3] = 1;
 	}
-	else
+	else if((GPIO_PinConfigPtr->GPIO_Port == GPIOE) && (GPIO_CLK_InitFlag[4] != 1))
 	{
 		RCC_GPIOE_CLK_EN();
+		GPIO_CLK_InitFlag[4] = 1;
 	}
 
 	//Check for alternate function mode (Input or Output) to enable it's clock

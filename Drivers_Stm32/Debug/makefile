@@ -39,6 +39,9 @@ default.size.stdout \
 OBJDUMP_LIST += \
 STM32.list \
 
+OBJCOPY_HEX += \
+STM32.hex \
+
 OBJCOPY_BIN += \
 STM32.bin \
 
@@ -62,6 +65,11 @@ STM32.list: $(EXECUTABLES)
 	@echo 'Finished building: $@'
 	@echo ' '
 
+STM32.hex: $(EXECUTABLES)
+	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "STM32.hex"
+	@echo 'Finished building: $@'
+	@echo ' '
+
 STM32.bin: $(EXECUTABLES)
 	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "STM32.bin"
 	@echo 'Finished building: $@'
@@ -72,7 +80,7 @@ clean:
 	-$(RM) *
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_BIN)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_HEX) $(OBJCOPY_BIN)
 
 .PHONY: all clean dependents
 .SECONDARY:

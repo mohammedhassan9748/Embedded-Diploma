@@ -16,7 +16,6 @@
 //									Global Variables
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
-static GPIO_PinConfig_t g_NSS_Pin[2];
 static void (*g_IRQ_CallBackPtr[2])(void);
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
@@ -183,7 +182,6 @@ void MCAL_SPI_DeInit(SPI_Config_t* SPI_ConfigPtr){
 void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr){
 
 	GPIO_PinConfig_t MOSI,MISO,SCK,NSS;
-	int NSS_Index;
 	/*
 	* 1) Check if SPIx is SPI1 or SPI2.
 	*/
@@ -204,8 +202,6 @@ void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr){
 		//Configure MOSI Pin Data
 		MOSI.GPIO_Port = GPIOA;
 		MOSI.GPIO_PinNo = GPIO_PIN_7;
-		NSS_Index = 0;
-
 	}
 	else
 	{
@@ -224,7 +220,6 @@ void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr){
 		//Configure MOSI Pin Data
 		MOSI.GPIO_Port = GPIOB;
 		MOSI.GPIO_PinNo = GPIO_PIN_15;
-		NSS_Index = 1;
 	}
 
 
@@ -337,7 +332,6 @@ void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr){
 			MCAL_GPIO_Init(&NSS);
 		}
 	}
-	g_NSS_Pin[NSS_Index] = NSS;
 }
 
 /**================================================================
