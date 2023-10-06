@@ -53,12 +53,14 @@
 						/*-----*/
 #define SPI2_BASE							0x40003800
 
+						/* I2C */
+						/*-----*/
+#define I2C1_BASE 							0x40005400
+#define I2C2_BASE 							0x40005800
+
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //							Base addresses for APB2 Bus Peripherals
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
-						/* NVIC */
-						/*------*/
-#define NVIC_BASE							0xE000E100
 
 						/* AFIO */
 						/*------*/
@@ -185,6 +187,19 @@ typedef struct{
 	vuint32_t I2SPR;		// 0x20
 }SPI_Typedef;
 
+			/* I2C */
+			/*-----*/
+typedef struct{
+	vuint32_t CR1;			// 0x00
+	vuint32_t CR2; 			// 0x04
+	vuint32_t OAR1;			// 0x08
+	vuint32_t OAR2;			// 0x0C
+	vuint32_t DR;			// 0x10
+	vuint32_t SR1;			// 0x14
+	vuint32_t SR2;			// 0x18
+	vuint32_t CCR;			// 0x1C
+	vuint32_t TRISE;		// 0x20
+}I2C_Typedef;
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //									Peripheral Instants:
@@ -221,6 +236,11 @@ typedef struct{
 #define SPI1					((SPI_Typedef*)SPI1_BASE)
 #define SPI2					((SPI_Typedef*)SPI2_BASE)
 
+					/* I2C */
+					/*-----*/
+#define I2C1					((I2C_Typedef*)I2C1_BASE)
+#define I2C2					((I2C_Typedef*)I2C2_BASE)
+
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //								NVIC Interrupt Enable Macros:
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
@@ -233,7 +253,11 @@ typedef struct{
 #define NVIC_IRQ9_EN()				(NVIC_ISER0 |= (1<<9))		//EXTI3
 #define NVIC_IRQ10_EN()				(NVIC_ISER0 |= (1<<10))		//EXTI4
 #define NVIC_IRQ23_EN()				(NVIC_ISER0 |= (1<<23))		//EXTI9_5
+#define NVIC_IRQ31_EN()				(NVIC_ISER0 |= (1<<31))		//I2C1_EV
 
+#define NVIC_IRQ32_EN()				(NVIC_ISER1 |= (1<<0))		//I2C1_ER
+#define NVIC_IRQ33_EN()				(NVIC_ISER1 |= (1<<1))		//I2C2_EV
+#define NVIC_IRQ34_EN()				(NVIC_ISER1 |= (1<<3))		//I2C2_ER
 #define NVIC_IRQ35_EN()				(NVIC_ISER1 |= (1<<3))		//SPI1
 #define NVIC_IRQ36_EN()				(NVIC_ISER1 |= (1<<4))		//SPI2
 #define NVIC_IRQ37_EN()				(NVIC_ISER1 |= (1<<5))		//USART1
@@ -250,7 +274,11 @@ typedef struct{
 #define NVIC_IRQ9_DIS()				(NVIC_ICER0 |= (1<<9))		//EXTI3
 #define NVIC_IRQ10_DIS()			(NVIC_ICER0 |= (1<<10))		//EXTI4
 #define NVIC_IRQ23_DIS()			(NVIC_ICER0 |= (1<<23))		//EXTI9_5
+#define NVIC_IRQ31_DIS()			(NVIC_ICER0 |= (1<<31))		//I2C1_EV
 
+#define NVIC_IRQ32_DIS()			(NVIC_ICER1 |= (1<<0))		//I2C1_ER
+#define NVIC_IRQ33_DIS()			(NVIC_ICER1 |= (1<<1))		//I2C2_EV
+#define NVIC_IRQ34_DIS()			(NVIC_ICER1 |= (1<<3))		//I2C2_ER
 #define NVIC_IRQ35_DIS()			(NVIC_ICER1 |= (1<<3))		//SPI1
 #define NVIC_IRQ36_DIS()			(NVIC_ICER1 |= (1<<4))		//SPI2
 #define NVIC_IRQ37_DIS()			(NVIC_ICER1 |= (1<<5))		//USART1
@@ -285,6 +313,11 @@ typedef struct{
 					/*--------------------*/
 #define RCC_SPI1_CLK_EN()			(RCC->APB2ENR |= (1<<12))
 #define RCC_SPI2_CLK_EN()			(RCC->APB1ENR |= (1<<14))
+
+					/* RCC SPI CLK ENABLE */
+					/*--------------------*/
+#define RCC_I2C1_CLK_EN()			(RCC->APB1ENR |= (1<<21))
+#define RCC_I2C2_CLK_EN()			(RCC->APB1ENR |= (1<<22))
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //									Generic Macros:

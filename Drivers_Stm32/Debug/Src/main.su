@@ -1,3 +1,1 @@
-main.c:56:5:main	112	static
-main.c:92:6:setup	8	static
-main.c:133:6:WaitForSlaveSetup	16	static
+main.c:31:5:main	24	static

@@ -81,7 +81,7 @@ static uint8_t Get_CRx_Position(uint16_t PinNumber){
 *
 */
 void MCAL_GPIO_Init(GPIO_PinConfig_t* GPIO_PinConfigPtr){
-	static uint8_t GPIO_CLK_InitFlag[5] = {0,0,0,0,0};
+	static uint8_t GPIO_CLK_InitFlag[6] = {0,0,0,0,0,0};
 	//Check port selected to enable it's clock
 	if((GPIO_PinConfigPtr->GPIO_Port == GPIOA) && (GPIO_CLK_InitFlag[0] != 1))
 	{
@@ -113,6 +113,7 @@ void MCAL_GPIO_Init(GPIO_PinConfig_t* GPIO_PinConfigPtr){
 	if(GPIO_PinConfigPtr->GPIO_Mode > GPIO_MODE_OUTPUT_OD)
 	{
 		RCC_AFIO_CLK_EN();
+		GPIO_CLK_InitFlag[5] = 1;
 	}
 
 	//Pointer holds the configuration register address either High or Low depends on PinNo

@@ -1,0 +1,15 @@
+I2C.c:39:6:MCAL_I2C_Init	48	static
+I2C.c:176:6:MCAL_I2C_DeInit	16	static
+I2C.c:219:6:MCAL_I2C_GPIO_SetPins	32	static
+I2C.c:275:19:MCAL_I2C_GetFlagStatus	24	static
+I2C.c:315:6:MCAL_I2C_GenerateStart	16	static
+I2C.c:356:6:MCAL_I2C_GenerateStop	16	static
+I2C.c:383:6:MCAL_I2C_SendAddress	16	static
+I2C.c:412:6:MCAL_I2C_MasterTX	32	static
+I2C.c:498:6:MCAL_I2C_MasterRX	32	static
+I2C.c:652:6:MCAL_I2C_SlaveTX	16	static
+I2C.c:671:6:MCAL_I2C_SlaveRX	16	static
+I2C.c:680:6:I2C1_EV_IRQHandler	16	static
+I2C.c:792:6:I2C1_ER_IRQHandler	4	static
+I2C.c:796:6:I2C2_EV_IRQHandler	16	static
+I2C.c:907:6:I2C2_ER_IRQHandler	4	static

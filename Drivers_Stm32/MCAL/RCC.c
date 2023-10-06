@@ -113,8 +113,8 @@ uint32_t MCAL_RCC_HCLK(void){
 	/*
 	* HPRE[3:0]: AHB prescaler
 	*/
-	return (MCAL_RCC_SYSCLK() >> (g_AHB_Prescaler_Table[ (RCC->CFGR >> 4) & 0b1111 ]));
-
+	uint32_t HCLK = (MCAL_RCC_SYSCLK() >> (g_AHB_Prescaler_Table[ (RCC->CFGR >> 4) & 0b1111 ]));
+	return HCLK;
 }
 
 /**================================================================
@@ -135,8 +135,8 @@ uint32_t MCAL_RCC_PCLK1(void){
 	* PPRE1[2:0]: APB Low-speed prescaler (APB1)
 	*/
 
-	return (MCAL_RCC_HCLK() >> (g_APB_Prescaler_Table[ (RCC->CFGR >> 8) & 0b111 ]));
-
+	uint32_t PCLK1 =  (MCAL_RCC_HCLK() >> (g_APB_Prescaler_Table[ (RCC->CFGR >> 8) & 0b111 ]));
+	return PCLK1;
 }
 
 /**================================================================

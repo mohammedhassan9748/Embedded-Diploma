@@ -26,111 +26,36 @@
 #include "../HAL/Inc/LCD.h"
 #include "../HAL/Inc/keypad.h"
 #include "../HAL/Inc/SevenSegment.h"
-
-					/* @Config */
-/*Choose the desired operation in SPI of you current MCU
- * OPTIONS:
- * --------
- * 1) MCU_Act_As_Master
- * 2) MCU_Act_As_Slave
-*/
-#define MCU_Act_As_Slave
-
-//Common global variables
-SPI_Config_t  spi1;
-
-//Master Global Variables
-#ifdef MCU_Act_As_Master
-GPIO_PinConfig_t nss1;
-#endif
-
-//Slave Global Variables
-#ifdef MCU_Act_As_Slave
-uint8_t PrintFlag=1;
-//GPIO_PinConfig_t led = {GPIOB,GPIO_PIN_0,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
-#endif
-
-void setup(void);
-void WaitForSlaveSetup(void);
+#include "../HAL/Inc/EEPROM.h"
 
 int main(void)
 {
-	setup();
 
-	#ifdef MCU_Act_As_Master
-		WaitForSlaveSetup();
-		MCAL_GPIO_WritePin(&nss1, GPIO_PIN_CLEAR);
-		MCAL_SPI_sendString(&spi1,"I am Micro1 ;)#");
-		MCAL_GPIO_WritePin(&nss1, GPIO_PIN_SET);
-	#endif
+	//Test Case 1
+	uint8_t ch1[7] = {1,2,3,4,5,6,7};
+	uint8_t ch2[7] = {0};
 
-	#ifdef MCU_Act_As_Slave
-		uint8_t Buffer[100];
-		MCAL_SPI_receiveString(&spi1,Buffer);
-		if(PrintFlag == 1)
-		{
-			HAL_LCD_WriteString(Buffer);
-			PrintFlag = 0;
-		}
-	#endif
+	HAL_EEPROM_Init();
+	HAL_EEPROM_WriteNbytes(0xAF, ch1 ,7);
+	HAL_EEPROM_ReadNbytes(0xAF, ch2 ,7);
 
-    while(1)
+	//Test Case 2
+	ch1[0] = 0xA;
+	ch1[1] = 0xB;
+	ch1[2] = 0xC;
+	ch1[3] = 0xD;
+
+	HAL_EEPROM_WriteNbytes(0xFFF, ch1 ,4);
+	HAL_EEPROM_ReadNbytes(0xFFF, ch2 ,4);
+
+	//Test Case 3
+	ch1[0] = 0xAB;
+	
+	HAL_EEPROM_WriteNbytes(0x1234, ch1 ,1);
+	HAL_EEPROM_ReadNbytes(0x1234, ch2 ,1);
+	
+    while (1)
     {
     }
-}
 
-//==================================================================================================================================//
-//==================================================================================================================================//
-//==================================================================================================================================//
-//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-//
-//															Functions														    	//
-//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-//
-//==================================================================================================================================//
-//==================================================================================================================================//
-//==================================================================================================================================//
-
-void setup(void)
-{
-	//Common Configuration for master & slave
-	spi1.SPIx = SPI1;
-	spi1.SPI_ClkPhase = SPI_2ND_EDGE_CAPTURE_STROBE;
-	spi1.SPI_ClkPolarity = SPI_CLOCK_IDLE_HIGH;
-	spi1.SPI_DataSize = SPI_DATA_SIZE_8;
-	spi1.SPI_FrameFormat = SPI_FRAME_FORMAT_MSB;
-	spi1.SPI_PreScaler = SPI_PRESCALER_DIVISOR_8;
-
-
-#ifdef MCU_Act_As_Master
-	spi1.SPI_CommMode = SPI_HALF_DUPLEX_TX;
-	spi1.SPI_Mode = SPI_MODE_MASTER;
-	spi1.SPI_SlaveSelect = SPI_SS_SOFTWARE_SET;
-	spi1.SPI_IRQ_EN = SPI_IE_DISABLE;
-	spi1.IRQ_CallBackPtr = NULL_PTR;
-	//Slave Select pin cofiguration
-	nss1.GPIO_Port = GPIOA;
-	nss1.GPIO_PinNo = GPIO_PIN_4;
-	nss1.GPIO_Mode = GPIO_MODE_OUTPUT_PP;
-	nss1.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_10MHZ;
-	MCAL_GPIO_Init(&nss1);
-	MCAL_GPIO_WritePin(&nss1, GPIO_PIN_SET);
-#endif
-
-#ifdef MCU_Act_As_Slave
-	spi1.SPI_CommMode = SPI_HALF_DUPLEX_RX;
-	spi1.SPI_Mode = SPI_MODE_SLAVE;
-	spi1.SPI_SlaveSelect = SPI_SS_HARDWARE_SLAVE;
-	spi1.SPI_IRQ_EN = SPI_IE_DISABLE;
-	spi1.IRQ_CallBackPtr = NULL_PTR;
-	//MCAL_GPIO_Init(&led);
-	HAL_LCD_Init();
-#endif
-
-	MCAL_SPI_Init(&spi1);
-	MCAL_SPI_GPIO_SetPins(&spi1);
-}
-
-
-void WaitForSlaveSetup(void){
-	for(int i=0;i<550;i++)
-		for(int i=0;i<255;i++);
 }
