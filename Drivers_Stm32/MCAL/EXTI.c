@@ -11,6 +11,7 @@
 
 #include "../Services/Utils.h"
 #include "Inc/EXTI.h"
+#include "Inc/GPIO.h"
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //									Generic Macros
