@@ -22,7 +22,9 @@
 //										Generic Macros
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
-#define PERIPHERAL_ENABLE			 	(uint16_t)(1<<0)
+#define I2C_PERIPHERAL_ENABLE_BIT			 	(uint16_t)(0)
+#define I2C_ACKNOWLEDGMENT_ENABLE_BIT			(uint16_t)(10)
+
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //										Generic Typedefs
@@ -130,33 +132,6 @@ typedef enum{
 #define I2C_MODE_I2C					(uint16_t)(0)
 #define I2C_MODE_SMBUS					(uint16_t)(1<<1)
 
-		/* @ref I2C_PeripheralFrequencuy */
-/*
- * The peripheral input clock must be programmed in the I2C_CR2 register in order to generate correct timings.
- * The peripheral input clock frequency must be at least:
- * • 2 MHz in Sm mode
- * • 4 MHz in Fm mode
- * 5:0 FREQ[5:0]: Peripheral clock frequency.
- * The FREQ bits must be configured with the APB clock frequency value (I2C peripheral connected to APB1 24MHZ-36MHZ).
- * The FREQ field is used by the peripheral to generate data setup and hold times compliant with the I2C specs.
- * The minimum allowed frequency is 2 MHz,
- * the maximum frequency is limited by the maximum APB frequency and cannot exceed 50 MHz.
- * --------
- * Example:
- * --------
- * (1)	0b000010: 2 MHz
- * (2)	0b110010: 50 MHz
- * ------------
- * Constraints:
- * ------------
- * 0b000000 (0MHZ): Not allowed
- * 0b000001 (1MHZ): Not allowed
- * Higher than 0b100100 (36MHZ): Not allowed -- Max frequency on APB1 Bus.
- * ---------
- * SUMMARY : Range for FREQ[5:0]: (0b000010 - 0b100100)binary || (2-36)decimal
- * ---------
-*/
-
 			/* @ref I2C_MasterSpeedMode */
 /*
  * Bit 15 F/S: I2C master mode selection
@@ -246,8 +221,8 @@ typedef enum{
 * --------
 * *********************************************
 */
-#define I2C_SLAVE_DUALITY_ENABLE			(uint16_t)(0)
-#define I2C_SLAVE_DUALITY_DISABLE			(uint16_t)(1<<0)
+#define I2C_SLAVE_DUALITY_DISABLE			(uint16_t)(0)
+#define I2C_SLAVE_DUALITY_ENABLE			(uint16_t)(1<<0)
 
 			/* @ref I2C_StretchMode */
 /*
@@ -266,23 +241,6 @@ typedef enum{
 #define I2C_STRETCH_MODE_ENABLE				(uint16_t)(0)
 #define I2C_STRETCH_MODE_DISABLE			(uint16_t)(1<<7)
 
-			/* @ref I2C_Acknowledgment */
-/*
-* Bit 10 ACK: Acknowledge enable
-* This bit is set and cleared by software and cleared by hardware when PE=0.
-* 0: No acknowledge returned
-* 1: Acknowledge returned after a byte is received (matched address or data)
-* *********************************************
-* OPTIONS:
-* --------
-1: I2C_ACKNOWLEDGMENT_ENABLE
-2: I2C_ACKNOWLEDGMENT_DISABLE
-* --------
-* *********************************************
-*/
-#define I2C_ACKNOWLEDGMENT_ENABLE			(uint16_t)(1<<10)
-#define I2C_ACKNOWLEDGMENT_DISABLE			(uint16_t)(0)
-
 			/* @ref I2C_GeneralCallAddress */
 /*
 * //Enable 	 ---> 	ITEVFEN
@@ -299,7 +257,7 @@ typedef enum{
 #define I2C_GENERAL_CALL_ADDRESS_ENABLE		(uint16_t)(1<<10)
 #define I2C_GENERAL_CALL_ADDRESS_DISABLE	(uint16_t)(0)
 
-			/* @ref I2C_IRQ_EV_EN */
+			/* @ref I2C_IRQ_EN */
 /*
 * FIRST OPTION INCLUDES:							//Event Interrupts Only
 * •Start bit sent (Master) SB.
@@ -308,7 +266,16 @@ typedef enum{
 * •Stop received (Slave) STOPF.
 * •Data byte transfer finished BTF.
 *
-* SECOND OPTION INCLUDES:							//Both Event & Buffer Interrupts
+* SECOND OPTION INCLUDES:
+* •Bus error BERR
+* •Arbitration loss (Master) ARLO
+* •Acknowledge failure AF
+* •Overrun/Underrun OVR
+* •PEC error PECERR
+* •Timeout/Tlow error TIMEOUT
+* •SMBus Alert SMBALERT
+*
+* THIRD OPTION INCLUDES:							//Both Event & Buffer Interrupts
 * •Transmit buffer empty TxE.
 * •Receive buffer not empty RxNE.
 * •FIRST OPTIONS INCLUDES
@@ -320,33 +287,16 @@ typedef enum{
 2: I2C_IRQ_IE_ITEVFEN
 3: I2C_IRQ_IE_ITEVFEN_ITBUFEN
 * --------
+* Note: You can select more than one option by
+* 		(or-ing) between the options in the
+* 		main configuration.
 * *********************************************
 */
-#define I2C_IRQ_EV_IE_DISABLE				(uint16_t)(0)
-#define I2C_IRQ_IE_ITEVFEN					(uint16_t)(1<<9)
-#define I2C_IRQ_IE_ITEVFEN_ITBUFEN			(uint16_t)((1<<10) | (1<<9))
-
-			/* @ref I2C_IRQ_ERR_EN */
-/*
-* THIRD OPTION INCLUDES:							//Error Interrupts Only
-* •Bus error BERR
-* •Arbitration loss (Master) ARLO
-* •Acknowledge failure AF
-* •Overrun/Underrun OVR
-* •PEC error PECERR
-* •Timeout/Tlow error TIMEOUT
-* •SMBus Alert SMBALERT
-* *********************************************
-* OPTIONS:
-* --------
-1: I2C_IRQ_EV_IE_DISABLE
-2: I2C_IRQ_IE_ITEVFEN
-3: I2C_IRQ_IE_ITEVFEN_ITBUFEN
-* --------
-* *********************************************
-*/
-#define I2C_IRQ_ERR_IE_DISABLE				(uint16_t)(0)
+#define I2C_IRQ_IE_DISABLE					(uint16_t)(0)
 #define I2C_IRQ_IE_ITERREN					(uint16_t)(1<<8)
+#define I2C_IRQ_IE_ITEVFEN					(uint16_t)(1<<9)
+#define I2C_IRQ_IE_IITBUFEN					(uint16_t)(1<<10)
+
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //										User Typedefs
@@ -378,25 +328,18 @@ typedef struct{
 	uint16_t I2C_StretchMode;  				// Specifies whether to disable the stretch mode or not.
 							  	  			// This parameter must be a value of @ref I2C_StretchMode.
 
-	uint16_t I2C_Acknowledgment;  			// Specifies whether to enable ack or not.
-							  	  			// This parameter must be a value of @ref I2C_Acknowledgment.
-
 	uint16_t I2C_GeneralCallAddress; 		// Specifies whether to enable General Call Address or not.
 							  	  			// This parameter must be a value of @ref I2C_GeneralCallAddress.
 
-	uint16_t  I2C_IRQ_EV_EN;  				// Enable or Disable Event IRQ for current I2C channel.
-											// This parameter must be a value of @ref I2C_IRQ_EV_EN.
+	uint16_t  I2C_IRQ_EN;  					// Enable or Disable Event IRQ for current I2C channel.
+											// This parameter must be a value of @ref I2C_IRQ_EN.
 
-	uint16_t  I2C_IRQ_ERR_EN;  				// Enable or Disable Event IRQ for current I2C channel.
-											// This parameter must be a value of @ref I2C_IRQ_ERR_EN.
+	void (*IRQ_CallBackFunction_Event)(void);
 
-	void (*IRQ_CallBackPtr_Event[7])(void);	// Set the C Function that will be called once IRQ Event happen.
-											// Set the index in your application by one of the enum
-											//"I2C_Event_IRQ_Src_t" variables
 
-	void (*IRQ_CallBackPtr_Error[7])(void);	// Set the C Function that will be called once IRQ Error happen.
-											// Set the index in your application by one of the enum
-											//"I2C_Error_IRQ_Src_t" variables
+	void (*IRQ_CallBackFunction_Error)(void);
+
+
 }I2C_Config_t;
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
@@ -407,9 +350,6 @@ typedef struct{
 void MCAL_I2C_Init(I2C_Config_t* I2C_ConfigPtr);
 void MCAL_I2C_DeInit(I2C_Config_t* I2C_ConfigPtr);
 
-//Setting GPIO Pins (I2C Channel) API
-void MCAL_I2C_GPIO_SetPins(I2C_Config_t* I2C_ConfigPtr);
-
 //Getting Flag Status of the flag required API
 I2C_Flag_Status_t MCAL_I2C_GetFlagStatus(I2C_Config_t* I2C_ConfigPtr, I2C_Flags_t flagType);
 
@@ -419,8 +359,13 @@ void MCAL_I2C_GenerateStart(I2C_Config_t* I2C_ConfigPtr, I2C_Start_Status_t star
 void MCAL_I2C_GenerateStop(I2C_Config_t* I2C_ConfigPtr, I2C_Stop_Status_t stopStatus);
 
 //Sending Address APIs
-
 void MCAL_I2C_SendAddress(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, I2C_Direction_t Dir);
+
+//Master/Slave Transmit One Byte
+void MCAL_I2C_SendByte(I2C_Config_t* I2C_ConfigPtr, uint8_t DataByte);
+
+//Master/Slave Receive One Byte by pointer
+void MCAL_I2C_ReceiveByte(I2C_Config_t* I2C_ConfigPtr, uint8_t* DataByte);
 
 //Master Sending/Writing Using Polling Technique Only API
 void MCAL_I2C_MasterTX(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, uint8_t* pTxBuffer, uint32_t dataLength,

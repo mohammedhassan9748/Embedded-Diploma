@@ -60,38 +60,38 @@
 */
 
 //*NOTE*: MUST BE CONFIGURED
-#define LCD_RS_PORT			GPIOB
-#define LCD_RS_PIN			GPIO_PIN_8
+#define LCD_RS_PORT			GPIOA
+#define LCD_RS_PIN			GPIO_PIN_3
 
-#define LCD_EN_PORT			GPIOB
-#define LCD_EN_PIN			GPIO_PIN_10
+#define LCD_EN_PORT			GPIOA
+#define LCD_EN_PIN			GPIO_PIN_4
 
-#define LCD_D4_PORT			GPIOB
-#define LCD_D4_PIN			GPIO_PIN_4
+#define LCD_D4_PORT			GPIOA
+#define LCD_D4_PIN			GPIO_PIN_5
 
-#define LCD_D5_PORT			GPIOB
-#define LCD_D5_PIN			GPIO_PIN_5
+#define LCD_D5_PORT			GPIOA
+#define LCD_D5_PIN			GPIO_PIN_6
 
-#define LCD_D6_PORT			GPIOB
-#define LCD_D6_PIN			GPIO_PIN_6
+#define LCD_D6_PORT			GPIOA
+#define LCD_D6_PIN			GPIO_PIN_7
 
 #define LCD_D7_PORT			GPIOB
-#define LCD_D7_PIN			GPIO_PIN_7
+#define LCD_D7_PIN			GPIO_PIN_0
 
 //*NOTE*: ONLY CONFIGURED FOR EIGHT_BIT_MODE
 #ifdef			 EIGHT_BIT_MODE
 
 #define LCD_D0_PORT			GPIOA
-#define LCD_D0_PIN			GPIO_PIN_0
+#define LCD_D0_PIN			GPIO_PIN_1
 
 #define LCD_D1_PORT			GPIOA
-#define LCD_D1_PIN			GPIO_PIN_1
+#define LCD_D1_PIN			GPIO_PIN_2
 
 #define LCD_D2_PORT			GPIOA
-#define LCD_D2_PIN			GPIO_PIN_2
+#define LCD_D2_PIN			GPIO_PIN_3
 
 #define LCD_D3_PORT			GPIOA
-#define LCD_D3_PIN			GPIO_PIN_3
+#define LCD_D3_PIN			GPIO_PIN_4
 
 #endif
 

@@ -44,6 +44,12 @@
 //							Base addresses for APB1 Bus Peripherals
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
+						/* GPTM */
+						/*------*/
+#define TIM2_BASE							0x40000000
+#define TIM3_BASE							0x40000400
+#define TIM4_BASE							0x40000800
+
 						/* USART */
 						/*-------*/
 #define USART2_BASE							0x40004400
@@ -161,6 +167,28 @@ typedef struct{
 	vuint32_t LCKR;			// 0x18
 }GPIO_Typedef;
 
+			/* GPTM */
+			/*------*/
+typedef struct{
+	vuint32_t CR1;			// 0x00
+	vuint32_t CR2; 			// 0x04
+	vuint32_t SMCR;			// 0x08
+	vuint32_t DIER;			// 0x0C
+	vuint32_t SR;			// 0x10
+	vuint32_t EGR;			// 0x14
+	vuint32_t CCMR[2];		// 0x18 - 0x1C
+	vuint32_t CCER;			// 0x20
+	vuint32_t CNT;			// 0x24
+	vuint32_t PSC; 			// 0x28
+	vuint32_t ARR;			// 0x2C
+	vuint32_t RESERVED1;	// 0x30
+	vuint32_t CCR[4];			// 0x34 - 0x40
+	vuint32_t RESERVED2;	// 0x44
+	vuint32_t DCR;			// 0x48
+	vuint32_t DMAR;			// 0x4C
+}GPTM_Typedef;
+
+
 			/* USART */
 			/*-------*/
 typedef struct{
@@ -225,6 +253,12 @@ typedef struct{
 #define GPIOD 					((GPIO_Typedef*)GPIOD_BASE)
 #define GPIOE 					((GPIO_Typedef*)GPIOE_BASE)
 
+					/* GPTM */
+					/*------*/
+#define TIM2 					((GPTM_Typedef*)TIM2_BASE)
+#define TIM3 					((GPTM_Typedef*)TIM3_BASE)
+#define TIM4 					((GPTM_Typedef*)TIM4_BASE)
+
 					/* USART */
 					/*-------*/
 #define USART1 					((USART_Typedef*)USART1_BASE)
@@ -253,6 +287,9 @@ typedef struct{
 #define NVIC_IRQ9_EN()				(NVIC_ISER0 |= (1<<9))		//EXTI3
 #define NVIC_IRQ10_EN()				(NVIC_ISER0 |= (1<<10))		//EXTI4
 #define NVIC_IRQ23_EN()				(NVIC_ISER0 |= (1<<23))		//EXTI9_5
+#define NVIC_IRQ28_EN()				(NVIC_ISER0 |= (1<<28))		//TIM2
+#define NVIC_IRQ29_EN()				(NVIC_ISER0 |= (1<<29))		//TIM3
+#define NVIC_IRQ30_EN()				(NVIC_ISER0 |= (1<<30))		//TIM4
 #define NVIC_IRQ31_EN()				(NVIC_ISER0 |= (1<<31))		//I2C1_EV
 
 #define NVIC_IRQ32_EN()				(NVIC_ISER1 |= (1<<0))		//I2C1_ER
@@ -274,6 +311,9 @@ typedef struct{
 #define NVIC_IRQ9_DIS()				(NVIC_ICER0 |= (1<<9))		//EXTI3
 #define NVIC_IRQ10_DIS()			(NVIC_ICER0 |= (1<<10))		//EXTI4
 #define NVIC_IRQ23_DIS()			(NVIC_ICER0 |= (1<<23))		//EXTI9_5
+#define NVIC_IRQ28_DIS()			(NVIC_ICER0 |= (1<<28))		//TIM2
+#define NVIC_IRQ29_DIS()			(NVIC_ICER0 |= (1<<29))		//TIM3
+#define NVIC_IRQ30_DIS()			(NVIC_ICER0 |= (1<<30))		//TIM4
 #define NVIC_IRQ31_DIS()			(NVIC_ICER0 |= (1<<31))		//I2C1_EV
 
 #define NVIC_IRQ32_DIS()			(NVIC_ICER1 |= (1<<0))		//I2C1_ER
@@ -302,6 +342,12 @@ typedef struct{
 #define RCC_GPIOC_CLK_EN()			(RCC->APB2ENR |= (1<<4))
 #define RCC_GPIOD_CLK_EN()			(RCC->APB2ENR |= (1<<5))
 #define RCC_GPIOE_CLK_EN()			(RCC->APB2ENR |= (1<<6))
+
+					/* RCC TIM CLK ENABLE */
+					/*--------------------*/
+#define RCC_TIM2_CLK_EN()			(RCC->APB1ENR |= (1<<0))
+#define RCC_TIM3_CLK_EN()			(RCC->APB1ENR |= (1<<1))
+#define RCC_TIM4_CLK_EN()			(RCC->APB1ENR |= (1<<2))
 
 					/* RCC USART CLK ENABLE */
 					/*----------------------*/

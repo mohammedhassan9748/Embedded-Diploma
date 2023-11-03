@@ -55,8 +55,8 @@ void MCAL_SPI_Init(SPI_Config_t* SPI_ConfigPtr){
 	SPIx_CR1_temp |= SPI_ConfigPtr->SPI_Mode;
 
 	/*
-	* 3) Set the device communication node (FullDuplex - HafDuplex - Simplex).
-	* NOTE: We aim only for bits 15 and 10 (BIDIMODE & RXONLY), therefore we masked them since they contain another bits
+	* 3) Set the device communication node (FullDuplex - HalfDuplex - Simplex).
+	* NOTE: We aim only for bits 15, 14 & 10. Therefore we masked them since they contain another bits
 	* in the definition for discrimination.
 	*/
 	SPIx_CR1_temp |= (SPI_ConfigPtr->SPI_CommMode & 0xC400);
@@ -64,8 +64,7 @@ void MCAL_SPI_Init(SPI_Config_t* SPI_ConfigPtr){
 	/*
 	* 4) Check if Master Mode is Selected to define the serial clock baud rate.
 	*/
-	if(SPI_ConfigPtr->SPI_Mode == SPI_MODE_MASTER)
-		SPIx_CR1_temp |= SPI_ConfigPtr->SPI_PreScaler;
+	SPIx_CR1_temp |= SPI_ConfigPtr->SPI_PreScaler;
 
 	/*
 	* 5) Set the DFF bit to define 8- or 16-bit data frame format.
@@ -109,15 +108,14 @@ void MCAL_SPI_Init(SPI_Config_t* SPI_ConfigPtr){
 	}
 
 	/*
-	* 9) Enable the SPI peripheral by setting the SPE bit to 1.
+	* 9) Set the real registers values with the safety templates.
 	*/
-	SPIx_CR1_temp |= SPI_ENABLE;
+	SPI_ConfigPtr->SPIx->CR2 = SPIx_CR2_temp;
+	SPI_ConfigPtr->SPIx->CR1 = SPIx_CR1_temp;
 
 	/*
-	* 10) Set the real registers values with the safety templates.
+	* 10) Enable the SPI peripheral by setting the SPE bit to 1.
 	*/
-	SPI_ConfigPtr->SPIx->CR1 = SPIx_CR1_temp;
-	SPI_ConfigPtr->SPIx->CR2 = SPIx_CR2_temp;
 
 }
 
@@ -240,7 +238,8 @@ void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr){
 	/*
 	* 2) Configure MOSI Pin.
 	*/
-	//Check if the MOSI on the Master or Slave Device won't be configured at all first and if not, configure it as it should be.
+	//Check if the MOSI on the Master or Slave Device won't be configured at all first and if not, configure it as it
+	//should be.
 	if(SPI_ConfigPtr->SPI_Mode == SPI_MODE_MASTER)
 	{
 		if(SPI_ConfigPtr->SPI_CommMode == SPI_SIMPLEX_RX_ONLY)
@@ -273,8 +272,9 @@ void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr){
 
 	/*
 	* 3) Configure MISO Pin.
+	* Check if the MISO on the Master or Slave Device won't be configured at all first and if not,
+	* configure it as it should be.
 	*/
-	//Check if the MISO on the Master or Slave Device won't be configured at all first and if not, configure it as it should be.
 	if(SPI_ConfigPtr->SPI_Mode == SPI_MODE_MASTER)
 	{
 		if(SPI_ConfigPtr->SPI_CommMode == SPI_HALF_DUPLEX_TX || SPI_ConfigPtr->SPI_CommMode == SPI_HALF_DUPLEX_RX
@@ -363,6 +363,8 @@ void MCAL_SPI_Transmit(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Pol
 	//Send the data to the Tx Buffer
 	SPI_ConfigPtr->SPIx->DR = (*pTxBuffer);
 
+	while( (SPI_ConfigPtr->SPIx->SR) & (1<<7) );
+
 }
 
 /**================================================================
@@ -408,7 +410,7 @@ void MCAL_SPI_Receive(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Poll
 * Note				- Supports for now Asynchronous Mode only with 8Mhz Clock.
 *
 */
-void MCAL_SPI_TX_RX(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Polling_Mechanism_t Polling_Status){
+void MCAL_SPI_FULLDUPLEX_TX_RX(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Polling_Mechanism_t Polling_Status){
 
 	//Transmit Data
 	MCAL_SPI_Transmit(SPI_ConfigPtr,pTxBuffer,Polling_Status);

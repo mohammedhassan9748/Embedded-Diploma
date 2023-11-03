@@ -4,6 +4,7 @@
 "HAL/keypad.o"
 "MCAL/EXTI.o"
 "MCAL/GPIO.o"
+"MCAL/GPTM.o"
 "MCAL/I2C.o"
 "MCAL/RCC.o"
 "MCAL/SPI.o"
@@ -11,4 +12,4 @@
 "Src/main.o"
 "Src/syscalls.o"
 "Src/sysmem.o"
-"Startup/startup_stm32f103c6tx.o"
+"Startup/startup_stm32f103c8tx.o"

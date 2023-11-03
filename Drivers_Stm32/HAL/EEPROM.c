@@ -45,11 +45,8 @@ void HAL_EEPROM_Init(void){
 	I2C1_Config.I2C_AddressMode = I2C_ADDRESS_MODE_7_BIT;
 	I2C1_Config.I2C_SlaveDeviceDuality = I2C_SLAVE_DUALITY_DISABLE;
 	I2C1_Config.I2C_StretchMode = I2C_STRETCH_MODE_ENABLE;
-	I2C1_Config.I2C_Acknowledgment = I2C_ACKNOWLEDGMENT_ENABLE;
 
 	MCAL_I2C_Init(&I2C1_Config);
-	MCAL_I2C_GPIO_SetPins(&I2C1_Config);
-
 }
 
 /**================================================================
@@ -66,7 +63,7 @@ void HAL_EEPROM_Init(void){
 */
 uint8_t HAL_EEPROM_WriteNbytes(uint16_t MemoryAddress, uint8_t* dataBuffer, uint32_t dataLength){
 
-	uint8_t newBuffer[256];
+	uint8_t newBuffer[1026];
 	newBuffer[0] = (uint8_t)(MemoryAddress>>8);
 	newBuffer[1] = (uint8_t) MemoryAddress;
 

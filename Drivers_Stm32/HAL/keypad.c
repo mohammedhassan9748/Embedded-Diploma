@@ -25,7 +25,7 @@ static GPIO_PinConfig_t g_KEYPAD_C1 = {KEYPAD_C1_PORT,KEYPAD_C1_PIN,GPIO_MODE_OU
 static GPIO_PinConfig_t g_KEYPAD_C2 = {KEYPAD_C2_PORT,KEYPAD_C2_PIN,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
 static GPIO_PinConfig_t g_KEYPAD_C3 = {KEYPAD_C3_PORT,KEYPAD_C3_PIN,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
 
-static const uint8_t g_KeypadData[4][4] = {'7','8','9','/','4','5','6','*','1','2','3','-','?','0','=','+'};
+static const uint8_t g_KeypadData[4][4] = {'1','2','3','A','4','5','6','B','7','8','9','C','*','0','#','D'};
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //									Private Functions Definitions

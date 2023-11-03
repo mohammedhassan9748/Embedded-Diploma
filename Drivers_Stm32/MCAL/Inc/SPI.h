@@ -206,12 +206,12 @@ void MCAL_SPI_DeInit(SPI_Config_t* SPI_ConfigPtr);
 //Setting GPIO Pins (SPI Channel) API
 void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr);
 
-//Sending & Receiving APIs
+// General Sending & Receiving APIs
 void MCAL_SPI_Transmit(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Polling_Mechanism_t Polling_Status);
 void MCAL_SPI_Receive (SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Polling_Mechanism_t Polling_Status);
 
-//Wait For All Transmission Complete API
-void MCAL_SPI_TX_RX(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Polling_Mechanism_t Polling_Status);
+//Full Duplex Transmitting and Receiving & Used by both master and slave
+void MCAL_SPI_FULLDUPLEX_TX_RX(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Polling_Mechanism_t Polling_Status);
 
 //Send String
 void MCAL_SPI_sendString(SPI_Config_t* SPI_ConfigPtr, uint8_t* Str);

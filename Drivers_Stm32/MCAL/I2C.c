@@ -16,9 +16,57 @@
 //									Global Variables
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
-volatile static void (*g_IRQ_CallBackPtr_Event[2][7])(void);	//For I2C1 & I2C2
-volatile static void (*g_IRQ_CallBackPtr_Error[2][7])(void);	//For I2C1 & I2C2
+volatile static void (*g_IRQ_CallBackPtr[4])(void);	//For I2C1 & I2C2
+static I2C_Event_IRQ_Src_t g_I2C1_Event_IRQ_Src;
+static I2C_Error_IRQ_Src_t g_I2C1_Error_IRQ_Src;
+static I2C_Event_IRQ_Src_t g_I2C2_Event_IRQ_Src;
+static I2C_Error_IRQ_Src_t g_I2C2_Error_IRQ_Src;
 
+//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
+//								Private Functions Definitions
+//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
+
+/*================================================================
+ * Description :
+ * Private Function used to set the SDA & SCL pins of the required peripheral in GPIO.
+ */
+static void I2C_GPIO_SetPins(I2C_Config_t* I2C_ConfigPtr){
+
+	GPIO_PinConfig_t SDA,SCL;
+	/*
+	 * 1) Check if I2Cx is I2C1 or I2C2 to configure ports and pin numbers.
+	 */
+	if(I2C_ConfigPtr->I2Cx == I2C1)
+	{
+		//Configure SDA Pin Data
+		SDA.GPIO_Port = GPIOB;
+		SDA.GPIO_PinNo = GPIO_PIN_7;
+		//Configure SCL Pin Data
+		SCL.GPIO_Port = GPIOB;
+		SCL.GPIO_PinNo = GPIO_PIN_6;
+	}
+	else
+	{
+		//Configure SDA Pin Data
+		SDA.GPIO_Port = GPIOB;
+		SDA.GPIO_PinNo = GPIO_PIN_11;
+		//Configure SCL Pin Data
+		SCL.GPIO_Port = GPIOB;
+		SCL.GPIO_PinNo = GPIO_PIN_10;
+	}
+
+	/*
+	 * 2) Compelete configuration and Initialize the SDA and SCL Pins.
+	 */
+	SDA.GPIO_Mode = GPIO_MODE_AF_OUTPUT_OD;
+	SDA.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_10MHZ;
+
+	SCL.GPIO_Mode = GPIO_MODE_AF_OUTPUT_OD;
+	SCL.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_10MHZ;
+
+	MCAL_GPIO_Init(&SCL);
+	MCAL_GPIO_Init(&SDA);
+}
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //									APIs Definitions
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
@@ -51,7 +99,7 @@ void MCAL_I2C_Init(I2C_Config_t* I2C_ConfigPtr){
 	 */
 	if(I2C_ConfigPtr->I2Cx == I2C1)
 		RCC_I2C1_CLK_EN();
-	else
+	else if(I2C_ConfigPtr->I2Cx == I2C2)
 		RCC_I2C2_CLK_EN();
 
 	/*
@@ -88,8 +136,8 @@ void MCAL_I2C_Init(I2C_Config_t* I2C_ConfigPtr){
 		/*
 		 * 7) Set the General call / Acknowledge / Clock stretching (Slave mode).
 		 */
-		I2Cx_temp[0] |= (I2C_ConfigPtr->I2C_StretchMode | I2C_ConfigPtr->I2C_Acknowledgment |
-				I2C_ConfigPtr->I2C_GeneralCallAddress | I2C_ConfigPtr->I2C_PeripheralMode);
+		I2Cx_temp[0] |= (I2C_ConfigPtr->I2C_StretchMode |I2C_ConfigPtr->I2C_GeneralCallAddress
+					 	 	 	 	 	 	 	 	 	| I2C_ConfigPtr->I2C_PeripheralMode);
 
 		/*
 		 * 8) Set the slave address mode and the slave address itself for slave devices.
@@ -105,34 +153,30 @@ void MCAL_I2C_Init(I2C_Config_t* I2C_ConfigPtr){
 		/*
 		 * 9) Enable or Disable Interrupt according to the configuration & Update Interrupt Handling CallBack.
 		 */
-		if(I2C_ConfigPtr->I2C_IRQ_EV_EN != I2C_IRQ_EV_IE_DISABLE){
+		if(I2C_ConfigPtr->I2C_IRQ_EN != I2C_IRQ_IE_DISABLE){
 
 			//Enable Interrupt mask in I2C
-			I2Cx_temp[1] |= I2C_ConfigPtr->I2C_IRQ_EV_EN;
+			I2Cx_temp[1] |= I2C_ConfigPtr->I2C_IRQ_EN;
 
-			//Enable Interrupt mask in NVIC
+			//Enable Interrupt mask in NVIC and Configure the CallBackPtrToFunction
 			if(I2C_ConfigPtr->I2Cx == I2C1)
-				NVIC_IRQ31_EN();
-			else
-				NVIC_IRQ33_EN();
-
-			for(int i=0;i<7;i++)
-				g_IRQ_CallBackPtr_Event[0][i] = I2C_ConfigPtr->IRQ_CallBackPtr_Event[i];
-		}
-
-		if(I2C_ConfigPtr->I2C_IRQ_ERR_EN != I2C_IRQ_ERR_IE_DISABLE){
-
-			//Enable Interrupt mask in I2C
-			I2Cx_temp[1] |= I2C_ConfigPtr->I2C_IRQ_EV_EN;
-
-			//Enable Interrupt mask in NVIC
-			if(I2C_ConfigPtr->I2Cx == I2C1)
-				NVIC_IRQ32_EN();
-			else
-				NVIC_IRQ34_EN();
-
-			for(int i=0;i<7;i++)
-				g_IRQ_CallBackPtr_Event[1][i] = I2C_ConfigPtr->IRQ_CallBackPtr_Error[i];
+			{
+				if(I2C_ConfigPtr->I2C_IRQ_EN & I2C_IRQ_IE_ITEVFEN)
+					NVIC_IRQ31_EN();
+				if(I2C_ConfigPtr->I2C_IRQ_EN & I2C_IRQ_IE_ITERREN)
+					NVIC_IRQ32_EN();
+				g_IRQ_CallBackPtr[0] = I2C_ConfigPtr->IRQ_CallBackFunction_Event;
+				g_IRQ_CallBackPtr[1] = I2C_ConfigPtr->IRQ_CallBackFunction_Error;
+			}
+			else if(I2C_ConfigPtr->I2Cx == I2C2)
+			{
+				if(I2C_ConfigPtr->I2C_IRQ_EN & I2C_IRQ_IE_ITEVFEN)
+					NVIC_IRQ33_EN();
+				if(I2C_ConfigPtr->I2C_IRQ_EN & I2C_IRQ_IE_ITERREN)
+					NVIC_IRQ32_EN();
+				g_IRQ_CallBackPtr[2] = I2C_ConfigPtr->IRQ_CallBackFunction_Event;
+				g_IRQ_CallBackPtr[3] = I2C_ConfigPtr->IRQ_CallBackFunction_Error;
+			}
 
 		}
 
@@ -140,13 +184,15 @@ void MCAL_I2C_Init(I2C_Config_t* I2C_ConfigPtr){
 		 * 10) Provide the real registers with the current value in the saftey registers, except for CR1 register.
 		 */
 		I2C_ConfigPtr->I2Cx->CR2 	= I2Cx_temp[1];
-		I2C_ConfigPtr->I2Cx->CCR 	= I2Cx_temp[4];
-		I2C_ConfigPtr->I2Cx->TRISE 	= I2Cx_temp[5];
 		I2C_ConfigPtr->I2Cx->OAR1 	= I2Cx_temp[2];
 		I2C_ConfigPtr->I2Cx->OAR2 	= I2Cx_temp[3];
-
-		I2Cx_temp[0] |= PERIPHERAL_ENABLE;
+		I2C_ConfigPtr->I2Cx->CCR 	= I2Cx_temp[4];
+		I2C_ConfigPtr->I2Cx->TRISE 	= I2Cx_temp[5];
 		I2C_ConfigPtr->I2Cx->CR1 = I2Cx_temp[0];
+
+		I2C_GPIO_SetPins(I2C_ConfigPtr);
+
+		SET_BIT(I2C_ConfigPtr->I2Cx->CR1,I2C_PERIPHERAL_ENABLE_BIT);
 	}
 	else
 	{
@@ -198,57 +244,6 @@ void MCAL_I2C_DeInit(I2C_Config_t* I2C_ConfigPtr){
 
 	}
 
-}
-
-/**================================================================
- * @Fn				- MCAL_I2C_GPIO_SetPins
- *
- * @brief 			- Set the SDA & SCL pins of the required peripheral in GPIO.
- *
- * @param [in] 		- I2C_ConfigPtr: Pointer to the I2C_Config_t structure that holds
- * 					  the configuration information for the I2Cx of the desired peripheral.
- *
- * @retval 			- None.
- *
- * Note				-
- *
- */
-void MCAL_I2C_GPIO_SetPins(I2C_Config_t* I2C_ConfigPtr){
-
-	GPIO_PinConfig_t SDA,SCL;
-	/*
-	 * 1) Check if I2Cx is I2C1 or I2C2 to configure ports and pin numbers.
-	 */
-	if(I2C_ConfigPtr->I2Cx == I2C1)
-	{
-		//Configure SDA Pin Data
-		SDA.GPIO_Port = GPIOB;
-		SDA.GPIO_PinNo = GPIO_PIN_7;
-		//Configure SCL Pin Data
-		SCL.GPIO_Port = GPIOB;
-		SCL.GPIO_PinNo = GPIO_PIN_6;
-	}
-	else
-	{
-		//Configure SDA Pin Data
-		SDA.GPIO_Port = GPIOB;
-		SDA.GPIO_PinNo = GPIO_PIN_11;
-		//Configure SCL Pin Data
-		SCL.GPIO_Port = GPIOB;
-		SCL.GPIO_PinNo = GPIO_PIN_10;
-	}
-
-	/*
-	 * 2) Compelete configuration and Initialize the SDA and SCL Pins.
-	 */
-	SDA.GPIO_Mode = GPIO_MODE_AF_OUTPUT_OD;
-	SDA.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_10MHZ;
-
-	SCL.GPIO_Mode = GPIO_MODE_AF_OUTPUT_OD;
-	SCL.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_10MHZ;
-
-	MCAL_GPIO_Init(&SDA);
-	MCAL_GPIO_Init(&SCL);
 }
 
 /**================================================================
@@ -416,7 +411,8 @@ void MCAL_I2C_MasterTX(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, uint8_t
 	MCAL_I2C_GenerateStart(I2C_ConfigPtr,I2C_Start_Enable,startCondition);
 
 	/*
-	 * Once the Start condition is sent: • The SB bit is set by hardware.
+	 * Once the Start condition is sent:
+	 * • The SB bit is set by hardware.
 	 * So wait for the SB flag to be set.
 	 */
 	while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_SB) == I2C_Flag_Reset);
@@ -436,14 +432,15 @@ void MCAL_I2C_MasterTX(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, uint8_t
 	while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_ADDR) == I2C_Flag_Reset);
 
 	/*
-	 * Then the master waits for a read of the SR1 register followed by a read of the SR2 register to clear ADDR bit.
+	 * Then the master waits for a read of the SR1 register followed by a read of the SR2 register to clear ADDR
+	 * bit.
 	 */
 	SRxTemp = I2C_ConfigPtr->I2Cx->SR1;
 	SRxTemp = I2C_ConfigPtr->I2Cx->SR2;
 
 	/*
-	 * Checking if the Master is transmitting as well as if the bus is busy which means that this master still has
-	 * access to the bus.
+	 * Checking if the Master is transmitting as well as if the bus is busy which means that this master still
+	 * has access to the bus.
 	 */
 	while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_MSL) == I2C_Flag_Reset);
 	while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_BUSY) == I2C_Flag_Reset);
@@ -458,16 +455,20 @@ void MCAL_I2C_MasterTX(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, uint8_t
 
 		I2C_ConfigPtr->I2Cx->DR = pTxBuffer[i];
 		while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_TXE) == I2C_Flag_Reset);
-
 	}
 
-	/*
-	 * After the last byte is written to the DR register, the STOP bit is set by software to generate a
-	 * Stop condition. The interface automatically goes back to slave mode (MSL bit cleared).
-	 */
+	//   when i=dataLenght, TXE=1 and BTF=1 before generating the STOP condition
+	//   Note: TXE=1 , BTF=1 , means that both SR and DR are empty and next transmission should begin
+	//   when BTF=1 SCL will be stretched (pulled to LOW)
+
+	while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_TXE) == I2C_Flag_Reset);
+
+	while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_BTF) == I2C_Flag_Reset);
+
+	//After the last byte is written to the DR register, the STOP bit is set by software to generate a
+	//Stop condition. The interface automatically goes back to slave mode (MSL bit cleared).
 	if(stopCondition == I2C_Stop)
 		MCAL_I2C_GenerateStop(I2C_ConfigPtr, I2C_Stop_Enable);
-
 }
 
 /**================================================================
@@ -499,137 +500,74 @@ void MCAL_I2C_MasterRX(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, uint8_t
 	//Temp Registers for Reading
 	vuint32_t SRxTemp = 0;
 
-	/*
-	 * Setting the START bit causes the interface to generate a Start condition and to switch to Master mode
-	 * (MSL bit set) when the BUSY bit is cleared.
-	 */
+	//Enable the Acknowledgment even if it is disabled in the initialization
+	SET_BIT(I2C_ConfigPtr->I2Cx->CR1,I2C_ACKNOWLEDGMENT_ENABLE_BIT);
+
+	//Setting the START bit causes the interface to generate a Start condition and to switch to Master mode
+	//(MSL bit set) when the BUSY bit is cleared.
 	MCAL_I2C_GenerateStart(I2C_ConfigPtr,I2C_Start_Enable,startCondition);
 
-	/*
-	 * Once the Start condition is sent: • The SB bit is set by hardware.
-	 * So wait for the SB flag to be set.
-	 */
+	// Once the Start condition is sent: • The SB bit is set by hardware. So wait for the SB flag to be set.
 	while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_SB) == I2C_Flag_Reset);
 
-	/*
-	 * 	Then the master waits for a read of the SR1 register followed by a write in the DR register with
-	 * 	the Slave address. SB=1, cleared by reading SR1 register followed by writing DR register with Address.
-	 */
+	// Then the master waits for a read of the SR1 register followed by a write in the DR register with
+	// the Slave address. SB=1, cleared by reading SR1 register followed by writing DR register with Address.
 	SRxTemp = I2C_ConfigPtr->I2Cx->SR1;
 	MCAL_I2C_SendAddress(I2C_ConfigPtr, devAddress, I2C_Direction_Read);
 
-	/*
-	 * Following the address transmission and after clearing ADDR, the master receives bytes from the DR register
-	 * from the SDA line via the internal shift register.
-	 */
+
+	// Following the address transmission and after clearing ADDR, the master receives bytes from the DR register
+	// from the SDA line via the internal shift register.
+	while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_ADDR) == I2C_Flag_Reset);
+
 	if(dataLength > 1)
 	{
-		/*
-		 * In 7-bit addressing mode (The Only Supported), one address byte is sent.
-		 * As soon as the address byte is sent,
-		 * The ADDR bit is set by hardware,
-		 */
-		while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_ADDR) == I2C_Flag_Reset);
-
-		/*
-		 * Then the master waits to read the SR1 register followed by a read of the SR2 register to clear ADDR bit.
-		 */
+		// • Clear ADDR.
 		SRxTemp = I2C_ConfigPtr->I2Cx->SR1;
 		SRxTemp = I2C_ConfigPtr->I2Cx->SR2;
-
-		//Enable the Acknowledgment even if it is disabled in the initialization
-		I2C_ConfigPtr->I2Cx->CR1 |= (1<<10);
 
 		for(int i=0;i<dataLength;i++)
 		{
 
+			// Poll on RXNE, wait for data register to be full for reading it.
 			while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_RXNE) == I2C_Flag_Reset);
+
 			if(i == dataLength-2)
 			{
-				/*
-				 * • RxNE = 1 => Nothing (DataN-2 not read).
-				 * • DataN-1 received
-				 * • Clear ACK bit
-				 */
+
+				// • Clear ACK bit
 				I2C_ConfigPtr->I2Cx->CR1 &= ~(1<<10);
 
-
-				/*
-				 * • Read DataN-1 in DR => This will launch the DataN reception in the shift register
-				 */
-				pTxBuffer[i] = I2C_ConfigPtr->I2Cx->DR;
-
-
-				/*
-				 * After the last byte is written to the DR register, the STOP bit is set by software to generat
-				 * a Stop condition. The interface automatically goes back to slave mode (MSL bit cleared).
-				 * • Program START/STOP
-				 */
+				// • Program START/STOP
 				if(stopCondition == I2C_Stop)
 					MCAL_I2C_GenerateStop(I2C_ConfigPtr, I2C_Stop_Enable);
-
-
-				/*
-				 * • RxNE = 1
-				 * • Read DataN
-				 */
-				while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_RXNE) == I2C_Flag_Reset);
-				pTxBuffer[i] = I2C_ConfigPtr->I2Cx->DR;
-
-				break;
 			}
-			else
-			{
-				pTxBuffer[i] = I2C_ConfigPtr->I2Cx->DR;
-			}
+
+			// • Read Data in DR
+			pTxBuffer[i] = I2C_ConfigPtr->I2Cx->DR;
+
 		}
 	}
+
 	else if(dataLength == 1)
 	{
-		/*
-		 * In 7-bit addressing mode (The Only Supported), one address byte is sent.
-		 * As soon as the address byte is sent,
-		 * The ADDR bit is set by hardware.
-		 * – In the ADDR event, clear the ACK bit. Then Clear ADDR.
-		 */
-		while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_ADDR) == I2C_Flag_Reset);
-
-		/*
-		 * • Clear ACK bit
-		 */
+		// • Clear ACK bit
 		I2C_ConfigPtr->I2Cx->CR1 &= ~(1<<10);
 
-
-		/*
-		 * Then the master waits to read the SR1 register followed by a read of the SR2 register to clear ADDR bit.
-		 */
+		// • Clear ADDR.
 		SRxTemp = I2C_ConfigPtr->I2Cx->SR1;
 		SRxTemp = I2C_ConfigPtr->I2Cx->SR2;
 
-		/*
-		 * After the last byte is written to the DR register, the STOP bit is set by software to generat
-		 * a Stop condition. The interface automatically goes back to slave mode (MSL bit cleared).
-		 * • Program START/STOP
-		 */
+		// Poll on RXNE, wait for data register to be full for reading it.
+		while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_RXNE) == I2C_Flag_Reset);
+
+		// • Program START/STOP
 		if(stopCondition == I2C_Stop)
 			MCAL_I2C_GenerateStop(I2C_ConfigPtr, I2C_Stop_Enable);
 
-
-		/*
-		 * • RxNE = 1
-		 * • Read DataN
-		 */
-		while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_RXNE) == I2C_Flag_Reset);
-		(*pTxBuffer) = I2C_ConfigPtr->I2Cx->DR;
-
+		// • Read Data in DR
+		*pTxBuffer = I2C_ConfigPtr->I2Cx->DR;
 	}
-
-	/*
-	 * Check if I2C_ACKNOWLEDGMENT_ENABLE to return to the initializaion configuration
-	 */
-	if(I2C_ConfigPtr->I2C_Acknowledgment == I2C_ACKNOWLEDGMENT_ENABLE)
-		I2C_ConfigPtr->I2Cx->CR1 |= (1<<10);
-
 }
 
 /**================================================================
@@ -648,7 +586,37 @@ void MCAL_I2C_MasterRX(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, uint8_t
  *
  */
 void MCAL_I2C_SlaveTX(I2C_Config_t* I2C_ConfigPtr, uint8_t* pTxBuffer){
-	I2C_ConfigPtr->I2Cx->DR = *pTxBuffer;
+
+	vuint32_t SRxTemp = 0;
+
+	SET_BIT(I2C_ConfigPtr->I2Cx->CR1,I2C_PERIPHERAL_ENABLE_BIT);
+
+	SET_BIT(I2C_ConfigPtr->I2Cx->CR1,I2C_ACKNOWLEDGMENT_ENABLE_BIT);
+
+	/*
+	 * In 7-bit addressing mode (The Only Supported), one address byte is sent.
+	 * As soon as the address byte is sent,
+	 * The ADDR bit is set by hardware,
+	 */
+	while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_ADDR) == I2C_Flag_Reset);
+
+	/*
+	 * Then the master waits for a read of the SR1 register followed by a read of the SR2 register to clear ADDR
+	 * bit.
+	 */
+	SRxTemp = I2C_ConfigPtr->I2Cx->SR1;
+	SRxTemp = I2C_ConfigPtr->I2Cx->SR2;
+
+	/*
+	 * I2C Slave keep sending the data as long as Acknowledgement Failure "AF" bit = 0
+	 */
+	while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_AF) == I2C_Flag_Reset){
+
+		while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_TXE) == I2C_Flag_Reset);
+		I2C_ConfigPtr->I2Cx->DR = *(pTxBuffer++);
+	}
+
+	CLEAR_BIT(I2C_ConfigPtr->I2Cx->CR1,I2C_PERIPHERAL_ENABLE_BIT);
 }
 
 /**================================================================
@@ -667,63 +635,88 @@ void MCAL_I2C_SlaveTX(I2C_Config_t* I2C_ConfigPtr, uint8_t* pTxBuffer){
  *
  */
 void MCAL_I2C_SlaveRX(I2C_Config_t* I2C_ConfigPtr, uint8_t* pTxBuffer){
-	*pTxBuffer = I2C_ConfigPtr->I2Cx->DR;
+
+	vuint32_t SRxTemp = 0;
+
+	SET_BIT(I2C_ConfigPtr->I2Cx->CR1,I2C_PERIPHERAL_ENABLE_BIT);
+
+	SET_BIT(I2C_ConfigPtr->I2Cx->CR1,I2C_ACKNOWLEDGMENT_ENABLE_BIT);
+
+	/*
+	 * In 7-bit addressing mode (The Only Supported), one address byte is sent.
+	 * As soon as the address byte is sent,
+	 * The ADDR bit is set by hardware,
+	 */
+	while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_ADDR) == I2C_Flag_Reset);
+
+	/*
+	 * Then the master waits for a read of the SR1 register followed by a read of the SR2 register to clear ADDR
+	 * bit.
+	 */
+	SRxTemp = I2C_ConfigPtr->I2Cx->SR1;
+	SRxTemp = I2C_ConfigPtr->I2Cx->SR2;
+
+	/*
+	 * I2C Slave keep receiving the data as long as Stop condition is not detected "STOPF" bit = 0
+	 */
+	while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_STOPF) == I2C_Flag_Reset){
+
+		while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_RXNE) == I2C_Flag_Reset);
+		*(pTxBuffer++) = I2C_ConfigPtr->I2Cx->DR;
+	}
+
+	CLEAR_BIT(I2C_ConfigPtr->I2Cx->CR1,I2C_PERIPHERAL_ENABLE_BIT);
 }
 
-
-//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
-//										ISRs Definitions
-//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
+/*======================================================================================================
+-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+										ISRs Definitions
+-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+======================================================================================================*/
 
 void I2C1_EV_IRQHandler(void)
 {
 
 	vuint32_t SRxTemp = 0;
-	I2C_Event_IRQ_Src_t IRQ_src;
-	//Read All Possible Events
 
 	//I2C_Event_Interrupt_State_SB
-	if(READ_BIT(I2C1->SR1,0))
+	if(READ_BIT(I2C2->SR1,0))
 	{
 		//Handled by Master
-		//TODO
+		/*
+		 * 	Then the master waits for a read of the SR1 register followed by a write in the DR register with
+		 * 	the Slave address. SB=1, cleared by reading SR1 register followed by writing DR register with Address.
+		 */
+		SRxTemp = I2C1->SR1;
+		g_I2C2_Event_IRQ_Src = I2C_Event_IRQ_Src_SB;
 	}
+
 	//I2C_Event_Interrupt_State_ADDR
 	if(READ_BIT(I2C1->SR1,1))
 	{
-		/*
-		 * Check Bit 0 MSL: Master/slave in I2Cx_SR2
-		 * 0: Slave Mode
-		 * 1: Master Mode
-		 * – Set by hardware as soon as the interface is in Master mode (SB=1).
-		 * – Cleared by hardware after detecting a Stop condition on the bus or a loss of arbitration (ARLO=1),
-		 * or by hardware when PE=0.
-		 */
-		if(READ_BIT(I2C1->SR2,0))
-		{
-			//Master Mode: Handled by Master
-			//TODO
-		}
-		else
-		{
-			//Slave Mode: Handled by Slave
-			//Dummy read to clear ADDR bit.
-			SRxTemp = I2C1->SR1;
-			SRxTemp = I2C1->SR2;
-			IRQ_src = I2C_Event_IRQ_Src_ADDR;
-		}
+
+		//Dummy read to clear ADDR bit.
+		SRxTemp = I2C1->SR1;
+		SRxTemp = I2C1->SR2;
+
+		g_I2C2_Event_IRQ_Src = I2C_Event_IRQ_Src_ADDR;
 	}
+
 	//I2C_Event_Interrupt_State_BTF
 	if(READ_BIT(I2C1->SR1,2))
 	{
 		//Handled by Master
-		//TODO
+		/*SRxTemp = I2C1->SR1;*/
+		g_I2C2_Event_IRQ_Src = I2C_Event_IRQ_Src_BTF;
 	}
+
 	//I2C_Event_Interrupt_State_ADD10
 	if(READ_BIT(I2C1->SR1,3))
 	{
 		//10 bit addresing mode -- not supported
+		g_I2C2_Event_IRQ_Src = I2C_Event_IRQ_Src_ADD10;
 	}
+
 	//I2C_Event_IRQ_Src_STOPF
 	if(READ_BIT(I2C1->SR1,4))
 	{
@@ -732,7 +725,7 @@ void I2C1_EV_IRQHandler(void)
 
 		SRxTemp = I2C1->SR1;
 		I2C1->CR1 |= 0;
-		IRQ_src = I2C_Event_IRQ_Src_STOPF;
+		g_I2C2_Event_IRQ_Src = I2C_Event_IRQ_Src_STOPF;
 	}
 
 	//I2C_Event_Interrupt_State_RxNE
@@ -754,36 +747,32 @@ void I2C1_EV_IRQHandler(void)
 		else
 		{
 			//Slave Mode: Handled by Slave
-			//Dummy read to clear ADDR bit.
-			IRQ_src = I2C_Event_IRQ_Src_RxNE;
+			/*
+			 * Slave shall read a byte from the data register sent from the master.
+			*/
 		}
+
+		g_I2C2_Event_IRQ_Src = I2C_Event_IRQ_Src_RxNE;
 	}
+
 	//I2C_Event_Interrupt_State_TxE
 	if(READ_BIT(I2C1->SR1,7))
 	{
-		/*
-		 * Bit 0 MSL: Master/slave
-		 * 0: Slave Mode
-		 * 1: Master Mode
-		 * – Set by hardware as soon as the interface is in Master mode (SB=1).
-		 * – Cleared by hardware after detecting a Stop condition on the bus or a loss of arbitration (ARLO=1),
-		 * or by hardware when PE=0.
-		 */
-		if(READ_BIT(I2C1->SR2,0))
-		{
-			//Master Mode: Handled by Master
-			//TODO
-		}
-		else
-		{
-			//Slave Mode: Handled by Slave
-			//Dummy read to clear ADDR bit.
-			IRQ_src = I2C_Event_IRQ_Src_TxE;
 
-		}
+		//Master Mode: Handled by Master
+		/*
+		 * Master shall send a byte to slave.
+		 */
+
+		//Slave Mode: Handled by Slave
+		/*
+		 * Slave shall send a byte to the master by writing it in the data register.
+		*/
+
+		g_I2C2_Event_IRQ_Src = I2C_Event_IRQ_Src_TxE;
 	}
 
-	g_IRQ_CallBackPtr_Event[0][IRQ_src]();
+	g_IRQ_CallBackPtr[0]();
 
 }
 void I2C1_ER_IRQHandler(void)
@@ -899,7 +888,7 @@ void I2C2_EV_IRQHandler(void)
 		}
 	}
 
-	g_IRQ_CallBackPtr_Event[1][IRQ_src]();
+	g_IRQ_CallBackPtr[2]();
 }
 void I2C2_ER_IRQHandler(void)
 {
