@@ -28,46 +28,7 @@ volatile static void (*g_IRQ_CallBackPtr[3])(void);
 -*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 ======================================================================================================*/
 
-/*================================================================
- * Description :
- * Private function used to set any input channel as configured in the GPTM_InputChannelX
- */
-static void GPTM_ClearConfig(GPTM_Config_t* GPTM_ConfigPtr)
-{
-	GPTM_ConfigPtr->GPTM_AutoReloadUpdate 									= 0;
-	GPTM_ConfigPtr->GPTM_CounterDirection 									= 0;
-	GPTM_ConfigPtr->GPTM_CounterMode 										= 0;
-	GPTM_ConfigPtr->GPTM_IRQ_EN 											= 0;
-	GPTM_ConfigPtr->GPTM_SMC_Mode 											= 0;
-	GPTM_ConfigPtr->GPTM_UEselectionSrc 									= 0;
-	GPTM_ConfigPtr->GPTM_UpdateEvent 										= 0;
-	GPTM_ConfigPtr->GPTM_ExternalTrigger.EXTTRIG_Enable						= 0;
-	GPTM_ConfigPtr->GPTM_ExternalTrigger.EXTTRIG_Polarity					= 0;
-	GPTM_ConfigPtr->GPTM_ExternalTrigger.EXTTRIG_PreScaler					= 0;
-	GPTM_ConfigPtr->GPTM_ExternalTrigger.EXTTRIG_SamplingFiltering			= 0;
-	for(uint8_t i=0;i<4;i++)
-	{
-		GPTM_ConfigPtr->GPTM_OutputChannelX[i].CH_ClearEnable				= 0;
-		GPTM_ConfigPtr->GPTM_OutputChannelX[i].CH_Enable					= 0;
-		GPTM_ConfigPtr->GPTM_OutputChannelX[i].CH_Direction					= 0;
-		GPTM_ConfigPtr->GPTM_OutputChannelX[i].CH_PreloadEnable				= 0;
-		GPTM_ConfigPtr->GPTM_OutputChannelX[i].CH_FastEnable				= 0;
-		GPTM_ConfigPtr->GPTM_OutputChannelX[i].CH_Mode						= 0;
-		GPTM_ConfigPtr->GPTM_OutputChannelX[i].CH_OutputPolaritySelected	= 0;
-		GPTM_ConfigPtr->GPTM_OutputChannelX[i].CH_OCxEnable					= 0;
 
-	}
-	for(uint8_t i=0;i<4;i++)
-	{
-		GPTM_ConfigPtr->GPTM_InputChannelX[i].CH_Enable						= 0;
-		GPTM_ConfigPtr->GPTM_InputChannelX[i].CH_Direction					= 0;
-		GPTM_ConfigPtr->GPTM_InputChannelX[i].CH_InputFilter				= 0;
-		GPTM_ConfigPtr->GPTM_InputChannelX[i].CH_InputPreScaler				= 0;
-		GPTM_ConfigPtr->GPTM_InputChannelX[i].CH_InputCaptureEnable			= 0;
-		GPTM_ConfigPtr->GPTM_InputChannelX[i].CH_InputPolarityDetected		= 0;
-	}
-
-}
 
 /*======================================================================================================
 -*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*

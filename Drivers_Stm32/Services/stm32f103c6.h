@@ -294,7 +294,7 @@ typedef struct{
 
 #define NVIC_IRQ32_EN()				(NVIC_ISER1 |= (1<<0))		//I2C1_ER
 #define NVIC_IRQ33_EN()				(NVIC_ISER1 |= (1<<1))		//I2C2_EV
-#define NVIC_IRQ34_EN()				(NVIC_ISER1 |= (1<<3))		//I2C2_ER
+#define NVIC_IRQ34_EN()				(NVIC_ISER1 |= (1<<2))		//I2C2_ER
 #define NVIC_IRQ35_EN()				(NVIC_ISER1 |= (1<<3))		//SPI1
 #define NVIC_IRQ36_EN()				(NVIC_ISER1 |= (1<<4))		//SPI2
 #define NVIC_IRQ37_EN()				(NVIC_ISER1 |= (1<<5))		//USART1
@@ -318,7 +318,7 @@ typedef struct{
 
 #define NVIC_IRQ32_DIS()			(NVIC_ICER1 |= (1<<0))		//I2C1_ER
 #define NVIC_IRQ33_DIS()			(NVIC_ICER1 |= (1<<1))		//I2C2_EV
-#define NVIC_IRQ34_DIS()			(NVIC_ICER1 |= (1<<3))		//I2C2_ER
+#define NVIC_IRQ34_DIS()			(NVIC_ICER1 |= (1<<2))		//I2C2_ER
 #define NVIC_IRQ35_DIS()			(NVIC_ICER1 |= (1<<3))		//SPI1
 #define NVIC_IRQ36_DIS()			(NVIC_ICER1 |= (1<<4))		//SPI2
 #define NVIC_IRQ37_DIS()			(NVIC_ICER1 |= (1<<5))		//USART1

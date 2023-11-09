@@ -25,6 +25,10 @@
 #define I2C_PERIPHERAL_ENABLE_BIT			 	(uint16_t)(0)
 #define I2C_ACKNOWLEDGMENT_ENABLE_BIT			(uint16_t)(10)
 
+#define I2C_IRQ_ITERREN							(uint16_t)(1<<8)
+#define I2C_IRQ_ITEVFEN							(uint16_t)(1<<9)
+#define I2C_IRQ_IITBUFEN						(uint16_t)(1<<10)
+
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //										Generic Typedefs
@@ -49,10 +53,16 @@ typedef enum{
 	I2C_Start_Disable,
 	I2C_Start_Enable
 }I2C_Start_Status_t;
+
 typedef enum{
 	I2C_Stop_Disable,
 	I2C_Stop_Enable
 }I2C_Stop_Status_t;
+
+typedef enum{
+	I2C_IRQ_Disable,
+	I2C_IRQ_Enable
+}I2C_IRQ_Status_t;
 
 typedef enum{
 	//SR1 FLAGS
@@ -117,6 +127,11 @@ typedef enum{
 	I2C_Direction_Write,
 	I2C_Direction_Read
 }I2C_Direction_t;
+
+typedef enum{
+	I2C_Ack_Disable,
+	I2C_Ack_Enable
+}I2C_Ack_State_t;
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //								Macros Configuration References
@@ -292,15 +307,18 @@ typedef enum{
 * 		main configuration.
 * *********************************************
 */
-#define I2C_IRQ_IE_DISABLE					(uint16_t)(0)
-#define I2C_IRQ_IE_ITERREN					(uint16_t)(1<<8)
-#define I2C_IRQ_IE_ITEVFEN					(uint16_t)(1<<9)
-#define I2C_IRQ_IE_IITBUFEN					(uint16_t)(1<<10)
-
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //										User Typedefs
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
+
+typedef struct{
+
+	I2C_IRQ_Status_t ITERREN;
+	I2C_IRQ_Status_t ITEVTEN;
+	I2C_IRQ_Status_t ITBUFEN;
+
+}IRQ_Config_t;
 
 typedef struct{
 
@@ -331,55 +349,61 @@ typedef struct{
 	uint16_t I2C_GeneralCallAddress; 		// Specifies whether to enable General Call Address or not.
 							  	  			// This parameter must be a value of @ref I2C_GeneralCallAddress.
 
-	uint16_t  I2C_IRQ_EN;  					// Enable or Disable Event IRQ for current I2C channel.
-											// This parameter must be a value of @ref I2C_IRQ_EN.
-
-	void (*IRQ_CallBackFunction_Event)(void);
+	IRQ_Config_t IRQ_Config;				// Specifies the configuration of the Interrupts.
 
 
-	void (*IRQ_CallBackFunction_Error)(void);
+	void (*IRQ_CallBackFunction_Event)(I2C_Event_IRQ_Src_t);
+											// Event CallBack Function that send the current IRQ source to main app func.
 
+
+	void (*IRQ_CallBackFunction_Error)(I2C_Error_IRQ_Src_t);
 
 }I2C_Config_t;
+
+
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //											APIS
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
-//Initialization & DeInitialization APIs
+// Initialization & DeInitialization APIs
 void MCAL_I2C_Init(I2C_Config_t* I2C_ConfigPtr);
 void MCAL_I2C_DeInit(I2C_Config_t* I2C_ConfigPtr);
 
-//Getting Flag Status of the flag required API
+// Interrupts Configuration
+void MCAL_I2C_IRQ_Config(I2C_Config_t* I2C_ConfigPtr);
+
+// Getting Flag Status of the flag required API
 I2C_Flag_Status_t MCAL_I2C_GetFlagStatus(I2C_Config_t* I2C_ConfigPtr, I2C_Flags_t flagType);
 
-//Getting Start and Stop APIs
+// Getting Start and Stop APIs
 void MCAL_I2C_GenerateStart(I2C_Config_t* I2C_ConfigPtr, I2C_Start_Status_t startStatus,
-	I2C_Start_Condition_t startCondition);
+		I2C_Start_Condition_t startCondition);
 void MCAL_I2C_GenerateStop(I2C_Config_t* I2C_ConfigPtr, I2C_Stop_Status_t stopStatus);
 
-//Sending Address APIs
+// Sending Address APIs
 void MCAL_I2C_SendAddress(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, I2C_Direction_t Dir);
 
-//Master/Slave Transmit One Byte
-void MCAL_I2C_SendByte(I2C_Config_t* I2C_ConfigPtr, uint8_t DataByte);
+// Master Sending/Writing only using polling technique API *Note used for whole sequence*
+void MCAL_I2C_MasterSendDataPolling(I2C_Config_t* I2C_ConfigPtr, uint8_t* pTxBuffer, uint32_t dataLength);
 
-//Master/Slave Receive One Byte by pointer
-void MCAL_I2C_ReceiveByte(I2C_Config_t* I2C_ConfigPtr, uint8_t* DataByte);
+// Master Receiving/Reading only using polling technique API *Note used for whole sequence*
+void MCAL_I2C_MasterRecDataPolling (I2C_Config_t* I2C_ConfigPtr, uint8_t* pRxBuffer, uint32_t dataLength,
+		I2C_Stop_Condition_t stopCondition);
 
-//Master Sending/Writing Using Polling Technique Only API
-void MCAL_I2C_MasterTX(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, uint8_t* pTxBuffer, uint32_t dataLength,
-	I2C_Start_Condition_t startCondition,I2C_Stop_Condition_t stopCondition);
+// Master Sending/Writing whole sequence using polling technique only API
+void MCAL_I2C_MasterTxPolling(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, uint8_t* pTxBuffer, uint32_t dataLength,
+		I2C_Start_Condition_t startCondition,I2C_Stop_Condition_t stopCondition);
 
-//Master Receiving/Reading Using Polling Technique Only API
-void MCAL_I2C_MasterRX(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, uint8_t* pTxBuffer, uint32_t dataLength,
-	I2C_Start_Condition_t startCondition, I2C_Stop_Condition_t stopCondition);
+// Master Receiving/Reading whole sequence using polling technique only API
+void MCAL_I2C_MasterRxPolling(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, uint8_t* pRxBuffer, uint32_t dataLength,
+		I2C_Start_Condition_t startCondition, I2C_Stop_Condition_t stopCondition);
 
-//Slave Transmitting Using Interrupts Only API
-void MCAL_I2C_SlaveTX(I2C_Config_t* I2C_ConfigPtr, uint8_t* pTxBuffer);
+// Slave Transmitting and Receiving using interrupt technique only APIs
+void MCAL_I2C_Slave_TX(I2C_Config_t* I2C_ConfigPtr, uint8_t TxData);
+uint8_t MCAL_I2C_Slave_RX(I2C_Config_t* I2C_ConfigPtr);
 
-//Slave Receiving Using Interrupts Only API
-void MCAL_I2C_SlaveRX(I2C_Config_t* I2C_ConfigPtr, uint8_t* pTxBuffer);
+void I2C_ACKConfig(I2C_Config_t* I2C_ConfigPtr, I2C_Ack_State_t state);
 
 
 #endif /* INC_I2C_H_ */

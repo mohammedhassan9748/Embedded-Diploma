@@ -16,11 +16,10 @@
 //									Global Variables
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
-volatile static void (*g_IRQ_CallBackPtr[4])(void);	//For I2C1 & I2C2
-static I2C_Event_IRQ_Src_t g_I2C1_Event_IRQ_Src;
-static I2C_Error_IRQ_Src_t g_I2C1_Error_IRQ_Src;
-static I2C_Event_IRQ_Src_t g_I2C2_Event_IRQ_Src;
-static I2C_Error_IRQ_Src_t g_I2C2_Error_IRQ_Src;
+volatile static void (*g_IRQ_I2C1_Event_CallBackFunction)(I2C_Event_IRQ_Src_t);
+volatile static void (*g_IRQ_I2C2_Event_CallBackFunction)(I2C_Event_IRQ_Src_t);
+volatile static void (*g_IRQ_I2C1_Error_CallBackFunction)(I2C_Error_IRQ_Src_t);
+volatile static void (*g_IRQ_I2C2_Error_CallBackFunction)(I2C_Error_IRQ_Src_t);
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //								Private Functions Definitions
@@ -67,9 +66,34 @@ static void I2C_GPIO_SetPins(I2C_Config_t* I2C_ConfigPtr){
 	MCAL_GPIO_Init(&SCL);
 	MCAL_GPIO_Init(&SDA);
 }
-//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
-//									APIs Definitions
-//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
+
+uint8_t I2C_NVIC_IRQ_Enabled(uint8_t IRQ_No)
+{
+	uint8_t status;
+	switch(IRQ_No)
+	{
+		case 31:
+			status = READ_BIT(NVIC_IABR0,31);
+			break;
+		case 32:
+			status = READ_BIT(NVIC_IABR1,0);
+			break;
+		case 33:
+			status = READ_BIT(NVIC_IABR1,1);
+			break;
+		case 34:
+			status = READ_BIT(NVIC_IABR1,2);
+			break;
+	}
+	return status;
+}
+
+/*======================================================================================================
+-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+											APIs Definitions
+-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+======================================================================================================*/
+
 
 /**================================================================
  * @Fn				- MCAL_I2C_Init
@@ -151,37 +175,7 @@ void MCAL_I2C_Init(I2C_Config_t* I2C_ConfigPtr){
 			I2Cx_temp[3] |= (I2C_ConfigPtr->I2C_SlaveAddress.I2C_SlaveDevice_SecondaryAddress<<1);
 
 		/*
-		 * 9) Enable or Disable Interrupt according to the configuration & Update Interrupt Handling CallBack.
-		 */
-		if(I2C_ConfigPtr->I2C_IRQ_EN != I2C_IRQ_IE_DISABLE){
-
-			//Enable Interrupt mask in I2C
-			I2Cx_temp[1] |= I2C_ConfigPtr->I2C_IRQ_EN;
-
-			//Enable Interrupt mask in NVIC and Configure the CallBackPtrToFunction
-			if(I2C_ConfigPtr->I2Cx == I2C1)
-			{
-				if(I2C_ConfigPtr->I2C_IRQ_EN & I2C_IRQ_IE_ITEVFEN)
-					NVIC_IRQ31_EN();
-				if(I2C_ConfigPtr->I2C_IRQ_EN & I2C_IRQ_IE_ITERREN)
-					NVIC_IRQ32_EN();
-				g_IRQ_CallBackPtr[0] = I2C_ConfigPtr->IRQ_CallBackFunction_Event;
-				g_IRQ_CallBackPtr[1] = I2C_ConfigPtr->IRQ_CallBackFunction_Error;
-			}
-			else if(I2C_ConfigPtr->I2Cx == I2C2)
-			{
-				if(I2C_ConfigPtr->I2C_IRQ_EN & I2C_IRQ_IE_ITEVFEN)
-					NVIC_IRQ33_EN();
-				if(I2C_ConfigPtr->I2C_IRQ_EN & I2C_IRQ_IE_ITERREN)
-					NVIC_IRQ32_EN();
-				g_IRQ_CallBackPtr[2] = I2C_ConfigPtr->IRQ_CallBackFunction_Event;
-				g_IRQ_CallBackPtr[3] = I2C_ConfigPtr->IRQ_CallBackFunction_Error;
-			}
-
-		}
-
-		/*
-		 * 10) Provide the real registers with the current value in the saftey registers, except for CR1 register.
+		 * 9) Provide the real registers with the current value in the saftey registers, except for CR1 register.
 		 */
 		I2C_ConfigPtr->I2Cx->CR2 	= I2Cx_temp[1];
 		I2C_ConfigPtr->I2Cx->OAR1 	= I2Cx_temp[2];
@@ -242,6 +236,91 @@ void MCAL_I2C_DeInit(I2C_Config_t* I2C_ConfigPtr){
 		NVIC_IRQ33_DIS();
 		NVIC_IRQ34_DIS();
 
+	}
+
+}
+
+void MCAL_I2C_IRQ_Config(I2C_Config_t* I2C_ConfigPtr)
+{
+	// Enable or Disable Interrupt according to the "I2C_ConfigPtr->I2C_IRQ_Config" status configuration.
+	if(I2C_ConfigPtr->IRQ_Config.ITEVTEN == I2C_IRQ_Enable)
+	{
+		//Enable Interrupt mask in NVIC but with checking if enabled before.
+		if(I2C_ConfigPtr->I2Cx == I2C1 && !I2C_NVIC_IRQ_Enabled(31))
+		{
+			NVIC_IRQ31_EN();
+			g_IRQ_I2C1_Event_CallBackFunction = I2C_ConfigPtr->IRQ_CallBackFunction_Event;
+		}
+		else if(I2C_ConfigPtr->I2Cx == I2C2 && !I2C_NVIC_IRQ_Enabled(33))
+		{
+			NVIC_IRQ33_EN();
+			g_IRQ_I2C2_Event_CallBackFunction = I2C_ConfigPtr->IRQ_CallBackFunction_Event;
+		}
+
+		I2C_ConfigPtr->I2Cx->CR2 |= I2C_IRQ_ITEVFEN;
+
+		if(I2C_ConfigPtr->IRQ_Config.ITBUFEN == I2C_IRQ_Enable)
+		{
+			I2C_ConfigPtr->I2Cx->CR2 |= I2C_IRQ_IITBUFEN;
+		}
+		else
+		{
+			I2C_ConfigPtr->I2Cx->CR2 &= ~I2C_IRQ_IITBUFEN;
+		}
+	}
+	else
+	{
+		//Disable Interrupt mask in NVIC but with checking if enabled before already.
+		if(I2C_ConfigPtr->I2Cx == I2C1 && I2C_NVIC_IRQ_Enabled(31))
+		{
+			NVIC_IRQ31_DIS();
+			g_IRQ_I2C1_Event_CallBackFunction = NULL_PTR;
+		}
+		else if(I2C_ConfigPtr->I2Cx == I2C2 && I2C_NVIC_IRQ_Enabled(33))
+		{
+			NVIC_IRQ33_DIS();
+			g_IRQ_I2C2_Event_CallBackFunction = NULL_PTR;
+		}
+
+		I2C_ConfigPtr->I2Cx->CR2 &= ~I2C_IRQ_ITEVFEN;
+
+		I2C_ConfigPtr->I2Cx->CR2 &= ~I2C_IRQ_IITBUFEN;
+	}
+
+
+
+	if(I2C_ConfigPtr->IRQ_Config.ITEVTEN == I2C_IRQ_Enable)
+	{
+		//Enable Interrupt mask in NVIC but with checking if enabled before.
+		if(I2C_ConfigPtr->I2Cx == I2C1 && !I2C_NVIC_IRQ_Enabled(32))
+		{
+			NVIC_IRQ32_EN();
+			g_IRQ_I2C1_Error_CallBackFunction = I2C_ConfigPtr->IRQ_CallBackFunction_Error;
+		}
+
+		else if(I2C_ConfigPtr->I2Cx == I2C2 && !I2C_NVIC_IRQ_Enabled(34))
+		{
+			NVIC_IRQ34_EN();
+			g_IRQ_I2C2_Error_CallBackFunction = I2C_ConfigPtr->IRQ_CallBackFunction_Error;
+		}
+
+		I2C_ConfigPtr->I2Cx->CR2 |= I2C_IRQ_ITERREN;
+	}
+	else
+	{
+		//Disable Interrupt mask in NVIC but with checking if enabled before already.
+		if(I2C_ConfigPtr->I2Cx == I2C1 && I2C_NVIC_IRQ_Enabled(32))
+		{
+			NVIC_IRQ32_DIS();
+			g_IRQ_I2C2_Error_CallBackFunction = NULL_PTR;
+		}
+		else if(I2C_ConfigPtr->I2Cx == I2C2 && I2C_NVIC_IRQ_Enabled(34))
+		{
+			NVIC_IRQ34_DIS();
+			g_IRQ_I2C2_Error_CallBackFunction = NULL_PTR;
+		}
+
+		I2C_ConfigPtr->I2Cx->CR2 &= ~I2C_IRQ_ITERREN;
 	}
 
 }
@@ -375,6 +454,73 @@ void MCAL_I2C_SendAddress(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, I2C_
 
 }
 
+// Master Sending/Writing only using polling technique API *Note used for whole sequence*
+void MCAL_I2C_MasterSendDataPolling(I2C_Config_t* I2C_ConfigPtr, uint8_t* pTxBuffer, uint32_t dataLength)
+{
+	for(int i=0;i<dataLength;i++)
+	{
+		I2C_ConfigPtr->I2Cx->DR = pTxBuffer[i];
+		while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_TXE) == I2C_Flag_Reset);
+	}
+}
+
+// Master Receiving/Reading only using polling technique API *Note used for whole sequence*
+void MCAL_I2C_MasterRecDataPolling (I2C_Config_t* I2C_ConfigPtr, uint8_t* pRxBuffer, uint32_t dataLength,
+		I2C_Stop_Condition_t stopCondition)
+{
+	vuint32_t SRxTemp = 0;
+
+	if(dataLength > 1)
+	{
+		// • Clear ADDR.
+		SRxTemp = I2C_ConfigPtr->I2Cx->SR1;
+		SRxTemp = I2C_ConfigPtr->I2Cx->SR2;
+
+		for(int i=0;i<dataLength;i++)
+		{
+
+			// Poll on RXNE, wait for data register to be full for reading it.
+			while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_RXNE) == I2C_Flag_Reset);
+
+			if(i == dataLength-2)
+			{
+				// • Clear ACK bit
+				I2C_ConfigPtr->I2Cx->CR1 &= ~(1<<10);
+
+				// • Program START/STOP
+				if(stopCondition == I2C_Stop)
+					MCAL_I2C_GenerateStop(I2C_ConfigPtr, I2C_Stop_Enable);
+			}
+
+			// • Read Data in DR
+			pRxBuffer[i] = I2C_ConfigPtr->I2Cx->DR;
+
+		}
+	}
+
+	else if(dataLength == 1)
+	{
+		// • Clear ACK bit
+		I2C_ConfigPtr->I2Cx->CR1 &= ~(1<<10);
+
+		// • Clear ADDR.
+		SRxTemp = I2C_ConfigPtr->I2Cx->SR1;
+		SRxTemp = I2C_ConfigPtr->I2Cx->SR2;
+
+		// Poll on RXNE, wait for data register to be full for reading it.
+		while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_RXNE) == I2C_Flag_Reset);
+
+		// • Program START/STOP
+		if(stopCondition == I2C_Stop)
+			MCAL_I2C_GenerateStop(I2C_ConfigPtr, I2C_Stop_Enable);
+
+		// • Read Data in DR
+		*pRxBuffer = I2C_ConfigPtr->I2Cx->DR;
+	}
+	(void)SRxTemp;
+}
+
+
 /**================================================================
  * @Fn				- MCAL_I2C_MasterTX
  *
@@ -398,11 +544,11 @@ void MCAL_I2C_SendAddress(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, I2C_
  * Note				- This API is implemented to support only polling technique and cannot be used with interrupts.
  *
  */
-void MCAL_I2C_MasterTX(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, uint8_t* pTxBuffer, uint32_t dataLength,
-		I2C_Start_Condition_t startCondition,I2C_Stop_Condition_t stopCondition){
-
+void MCAL_I2C_MasterTxPolling(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, uint8_t* pTxBuffer,
+		uint32_t dataLength, I2C_Start_Condition_t startCondition,I2C_Stop_Condition_t stopCondition)
+{
 	//Temp Registers for Reading
-	uint32_t SRxTemp = 0;
+	vuint32_t SRxTemp = 0;
 
 	/*
 	 * Setting the START bit causes the interface to generate a Start condition and to switch to Master mode
@@ -451,11 +597,7 @@ void MCAL_I2C_MasterTX(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, uint8_t
 	 * Following the address transmission and after clearing ADDR, the master sends bytes from the DR register
 	 * to the SDA line via the internal shift register.
 	 */
-	for(int i=0;i<dataLength;i++){
-
-		I2C_ConfigPtr->I2Cx->DR = pTxBuffer[i];
-		while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_TXE) == I2C_Flag_Reset);
-	}
+	MCAL_I2C_MasterSendDataPolling(I2C_ConfigPtr, pTxBuffer, dataLength);
 
 	//   when i=dataLenght, TXE=1 and BTF=1 before generating the STOP condition
 	//   Note: TXE=1 , BTF=1 , means that both SR and DR are empty and next transmission should begin
@@ -469,6 +611,8 @@ void MCAL_I2C_MasterTX(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, uint8_t
 	//Stop condition. The interface automatically goes back to slave mode (MSL bit cleared).
 	if(stopCondition == I2C_Stop)
 		MCAL_I2C_GenerateStop(I2C_ConfigPtr, I2C_Stop_Enable);
+
+	(void)SRxTemp;
 }
 
 /**================================================================
@@ -494,9 +638,9 @@ void MCAL_I2C_MasterTX(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, uint8_t
  * Note				- This API is implemented to support only polling technique and cannot be used with interrupts.
  *
  */
-void MCAL_I2C_MasterRX(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, uint8_t* pTxBuffer, uint32_t dataLength,
-		I2C_Start_Condition_t startCondition, I2C_Stop_Condition_t stopCondition){
-
+void MCAL_I2C_MasterRxPolling(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, uint8_t* pRxBuffer,
+		uint32_t dataLength, I2C_Start_Condition_t startCondition, I2C_Stop_Condition_t stopCondition)
+{
 	//Temp Registers for Reading
 	vuint32_t SRxTemp = 0;
 
@@ -520,152 +664,61 @@ void MCAL_I2C_MasterRX(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, uint8_t
 	// from the SDA line via the internal shift register.
 	while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_ADDR) == I2C_Flag_Reset);
 
-	if(dataLength > 1)
-	{
-		// • Clear ADDR.
-		SRxTemp = I2C_ConfigPtr->I2Cx->SR1;
-		SRxTemp = I2C_ConfigPtr->I2Cx->SR2;
+	MCAL_I2C_MasterRecDataPolling(I2C_ConfigPtr, pRxBuffer, dataLength, stopCondition);
 
-		for(int i=0;i<dataLength;i++)
-		{
-
-			// Poll on RXNE, wait for data register to be full for reading it.
-			while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_RXNE) == I2C_Flag_Reset);
-
-			if(i == dataLength-2)
-			{
-
-				// • Clear ACK bit
-				I2C_ConfigPtr->I2Cx->CR1 &= ~(1<<10);
-
-				// • Program START/STOP
-				if(stopCondition == I2C_Stop)
-					MCAL_I2C_GenerateStop(I2C_ConfigPtr, I2C_Stop_Enable);
-			}
-
-			// • Read Data in DR
-			pTxBuffer[i] = I2C_ConfigPtr->I2Cx->DR;
-
-		}
-	}
-
-	else if(dataLength == 1)
-	{
-		// • Clear ACK bit
-		I2C_ConfigPtr->I2Cx->CR1 &= ~(1<<10);
-
-		// • Clear ADDR.
-		SRxTemp = I2C_ConfigPtr->I2Cx->SR1;
-		SRxTemp = I2C_ConfigPtr->I2Cx->SR2;
-
-		// Poll on RXNE, wait for data register to be full for reading it.
-		while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_RXNE) == I2C_Flag_Reset);
-
-		// • Program START/STOP
-		if(stopCondition == I2C_Stop)
-			MCAL_I2C_GenerateStop(I2C_ConfigPtr, I2C_Stop_Enable);
-
-		// • Read Data in DR
-		*pTxBuffer = I2C_ConfigPtr->I2Cx->DR;
-	}
+	(void)SRxTemp;
 }
 
-/**================================================================
- * @Fn				- MCAL_I2C_SlaveTX
+/* ================================================================
+ * @Fn 				- MCAL_I2C_Slave_TX
  *
- * @brief 			- Transmit data required to send from slave to master.
+ * @brief 			- Slave send data to master using interrupt mechanism
  *
  * @param [in] 		- I2C_ConfigPtr: Pointer to the I2C_Config_t structure that holds
  * 					  the configuration information for the I2Cx of the desired peripheral.
  *
- * @param [in] 		- pTxBuffer: Data required to transmit from slave to master.
+ * @param [in] 		- TxData : slave data to be sent to master
  *
- * @retval 			- None.
+ * @retval 			- None
  *
- * Note				- This function is used only with interrupts, can't be used with polling technique.
- *
+ * Note 			- Support interrupt mechanism only
  */
-void MCAL_I2C_SlaveTX(I2C_Config_t* I2C_ConfigPtr, uint8_t* pTxBuffer){
-
-	vuint32_t SRxTemp = 0;
-
-	SET_BIT(I2C_ConfigPtr->I2Cx->CR1,I2C_PERIPHERAL_ENABLE_BIT);
-
-	SET_BIT(I2C_ConfigPtr->I2Cx->CR1,I2C_ACKNOWLEDGMENT_ENABLE_BIT);
-
-	/*
-	 * In 7-bit addressing mode (The Only Supported), one address byte is sent.
-	 * As soon as the address byte is sent,
-	 * The ADDR bit is set by hardware,
-	 */
-	while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_ADDR) == I2C_Flag_Reset);
-
-	/*
-	 * Then the master waits for a read of the SR1 register followed by a read of the SR2 register to clear ADDR
-	 * bit.
-	 */
-	SRxTemp = I2C_ConfigPtr->I2Cx->SR1;
-	SRxTemp = I2C_ConfigPtr->I2Cx->SR2;
-
-	/*
-	 * I2C Slave keep sending the data as long as Acknowledgement Failure "AF" bit = 0
-	 */
-	while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_AF) == I2C_Flag_Reset){
-
-		while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_TXE) == I2C_Flag_Reset);
-		I2C_ConfigPtr->I2Cx->DR = *(pTxBuffer++);
-	}
-
-	CLEAR_BIT(I2C_ConfigPtr->I2Cx->CR1,I2C_PERIPHERAL_ENABLE_BIT);
+void MCAL_I2C_Slave_TX(I2C_Config_t* I2C_ConfigPtr, uint8_t TxData)
+{
+	I2C_ConfigPtr->I2Cx->DR = TxData;
 }
 
-/**================================================================
- * @Fn				- MCAL_I2C_SlaveRX
+/* ================================================================
  *
- * @brief 			- Receive data required that was sent from the master to the slave.
+ * @Fn 				- MCAL_I2C_Slave_RX
+ *
+ * @brief 			- Slave Receive data from master using interrupt mechanism
  *
  * @param [in] 		- I2C_ConfigPtr: Pointer to the I2C_Config_t structure that holds
  * 					  the configuration information for the I2Cx of the desired peripheral.
  *
- * @param [in] 		- pTxBuffer: Holds the data required to receive.
+ * @retval 			- Received data
  *
- * @retval 			- None.
- *
- * Note				- This function is used only with interrupts, can't be used with polling technique.
+ * Note 			- Support interrupt mechanism only
  *
  */
-void MCAL_I2C_SlaveRX(I2C_Config_t* I2C_ConfigPtr, uint8_t* pTxBuffer){
+uint8_t MCAL_I2C_Slave_RX(I2C_Config_t* I2C_ConfigPtr)
+{
+	return (I2C_ConfigPtr->I2Cx->DR);
+}
 
-	vuint32_t SRxTemp = 0;
-
-	SET_BIT(I2C_ConfigPtr->I2Cx->CR1,I2C_PERIPHERAL_ENABLE_BIT);
-
-	SET_BIT(I2C_ConfigPtr->I2Cx->CR1,I2C_ACKNOWLEDGMENT_ENABLE_BIT);
-
-	/*
-	 * In 7-bit addressing mode (The Only Supported), one address byte is sent.
-	 * As soon as the address byte is sent,
-	 * The ADDR bit is set by hardware,
-	 */
-	while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_ADDR) == I2C_Flag_Reset);
-
-	/*
-	 * Then the master waits for a read of the SR1 register followed by a read of the SR2 register to clear ADDR
-	 * bit.
-	 */
-	SRxTemp = I2C_ConfigPtr->I2Cx->SR1;
-	SRxTemp = I2C_ConfigPtr->I2Cx->SR2;
-
-	/*
-	 * I2C Slave keep receiving the data as long as Stop condition is not detected "STOPF" bit = 0
-	 */
-	while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_STOPF) == I2C_Flag_Reset){
-
-		while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_RXNE) == I2C_Flag_Reset);
-		*(pTxBuffer++) = I2C_ConfigPtr->I2Cx->DR;
+void I2C_ACKConfig(I2C_Config_t* I2C_ConfigPtr, I2C_Ack_State_t state)
+{
+	if(state == I2C_Ack_Enable)
+	{
+		/* Enable Automatic ACK */
+		I2C_ConfigPtr->I2Cx->CR1 |= (I2C_ACKNOWLEDGMENT_ENABLE_BIT);
 	}
-
-	CLEAR_BIT(I2C_ConfigPtr->I2Cx->CR1,I2C_PERIPHERAL_ENABLE_BIT);
+	else
+	{
+		/* Disable Automatic ACK */
+		I2C_ConfigPtr->I2Cx->CR1 &= ~(I2C_ACKNOWLEDGMENT_ENABLE_BIT);
+	}
 }
 
 /*======================================================================================================
@@ -676,221 +729,341 @@ void MCAL_I2C_SlaveRX(I2C_Config_t* I2C_ConfigPtr, uint8_t* pTxBuffer){
 
 void I2C1_EV_IRQHandler(void)
 {
+	//vuint32_t Dummy_Read = 0; // Volatile for compiler optimization
+	vuint32_t dummy = 0;
 
-	vuint32_t SRxTemp = 0;
+	/* Interrupt handling for both master and slave mode of the device */
+	uint32_t Temp_1, Temp_2, Temp_3;
 
-	//I2C_Event_Interrupt_State_SB
-	if(READ_BIT(I2C2->SR1,0))
+	Temp_1 = (I2C1->CR2 & (I2C_IRQ_ITEVFEN));	// Event interrupt enable
+	Temp_2 = (I2C1->CR2 & (I2C_IRQ_IITBUFEN));	// Buffer interrupt enable
+	Temp_3 = (I2C1->SR1 & (I2C_Flag_STOPF));	// Stop detection (slave mode)
+
+	/* Handle Stop Condition Event */
+	if(Temp_1 && Temp_3)
 	{
-		//Handled by Master
-		/*
-		 * 	Then the master waits for a read of the SR1 register followed by a write in the DR register with
-		 * 	the Slave address. SB=1, cleared by reading SR1 register followed by writing DR register with Address.
+		/* STOPF Cleared by software reading the SR1 register followed by a write in the CR1 register,
+		 * i have already read SR1 in Temp_3
+		 * then next statement i write to CR1
 		 */
-		SRxTemp = I2C1->SR1;
-		g_I2C2_Event_IRQ_Src = I2C_Event_IRQ_Src_SB;
+		I2C1->CR1 |= 0x0000;
+		g_IRQ_I2C1_Event_CallBackFunction(I2C_Event_IRQ_Src_STOPF);
 	}
 
-	//I2C_Event_Interrupt_State_ADDR
-	if(READ_BIT(I2C1->SR1,1))
+	/* =============================================================================== */
+
+	/* Handle Received address matched. */
+	Temp_3 = (I2C1->SR1 & (I2C_Flag_ADDR));		//ADDR
+	if(Temp_1 && Temp_3)
 	{
-
-		//Dummy read to clear ADDR bit.
-		SRxTemp = I2C1->SR1;
-		SRxTemp = I2C1->SR2;
-
-		g_I2C2_Event_IRQ_Src = I2C_Event_IRQ_Src_ADDR;
-	}
-
-	//I2C_Event_Interrupt_State_BTF
-	if(READ_BIT(I2C1->SR1,2))
-	{
-		//Handled by Master
-		/*SRxTemp = I2C1->SR1;*/
-		g_I2C2_Event_IRQ_Src = I2C_Event_IRQ_Src_BTF;
-	}
-
-	//I2C_Event_Interrupt_State_ADD10
-	if(READ_BIT(I2C1->SR1,3))
-	{
-		//10 bit addresing mode -- not supported
-		g_I2C2_Event_IRQ_Src = I2C_Event_IRQ_Src_ADD10;
-	}
-
-	//I2C_Event_IRQ_Src_STOPF
-	if(READ_BIT(I2C1->SR1,4))
-	{
-		//Handled by slave device only
-		//(STOPF == 1) {READ SR1; WRITE CR1}
-
-		SRxTemp = I2C1->SR1;
-		I2C1->CR1 |= 0;
-		g_I2C2_Event_IRQ_Src = I2C_Event_IRQ_Src_STOPF;
-	}
-
-	//I2C_Event_Interrupt_State_RxNE
-	if(READ_BIT(I2C1->SR1,6))
-	{
-		/*
-		 * Bit 0 MSL: Master/slave
-		 * 0: Slave Mode
-		 * 1: Master Mode
-		 * – Set by hardware as soon as the interface is in Master mode (SB=1).
-		 * – Cleared by hardware after detecting a Stop condition on the bus or a loss of arbitration (ARLO=1),
-		 * or by hardware when PE=0.
+		/* clear ADDR flag
+		 * In slave mode, it is recommended to perform the complete clearing sequence (READ SR1 then READ SR2) after ADDR is set.
 		 */
-		if(READ_BIT(I2C1->SR2,0))
+		//Dummy_Read  = I2C1->SR1;
+		//Dummy_Read  = I2C1->SR2;
+
+		/* Check master mode or slave mode */
+		if(I2C1->SR2 & (1<<I2C_Flag_MSL))
 		{
-			//Master Mode: Handled by Master
-			//TODO
+			/* Master mode (Using polling mechanism not interrupt) */
 		}
 		else
 		{
-			//Slave Mode: Handled by Slave
-			/*
-			 * Slave shall read a byte from the data register sent from the master.
-			*/
+			/* Slave mode */
+			g_IRQ_I2C1_Event_CallBackFunction(I2C_Event_IRQ_Src_ADDR);
 		}
 
-		g_I2C2_Event_IRQ_Src = I2C_Event_IRQ_Src_RxNE;
 	}
 
-	//I2C_Event_Interrupt_State_TxE
-	if(READ_BIT(I2C1->SR1,7))
+	/* =============================================================================== */
+
+	/* Handle TxE: Data register empty (Master request data from slave)--> slave_transmitter */
+	Temp_3 = (I2C1->SR1 & (I2C_Flag_TXE));		// TXE
+	if(Temp_1 && Temp_2 && Temp_3)				// In case TXE=1, ITEVTEN=1, ITBUFEN=1
 	{
-
-		//Master Mode: Handled by Master
-		/*
-		 * Master shall send a byte to slave.
-		 */
-
-		//Slave Mode: Handled by Slave
-		/*
-		 * Slave shall send a byte to the master by writing it in the data register.
-		*/
-
-		g_I2C2_Event_IRQ_Src = I2C_Event_IRQ_Src_TxE;
+		/* Check master mode or slave mode */
+		if(I2C1->SR2 & (1<<I2C_Flag_MSL))
+		{
+			/* Master mode (Using polling mechanism not interrupt) */
+		}
+		else
+		{
+			/* Slave mode */
+			/* Check if slave in transmit mode */
+			if(I2C1->SR2 & (1<<I2C_Flag_TRA))		//TRA: Transmitter/receiver: 1: Data bytes transmitted
+			{
+				g_IRQ_I2C1_Event_CallBackFunction(I2C_Event_IRQ_Src_TxE);
+			}
+		}
 	}
 
-	g_IRQ_CallBackPtr[0]();
+	/* =============================================================================== */
+
+	/* Handle RxNE: Data register not empty (slave receive data)-->slave_Receiver */
+	Temp_3 = (I2C1->SR1 & (I2C_Flag_RXNE));		// RXNE
+	if(Temp_1 && Temp_2 && Temp_3)				// In case RXNE=1, ITEVTEN=1, ITBUFEN=1
+	{
+		/* Check master mode or slave mode */
+		if(I2C1->SR2 & (1<<I2C_Flag_MSL))
+		{
+			/* Master mode (Using polling mechanism not interrupt) */
+		}
+		else
+		{
+			/* Slave mode */
+			if(I2C1->SR2 & (1<<I2C_Flag_TRA))		//TRA: Transmitter/receiver: 0: Data bytes received
+			{
+				g_IRQ_I2C1_Event_CallBackFunction(I2C_Event_IRQ_Src_RxNE);
+			}
+		}
+	}
+	(void)dummy;
 
 }
 void I2C1_ER_IRQHandler(void)
 {
+	uint32_t temp1,temp2;
 
+    //Know the status of  ITERREN control bit in the CR2
+	temp2 = (I2C1->CR2) & I2C_IRQ_ITERREN;
+
+
+/***********************Check for Bus error************************************/
+	temp1 = (I2C1->SR1) & ( 1<< I2C_Error_IRQ_Src_BERR);
+	if(temp1  && temp2 )
+	{
+		//This is Bus error
+
+		//Implement the code to clear the buss error flag
+		I2C1->SR1 &= ~( 1 << I2C_Flag_BERR);
+
+		//Implement the code to notify the application about the error
+	   g_IRQ_I2C1_Error_CallBackFunction(I2C_Error_IRQ_Src_BERR);
+	}
+
+/***********************Check for arbitration lost error************************************/
+	temp1 = (I2C1->SR1) & ( 1<< I2C_Error_IRQ_Src_ARLO);
+	if(temp1  && temp2)
+	{
+		//This is arbitration lost error
+
+		//Implement the code to clear the arbitration lost error flag
+		I2C1->SR1 &= ~( 1 << I2C_Flag_ARLO);
+
+		//Implement the code to notify the application about the error
+		g_IRQ_I2C1_Error_CallBackFunction(I2C_Error_IRQ_Src_ARLO);
+
+	}
+
+/***********************Check for ACK failure  error************************************/
+
+	temp1 = (I2C1->SR1) & ( 1<< I2C_Error_IRQ_Src_AF);
+	if(temp1  && temp2)
+	{
+		//This is ACK failure error
+
+	    //Implement the code to clear the ACK failure error flag
+		I2C1->SR1 &= ~( 1 << I2C_Flag_AF);
+
+		//Implement the code to notify the application about the error
+		g_IRQ_I2C1_Error_CallBackFunction(I2C_Error_IRQ_Src_AF);
+	}
+
+/***********************Check for Overrun/underrun error************************************/
+	temp1 = (I2C1->SR1) & ( 1<< I2C_Error_IRQ_Src_OVR);
+	if(temp1  && temp2)
+	{
+		//This is Overrun/underrun
+
+	    //Implement the code to clear the Overrun/underrun error flag
+		I2C1->SR1 &= ~( 1 << I2C_Flag_OVR);
+
+		//Implement the code to notify the application about the error
+		g_IRQ_I2C1_Error_CallBackFunction(I2C_Error_IRQ_Src_OVR);
+	}
+
+/***********************Check for Time out error************************************/
+	temp1 = (I2C1->SR1) & ( 1<< I2C_Error_IRQ_Src_TIMEOUT);
+	if(temp1  && temp2)
+	{
+		//This is Time out error
+
+	    //Implement the code to clear the Time out error flag
+		I2C1->SR1 &= ~( 1 << I2C_Flag_TIMEOUT);
+
+		//Implement the code to notify the application about the error
+		g_IRQ_I2C1_Error_CallBackFunction(I2C_Error_IRQ_Src_TIMEOUT);
+	}
 }
+
+
 void I2C2_EV_IRQHandler(void)
 {
 
-	vuint32_t SRxTemp = 0;
-	I2C_Event_IRQ_Src_t IRQ_src;
-	//Read All Possible Events
+	//vuint32_t Dummy_Read = 0; // Volatile for compiler optimization
+	vuint32_t dummy = 0;
 
-	//I2C_Event_Interrupt_State_SB
-	if(READ_BIT(I2C2->SR1,0))
+	/* Interrupt handling for both master and slave mode of the device */
+	uint32_t Temp_1, Temp_2, Temp_3;
+
+	Temp_1 = (I2C2->CR2 & (I2C_IRQ_ITEVFEN));	// Event interrupt enable
+	Temp_2 = (I2C2->CR2 & (I2C_IRQ_IITBUFEN));	// Buffer interrupt enable
+	Temp_3 = (I2C2->SR1 & (I2C_Flag_STOPF));	// Stop detection (slave mode)
+
+	/* Handle Stop Condition Event */
+	if(Temp_1 && Temp_3)
 	{
-		//Handled by Master
-		//TODO
-	}
-	//I2C_Event_Interrupt_State_ADDR
-	if(READ_BIT(I2C2->SR1,1))
-	{
-		/*
-		 * Bit 0 MSL: Master/slave
-		 * 0: Slave Mode
-		 * 1: Master Mode
-		 * – Set by hardware as soon as the interface is in Master mode (SB=1).
-		 * – Cleared by hardware after detecting a Stop condition on the bus or a loss of arbitration (ARLO=1),
-		 * or by hardware when PE=0.
+		/* STOPF Cleared by software reading the SR1 register followed by a write in the CR1 register,
+		 * i have already read SR1 in Temp_3
+		 * then next statement i write to CR1
 		 */
-		if(READ_BIT(I2C2->SR2,0))
+		I2C2->CR1 |= 0x0000;
+		g_IRQ_I2C2_Event_CallBackFunction(I2C_Event_IRQ_Src_STOPF);
+	}
+
+	/* =============================================================================== */
+
+	/* Handle Received address matched. */
+	Temp_3 = (I2C2->SR1 & (I2C_Flag_ADDR));		//ADDR
+	if(Temp_1 && Temp_3)
+	{
+		/* clear ADDR flag
+		 * In slave mode, it is recommended to perform the complete clearing sequence (READ SR1 then READ SR2) after ADDR is set.
+		 */
+		//Dummy_Read  = I2C1->SR1;
+		//Dummy_Read  = I2C1->SR2;
+
+		/* Check master mode or slave mode */
+		if(I2C2->SR2 & (1<<I2C_Flag_MSL))
 		{
-			//Master Mode: Handled by Master
-			//TODO
+			/* Master mode (Using polling mechanism not interrupt) */
 		}
 		else
 		{
-			//Slave Mode: Handled by Slave
-			//Dummy read to clear ADDR bit.
-			SRxTemp = I2C2->SR1;
-			SRxTemp = I2C2->SR2;
-			IRQ_src = I2C_Event_IRQ_Src_ADDR;
-
+			/* Slave mode */
+			g_IRQ_I2C2_Event_CallBackFunction(I2C_Event_IRQ_Src_ADDR);
 		}
-	}
-	//I2C_Event_Interrupt_State_BTF
-	if(READ_BIT(I2C2->SR1,2))
-	{
-		//Handled by Master
-		//TODO
-	}
-	//I2C_Event_Interrupt_State_ADD10
-	if(READ_BIT(I2C2->SR1,3))
-	{
-		//10 bit addresing mode -- not supported
-	}
-	//I2C_Event_IRQ_Src_STOPF
-	if(READ_BIT(I2C2->SR1,4))
-	{
-		//Handled by slave device only
-		//(STOPF == 1) {READ SR1; WRITE CR1}
 
-		SRxTemp = I2C2->SR1;
-		I2C2->CR2 |= 0;
-		IRQ_src = I2C_Event_IRQ_Src_STOPF;
 	}
 
-	//I2C_Event_Interrupt_State_RxNE
-	if(READ_BIT(I2C2->SR1,6))
+	/* =============================================================================== */
+
+	/* Handle TxE: Data register empty (Master request data from slave)--> slave_transmitter */
+	Temp_3 = (I2C2->SR1 & (I2C_Flag_TXE));		// TXE
+	if(Temp_1 && Temp_2 && Temp_3)				// In case TXE=1, ITEVTEN=1, ITBUFEN=1
 	{
-		/*
-		 * Bit 0 MSL: Master/slave
-		 * 0: Slave Mode
-		 * 1: Master Mode
-		 * – Set by hardware as soon as the interface is in Master mode (SB=1).
-		 * – Cleared by hardware after detecting a Stop condition on the bus or a loss of arbitration (ARLO=1),
-		 * or by hardware when PE=0.
-		 */
-		if(READ_BIT(I2C2->SR2,0))
+		/* Check master mode or slave mode */
+		if(I2C2->SR2 & (1<<I2C_Flag_MSL))
 		{
-			//Master Mode: Handled by Master
-			//TODO
+			/* Master mode (Using polling mechanism not interrupt) */
 		}
 		else
 		{
-			//Slave Mode: Handled by Slave
-			//Dummy read to clear ADDR bit.
-			IRQ_src = I2C_Event_IRQ_Src_RxNE;
+			/* Slave mode */
+			/* Check if slave in transmit mode */
+			if(I2C2->SR2 & (1<<I2C_Flag_TRA))		//TRA: Transmitter/receiver: 1: Data bytes transmitted
+			{
+				g_IRQ_I2C2_Event_CallBackFunction(I2C_Event_IRQ_Src_TxE);
+			}
 		}
 	}
-	//I2C_Event_Interrupt_State_TxE
-	if(READ_BIT(I2C2->SR1,7))
+
+	/* =============================================================================== */
+
+	/* Handle RxNE: Data register not empty (slave receive data)-->slave_Receiver */
+	Temp_3 = (I2C2->SR1 & (I2C_Flag_RXNE));		// RXNE
+	if(Temp_1 && Temp_2 && Temp_3)				// In case RXNE=1, ITEVTEN=1, ITBUFEN=1
 	{
-		/*
-		 * Bit 0 MSL: Master/slave
-		 * 0: Slave Mode
-		 * 1: Master Mode
-		 * – Set by hardware as soon as the interface is in Master mode (SB=1).
-		 * – Cleared by hardware after detecting a Stop condition on the bus or a loss of arbitration (ARLO=1),
-		 * or by hardware when PE=0.
-		 */
-		if(READ_BIT(I2C2->SR2,0))
+		/* Check master mode or slave mode */
+		if(I2C1->SR2 & (1<<I2C_Flag_MSL))
 		{
-			//Master Mode: Handled by Master
-			//TODO
+			/* Master mode (Using polling mechanism not interrupt) */
 		}
 		else
 		{
-			//Slave Mode: Handled by Slave
-			//Dummy read to clear ADDR bit.
-			IRQ_src = I2C_Event_IRQ_Src_TxE;
-
+			/* Slave mode */
+			if(I2C2->SR2 & (1<<I2C_Flag_TRA))		//TRA: Transmitter/receiver: 0: Data bytes received
+			{
+				g_IRQ_I2C2_Event_CallBackFunction(I2C_Event_IRQ_Src_RxNE);
+			}
 		}
 	}
+	(void)dummy;
 
-	g_IRQ_CallBackPtr[2]();
+
 }
 void I2C2_ER_IRQHandler(void)
 {
+	uint32_t temp1,temp2;
 
+    //Know the status of  ITERREN control bit in the CR2
+	temp2 = (I2C2->CR2) & I2C_IRQ_ITERREN;
+
+
+/***********************Check for Bus error************************************/
+	temp1 = (I2C2->SR1) & ( 1<< I2C_Error_IRQ_Src_BERR);
+	if(temp1  && temp2 )
+	{
+		//This is Bus error
+
+		//Implement the code to clear the buss error flag
+		I2C2->SR1 &= ~( 1 << I2C_Flag_BERR);
+
+		//Implement the code to notify the application about the error
+	   g_IRQ_I2C2_Error_CallBackFunction(I2C_Error_IRQ_Src_BERR);
+	}
+
+/***********************Check for arbitration lost error************************************/
+	temp1 = (I2C2->SR1) & ( 1<< I2C_Error_IRQ_Src_ARLO);
+	if(temp1  && temp2)
+	{
+		//This is arbitration lost error
+
+		//Implement the code to clear the arbitration lost error flag
+		I2C2->SR1 &= ~( 1 << I2C_Flag_ARLO);
+
+		//Implement the code to notify the application about the error
+		g_IRQ_I2C2_Error_CallBackFunction(I2C_Error_IRQ_Src_ARLO);
+
+	}
+
+/***********************Check for ACK failure  error************************************/
+
+	temp1 = (I2C2->SR1) & ( 1<< I2C_Error_IRQ_Src_AF);
+	if(temp1  && temp2)
+	{
+		//This is ACK failure error
+
+	    //Implement the code to clear the ACK failure error flag
+		I2C1->SR2 &= ~( 1 << I2C_Flag_AF);
+
+		//Implement the code to notify the application about the error
+		g_IRQ_I2C2_Error_CallBackFunction(I2C_Error_IRQ_Src_AF);
+	}
+
+/***********************Check for Overrun/underrun error************************************/
+	temp1 = (I2C2->SR1) & ( 1<< I2C_Error_IRQ_Src_OVR);
+	if(temp1  && temp2)
+	{
+		//This is Overrun/underrun
+
+	    //Implement the code to clear the Overrun/underrun error flag
+		I2C2->SR1 &= ~( 1 << I2C_Flag_OVR);
+
+		//Implement the code to notify the application about the error
+		g_IRQ_I2C2_Error_CallBackFunction(I2C_Error_IRQ_Src_OVR);
+	}
+
+/***********************Check for Time out error************************************/
+	temp1 = (I2C2->SR1) & ( 1<< I2C_Error_IRQ_Src_TIMEOUT);
+	if(temp1  && temp2)
+	{
+		//This is Time out error
+
+	    //Implement the code to clear the Time out error flag
+		I2C2->SR1 &= ~( 1 << I2C_Flag_TIMEOUT);
+
+		//Implement the code to notify the application about the error
+		g_IRQ_I2C2_Error_CallBackFunction(I2C_Error_IRQ_Src_TIMEOUT);
+	}
 }

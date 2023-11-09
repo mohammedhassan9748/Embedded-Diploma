@@ -71,7 +71,7 @@ uint8_t HAL_EEPROM_WriteNbytes(uint16_t MemoryAddress, uint8_t* dataBuffer, uint
 		newBuffer[i+2] = dataBuffer[i];
 	}
 
-	MCAL_I2C_MasterTX(&I2C1_Config, EEPROM_SLAVE_ADDRESS, newBuffer, dataLength+2, I2C_Start, I2C_Stop);
+	MCAL_I2C_MasterTxPolling(&I2C1_Config, EEPROM_SLAVE_ADDRESS, newBuffer, dataLength+2, I2C_Start, I2C_Stop);
 
 	return 0;
 }
@@ -93,9 +93,9 @@ uint8_t HAL_EEPROM_ReadNbytes(uint16_t MemoryAddress, uint8_t* dataBuffer, uint3
 	MemoryAddressBuffer[0] = (uint8_t)(MemoryAddress>>8);
 	MemoryAddressBuffer[1] = (uint8_t) MemoryAddress;
 
-	MCAL_I2C_MasterTX(&I2C1_Config, EEPROM_SLAVE_ADDRESS, MemoryAddressBuffer, 2, I2C_Start, I2C_No_Stop);
+	MCAL_I2C_MasterTxPolling(&I2C1_Config, EEPROM_SLAVE_ADDRESS, MemoryAddressBuffer, 2, I2C_Start, I2C_No_Stop);
 
-	MCAL_I2C_MasterRX(&I2C1_Config, EEPROM_SLAVE_ADDRESS, dataBuffer, dataLength, I2C_Repeated_Start, I2C_Stop);
+	MCAL_I2C_MasterRxPolling(&I2C1_Config, EEPROM_SLAVE_ADDRESS, dataBuffer, dataLength, I2C_Repeated_Start, I2C_Stop);
 
 	return 0;
 }

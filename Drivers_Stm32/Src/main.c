@@ -31,7 +31,7 @@
 #include "../HAL/Inc/EEPROM.h"
 #include "../HAL/Inc/SevenSegment.h"
 
-uint8_t BufferSend[5] = {'M','A','B','C','D'};
+//uint8_t BufferSend[5] = {'C','F','A','7','A'};
 uint8_t BufferRec[5];
 
 GPIO_PinConfig_t led = {GPIOC,GPIO_PIN_13,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
