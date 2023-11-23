@@ -12,7 +12,6 @@
 //										Includes
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
-#include "../../Services/Platform_Types.h"
 #include "../../Services/atmega32.h"
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
@@ -43,7 +42,7 @@
 0: Pin state is zero.
 1: Pin state is one.
 */
-#define GPIO_PIN_CLEAR				0	//Pin state is zero.
+#define GPIO_PIN_CLEAR				    0	//Pin state is zero.
 #define GPIO_PIN_SET					1 	//Pin state is one.
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
@@ -51,7 +50,10 @@
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
 typedef struct{
-
+	
+	GPIO_Typedef* GPIO_Port;		// Specifies the GPIO Port of the pin being initialized
+									// This parameter must be a value of GPIO Peripheral Instants in atmega32.h.
+	
 	uint8_t GPIO_PinNo;  			// Specifies the GPIO Pins to be configured
 						  	  	    // This parameter can be a value of @ref GPIO_Pins_Define
 
@@ -65,17 +67,17 @@ typedef struct{
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
 //Initialization & DeInitialization APIs
-void MCAL_GPIO_Init(GPIO_Typedef* GPIOx_Ptr, GPIO_PinConfig_t* GPIO_PinConfigPtr);
+void MCAL_GPIO_Init(GPIO_PinConfig_t* GPIO_PinConfigPtr);
 void MCAL_GPIO_DeInit(GPIO_Typedef* GPIOx_Ptr);
 
 //Read APIs
-uint8_t MCAL_GPIO_ReadPin(GPIO_Typedef* GPIOx_Ptr, uint8_t PinNo);
+uint8_t MCAL_GPIO_ReadPin(GPIO_PinConfig_t* GPIO_PinConfigPtr);
 uint8_t MCAL_GPIO_ReadPort(GPIO_Typedef* GPIOx_Ptr);
 
 //Write APIs
-void MCAL_GPIO_WritePin(GPIO_Typedef* GPIOx_Ptr, uint8_t PinNo, uint8_t PinValue);
+void MCAL_GPIO_WritePin(GPIO_PinConfig_t* GPIO_PinConfigPtr, uint8_t PinValue);
 void MCAL_GPIO_WritePort(GPIO_Typedef* GPIOx_Ptr, uint8_t PortValue);
 
-void MCAL_GPIO_TogglePin(GPIO_Typedef* GPIOx_Ptr, uint8_t PinNo);
+void MCAL_GPIO_TogglePin(GPIO_PinConfig_t* GPIO_PinConfigPtr);
 
 #endif /* GPIO_H_ */

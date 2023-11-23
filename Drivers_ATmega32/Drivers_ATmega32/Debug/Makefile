@@ -44,8 +44,11 @@ SUBDIRS :=  \
 C_SRCS +=  \
 ../HAL/keypad.c \
 ../HAL/LCD.c \
+../HAL/SevenSegment.c \
 ../main.c \
-../MCAL/GPIO.c
+../MCAL/EXTI.c \
+../MCAL/GPIO.c \
+../MCAL/USART.c
 
 
 PREPROCESSING_SRCS += 
@@ -57,26 +60,38 @@ ASM_SRCS +=
 OBJS +=  \
 HAL/keypad.o \
 HAL/LCD.o \
+HAL/SevenSegment.o \
 main.o \
-MCAL/GPIO.o
+MCAL/EXTI.o \
+MCAL/GPIO.o \
+MCAL/USART.o
 
 OBJS_AS_ARGS +=  \
 HAL/keypad.o \
 HAL/LCD.o \
+HAL/SevenSegment.o \
 main.o \
-MCAL/GPIO.o
+MCAL/EXTI.o \
+MCAL/GPIO.o \
+MCAL/USART.o
 
 C_DEPS +=  \
 HAL/keypad.d \
 HAL/LCD.d \
+HAL/SevenSegment.d \
 main.d \
-MCAL/GPIO.d
+MCAL/EXTI.d \
+MCAL/GPIO.d \
+MCAL/USART.d
 
 C_DEPS_AS_ARGS +=  \
 HAL/keypad.d \
 HAL/LCD.d \
+HAL/SevenSegment.d \
 main.d \
-MCAL/GPIO.d
+MCAL/EXTI.d \
+MCAL/GPIO.d \
+MCAL/USART.d
 
 OUTPUT_FILE_PATH +=Drivers_ATmega32.elf
 
@@ -106,6 +121,13 @@ HAL/LCD.o: ../HAL/LCD.c
 	@echo Finished building: $<
 	
 
+HAL/SevenSegment.o: ../HAL/SevenSegment.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega32 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega32" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
 ./main.o: .././main.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
@@ -113,7 +135,21 @@ HAL/LCD.o: ../HAL/LCD.c
 	@echo Finished building: $<
 	
 
+MCAL/EXTI.o: ../MCAL/EXTI.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega32 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega32" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
 MCAL/GPIO.o: ../MCAL/GPIO.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega32 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega32" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
+MCAL/USART.o: ../MCAL/USART.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
 	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega32 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega32" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 

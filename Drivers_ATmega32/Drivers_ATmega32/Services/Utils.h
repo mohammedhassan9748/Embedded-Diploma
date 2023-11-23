@@ -9,12 +9,12 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
-#define SETBIT(REG,BITNO)		(REG |= (1<<BITNO))
+#define SET_BIT(REG,BITNO)			(REG |= (1<<BITNO))
 
-#define CLEARBIT(REG,BITNO)		(REG &= ~(1<<BITNO))
+#define CLEAR_BIT(REG,BITNO)		(REG &= ~(1<<BITNO))
 
-#define READBIT(REG,BITNO)		((REG &= (1<<BITNO))>>BITNO)
+#define READ_BIT(REG,BITNO)			((REG &= (1<<BITNO))>>BITNO)
 
-#define TOGGLEBIT(REG,BITNO)	(REG ^= (1<<BITNO))
+#define TOGGLE_BIT(REG,BITNO)		(REG ^= (1<<BITNO))
 
 #endif /* UTILS_H_ */

@@ -6,7 +6,13 @@ HAL\keypad.c
 
 HAL\LCD.c
 
+HAL\SevenSegment.c
+
 main.c
 
+MCAL\EXTI.c
+
 MCAL\GPIO.c
+
+MCAL\USART.c
 

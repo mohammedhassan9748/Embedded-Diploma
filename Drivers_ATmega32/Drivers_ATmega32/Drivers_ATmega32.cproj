@@ -40,6 +40,19 @@
         </dependencies>
       </framework-data>
     </AsfFrameworkConfig>
+    <avrtool>com.atmel.avrdbg.tool.simulator</avrtool>
+    <avrtoolserialnumber />
+    <avrdeviceexpectedsignature>0x1E9502</avrdeviceexpectedsignature>
+    <com_atmel_avrdbg_tool_simulator>
+      <ToolOptions xmlns="">
+        <InterfaceProperties>
+        </InterfaceProperties>
+      </ToolOptions>
+      <ToolType xmlns="">com.atmel.avrdbg.tool.simulator</ToolType>
+      <ToolNumber xmlns="">
+      </ToolNumber>
+      <ToolName xmlns="">Simulator</ToolName>
+    </com_atmel_avrdbg_tool_simulator>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <ToolchainSettings>
@@ -118,6 +131,8 @@
         <avrgcc.assembler.debugging.DebugLevel>Default (-Wa,-g)</avrgcc.assembler.debugging.DebugLevel>
       </AvrGcc>
     </ToolchainSettings>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="HAL\Inc\keypad.h">
@@ -126,19 +141,37 @@
     <Compile Include="HAL\Inc\LCD.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="HAL\Inc\SevenSegment.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="HAL\keypad.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="HAL\LCD.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="HAL\SevenSegment.c">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="main.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="MCAL\EXTI.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="MCAL\GPIO.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="MCAL\Inc\EXTI.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="MCAL\Inc\GPIO.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="MCAL\Inc\USART.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="MCAL\USART.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="Services\atmega32.h">

@@ -9,6 +9,7 @@
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //										Includes
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
+
 #include "../Services/Utils.h"
 #include "Inc/LCD.h"
 
@@ -16,7 +17,21 @@
 //									Global Variables
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
-static GPIO_PinConfig_t g_PinConfig;
+//Initializing LCD Pins
+static GPIO_PinConfig_t g_LCD_RS = {LCD_RS_PORT,LCD_RS_PIN,GPIO_MODE_OUTPUT};
+static GPIO_PinConfig_t g_LCD_EN = {LCD_EN_PORT,LCD_EN_PIN,GPIO_MODE_OUTPUT};
+
+static GPIO_PinConfig_t g_LCD_D4 =  {LCD_RS_PORT,LCD_D4_PIN,GPIO_MODE_OUTPUT};
+static GPIO_PinConfig_t g_LCD_D5 =  {LCD_RS_PORT,LCD_D5_PIN,GPIO_MODE_OUTPUT};
+static GPIO_PinConfig_t g_LCD_D6 =  {LCD_RS_PORT,LCD_D6_PIN,GPIO_MODE_OUTPUT};
+static GPIO_PinConfig_t g_LCD_D7 =  {LCD_RS_PORT,LCD_D7_PIN,GPIO_MODE_OUTPUT};
+
+#ifdef EIGHT_BIT_MODE
+static GPIO_PinConfig_t g_LCD_D0 =  {LCD_RS_PORT,LCD_D0_PIN,GPIO_MODE_OUTPUT};
+static GPIO_PinConfig_t g_LCD_D1 =  {LCD_RS_PORT,LCD_D1_PIN,GPIO_MODE_OUTPUT};
+static GPIO_PinConfig_t g_LCD_D2 =  {LCD_RS_PORT,LCD_D2_PIN,GPIO_MODE_OUTPUT};
+static GPIO_PinConfig_t g_LCD_D3 =	{LCD_RS_PORT,LCD_D3_PIN,GPIO_MODE_OUTPUT};
+#endif
 
 //For 16x2 LCD
 static uint8_t g_LCD_X = LCD_X_RESET_VALUE; //Max of g_LCD_X is 15 -- Do not exceed
@@ -26,16 +41,51 @@ static uint8_t g_LCD_Y = LCD_Y_RESET_VALUE; //Max of g_LCD_X is  2 -- Do not exc
 //								Private Functions Definitions
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
+
 /*================================================================
  * Description :
- * Private Delay Function in ms
- * Only for 1Mhz Clock
+ * Private Delay Function to wait for LCD.
  */
-static void LCD_delay_ms(uint32_t delay_count){
-	//Note: For 1Mhz Clock
-	for(int i=0;i<delay_count;i++){
-		for(int j=0;j<128;j++);
-	}
+static void LCD_wait(void){
+	unsigned char i,j;
+	for(i=0;i<50;i++)        //A simple for loop for delay
+		for(j=0;j<255;j++);
+}
+
+/*================================================================
+ * Description :
+ * Initializes the pins chosen according to all @config
+ */
+static void LCD_Config(void){
+	
+	//Configure RS Pin
+	MCAL_GPIO_Init(&g_LCD_RS);
+
+	//Configure EN Pin
+	MCAL_GPIO_Init(&g_LCD_EN);
+
+	LCD_wait();
+
+	//Configure Data Bit 4 Pin
+	MCAL_GPIO_Init(&g_LCD_D4);
+	//Configure Data Bit 5 Pin
+	MCAL_GPIO_Init(&g_LCD_D5);
+	//Configure Data Bit 6 Pin
+	MCAL_GPIO_Init(&g_LCD_D6);
+	//Configure Data Bit 7 Pin
+	MCAL_GPIO_Init(&g_LCD_D7);
+
+	#ifdef	EIGHT_BIT_MODE
+
+	//Configure the rest Data Port if 8 bit mode.
+
+	MCAL_GPIO_Init(&g_LCD_D0); //Configure Data Bit 0 Pin
+	MCAL_GPIO_Init(&g_LCD_D1); //Configure Data Bit 1 Pin
+	MCAL_GPIO_Init(&g_LCD_D2); //Configure Data Bit 2 Pin
+	MCAL_GPIO_Init(&g_LCD_D3); //Configure Data Bit 3 Pin
+
+	#endif
+
 }
 
 /*================================================================
@@ -45,70 +95,14 @@ static void LCD_delay_ms(uint32_t delay_count){
 static void LCD_Kick(void){
 	
 	//Set EN pin
-	MCAL_GPIO_WritePin(LCD_CTRL_PORT,LCD_EN_PIN,GPIO_PIN_SET);
-	
-	// AC Characteristics : Enable cycle time (R & W ) = 500 ns
-	LCD_delay_ms(50);
-	
-	//Clear EN pin
-	MCAL_GPIO_WritePin(LCD_CTRL_PORT,LCD_EN_PIN,GPIO_PIN_CLEAR);
-}
+	MCAL_GPIO_WritePin(&g_LCD_EN,GPIO_PIN_SET);
 
-/*================================================================
- * Description :
- * Initializes the pins chosen according to @config
- */
-static void LCD_GPIO_Init(void){
+	// Delay
+	LCD_wait();
+
+	//Clear EN pin
+	MCAL_GPIO_WritePin(&g_LCD_EN,GPIO_PIN_CLEAR);
 	
-	//Configure at first g_PinConfig as output always
-	g_PinConfig.GPIO_Mode = GPIO_MODE_OUTPUT;
-	
-	//Configure RS Pin
-	g_PinConfig.GPIO_PinNo = LCD_RS_PIN;
-	MCAL_GPIO_Init(LCD_CTRL_PORT,&g_PinConfig);
-	
-	//Configure EN Pin
-	g_PinConfig.GPIO_PinNo = LCD_EN_PIN;
-	MCAL_GPIO_Init(LCD_CTRL_PORT,&g_PinConfig);
-	
-	LCD_delay_ms(20);
-	
-	#if DATA_BITS_NO == FOUR_BIT_MODE
-	
-	//Configure Data Bit 4 Pin
-	g_PinConfig.GPIO_PinNo = LCD_DATA_PIN_4;
-	MCAL_GPIO_Init(LCD_DATA_PORT,&g_PinConfig);
-	//Configure Data Bit 5 Pin
-	g_PinConfig.GPIO_PinNo = LCD_DATA_PIN_5;
-	MCAL_GPIO_Init(LCD_DATA_PORT,&g_PinConfig);
-	//Configure Data Bit 6 Pin
-	g_PinConfig.GPIO_PinNo = LCD_DATA_PIN_6;
-	MCAL_GPIO_Init(LCD_DATA_PORT,&g_PinConfig);
-	//Configure Data Bit 7 Pin
-	g_PinConfig.GPIO_PinNo = LCD_DATA_PIN_7;
-	MCAL_GPIO_Init(LCD_DATA_PORT,&g_PinConfig);
-	
-	#elif DATA_BITS_NO == EIGHT_BIT_MODE 
-	
-	//Configure Data Port
-	g_PinConfig.GPIO_PinNo = GPIO_PIN_0;
-	MCAL_GPIO_Init(LCD_DATA_PORT,&g_PinConfig);
-	g_PinConfig.GPIO_PinNo = GPIO_PIN_1;
-	MCAL_GPIO_Init(LCD_DATA_PORT,&g_PinConfig);
-	g_PinConfig.GPIO_PinNo = GPIO_PIN_2;
-	MCAL_GPIO_Init(LCD_DATA_PORT,&g_PinConfig);
-	g_PinConfig.GPIO_PinNo = GPIO_PIN_3;
-	MCAL_GPIO_Init(LCD_DATA_PORT,&g_PinConfig);
-	g_PinConfig.GPIO_PinNo = GPIO_PIN_4;
-	MCAL_GPIO_Init(LCD_DATA_PORT,&g_PinConfig);
-	g_PinConfig.GPIO_PinNo = GPIO_PIN_5;
-	MCAL_GPIO_Init(LCD_DATA_PORT,&g_PinConfig);
-	g_PinConfig.GPIO_PinNo = GPIO_PIN_6;
-	MCAL_GPIO_Init(LCD_DATA_PORT,&g_PinConfig);
-	g_PinConfig.GPIO_PinNo = GPIO_PIN_7;
-	MCAL_GPIO_Init(LCD_DATA_PORT,&g_PinConfig);
-	
-	#endif
 }
 
 /*================================================================
@@ -118,32 +112,43 @@ static void LCD_GPIO_Init(void){
 static void LCD_WriteChar(const uint8_t c){
 	
 	// Data Mode : RS = 1
-	MCAL_GPIO_WritePin(LCD_CTRL_PORT,LCD_RS_PIN,GPIO_PIN_SET);
-	LCD_delay_ms(1);
+	MCAL_GPIO_WritePin(&g_LCD_RS,GPIO_PIN_SET);
+	//Delay
+	LCD_wait();
 
 	//Check if DATA_BITS_NO configured as FOUR_BIT_MODE
-	#if DATA_BITS_NO == FOUR_BIT_MODE
-	
+	#ifdef FOUR_BIT_MODE
+
 	//Send Last four bits
-	MCAL_GPIO_WritePin(LCD_DATA_PORT,LCD_DATA_PIN_4,(c&(1<<4))>>4);
-	MCAL_GPIO_WritePin(LCD_DATA_PORT,LCD_DATA_PIN_5,(c&(1<<5))>>5);
-	MCAL_GPIO_WritePin(LCD_DATA_PORT,LCD_DATA_PIN_6,(c&(1<<6))>>6);
-	MCAL_GPIO_WritePin(LCD_DATA_PORT,LCD_DATA_PIN_7,(c&(1<<7))>>7);
+	MCAL_GPIO_WritePin(&g_LCD_D4,(c&(1<<4))>>4);
+	MCAL_GPIO_WritePin(&g_LCD_D5,(c&(1<<5))>>5);
+	MCAL_GPIO_WritePin(&g_LCD_D6,(c&(1<<6))>>6);
+	MCAL_GPIO_WritePin(&g_LCD_D7,(c&(1<<7))>>7);
 	LCD_Kick();
-	
+
 	//Send First four bits
-	MCAL_GPIO_WritePin(LCD_DATA_PORT,LCD_DATA_PIN_4,(c&(1<<0))>>0);
-	MCAL_GPIO_WritePin(LCD_DATA_PORT,LCD_DATA_PIN_5,(c&(1<<1))>>1);
-	MCAL_GPIO_WritePin(LCD_DATA_PORT,LCD_DATA_PIN_6,(c&(1<<2))>>2);
-	MCAL_GPIO_WritePin(LCD_DATA_PORT,LCD_DATA_PIN_7,(c&(1<<3))>>3);
+	MCAL_GPIO_WritePin(&g_LCD_D4,(c&(1<<0))>>0);
+	MCAL_GPIO_WritePin(&g_LCD_D5,(c&(1<<1))>>1);
+	MCAL_GPIO_WritePin(&g_LCD_D6,(c&(1<<2))>>2);
+	MCAL_GPIO_WritePin(&g_LCD_D7,(c&(1<<3))>>3);
 	LCD_Kick();
-	
+
+	#endif
+
 	//Check if DATA_BITS_NO configured as EIGHT_BIT_MODE
-	#elif DATA_BITS_NO == EIGHT_BIT_MODE
-	
-	MCAL_GPIO_WritePort(LCD_DATA_PORT,c);
+	#ifdef EIGHT_BIT_MODE
+
+	//Send whole bit data.
+	MCAL_GPIO_WritePin(&g_LCD_D0,(c&(1<<0))>>0);
+	MCAL_GPIO_WritePin(&g_LCD_D1,(c&(1<<1))>>1);
+	MCAL_GPIO_WritePin(&g_LCD_D2,(c&(1<<2))>>2);
+	MCAL_GPIO_WritePin(&g_LCD_D3,(c&(1<<3))>>3);
+	MCAL_GPIO_WritePin(&g_LCD_D4,(c&(1<<4))>>4);
+	MCAL_GPIO_WritePin(&g_LCD_D5,(c&(1<<5))>>5);
+	MCAL_GPIO_WritePin(&g_LCD_D6,(c&(1<<6))>>6);
+	MCAL_GPIO_WritePin(&g_LCD_D7,(c&(1<<7))>>7);
 	LCD_Kick();
-	
+
 	#endif
 
 }
@@ -167,23 +172,25 @@ static void LCD_WriteChar(const uint8_t c){
 void HAL_LCD_Init(void){
 	
 	//Initialize LCD GPIO Connection
-	LCD_GPIO_Init();
-	
+	LCD_Config();
+
 	//Check if DATA_BITS_NO configured as FOUR_BIT_MODE
-	#if DATA_BITS_NO == FOUR_BIT_MODE
-	
+	#ifdef	FOUR_BIT_MODE
+
 	HAL_LCD_WriteCommand(LCD_CMD_GO_TO_HOME);
 	HAL_LCD_WriteCommand(LCD_CMD_FUNCTION_4BIT_2LINES);
-	
-	//Check if DATA_BITS_NO configured as EIGHT_BIT_MODE
-	#elif DATA_BITS_NO == EIGHT_BIT_MODE
-	
-	HAL_LCD_WriteCommand(LCD_CMD_FUNCTION_8BIT_2LINES);
-	
+
 	#endif
-	
+
+	//Check if DATA_BITS_NO configured as EIGHT_BIT_MODE
+	#ifdef EIGHT_BIT_MODE
+
+	HAL_LCD_WriteCommand(LCD_CMD_FUNCTION_8BIT_2LINES);
+
+	#endif
+
 	HAL_LCD_WriteCommand(LCD_CMD_DISP_ON);
-	
+
 }
 
 /**================================================================
@@ -201,32 +208,43 @@ void HAL_LCD_Init(void){
 void HAL_LCD_WriteCommand(uint8_t command){
 	
 	// Command Mode : RS = 0
-	MCAL_GPIO_WritePin(LCD_CTRL_PORT,LCD_RS_PIN,GPIO_PIN_CLEAR);
-	LCD_delay_ms(1);
-	
+	MCAL_GPIO_WritePin(&g_LCD_RS,GPIO_PIN_CLEAR);
+	//Delay
+	LCD_wait();
+
 	//Check if DATA_BITS_NO configured as FOUR_BIT_MODE
-	#if DATA_BITS_NO == FOUR_BIT_MODE
-	
+	#ifdef FOUR_BIT_MODE
+
 	//Send Last four bits
-	MCAL_GPIO_WritePin(LCD_DATA_PORT,LCD_DATA_PIN_4,(command&(1<<4))>>4);
-	MCAL_GPIO_WritePin(LCD_DATA_PORT,LCD_DATA_PIN_5,(command&(1<<5))>>5);
-	MCAL_GPIO_WritePin(LCD_DATA_PORT,LCD_DATA_PIN_6,(command&(1<<6))>>6);
-	MCAL_GPIO_WritePin(LCD_DATA_PORT,LCD_DATA_PIN_7,(command&(1<<7))>>7);
+	MCAL_GPIO_WritePin(&g_LCD_D4,(command&(1<<4))>>4);
+	MCAL_GPIO_WritePin(&g_LCD_D5,(command&(1<<5))>>5);
+	MCAL_GPIO_WritePin(&g_LCD_D6,(command&(1<<6))>>6);
+	MCAL_GPIO_WritePin(&g_LCD_D7,(command&(1<<7))>>7);
 	LCD_Kick();
-	
+
 	//Send First four bits
-	MCAL_GPIO_WritePin(LCD_DATA_PORT,LCD_DATA_PIN_4,(command&(1<<0))>>0);
-	MCAL_GPIO_WritePin(LCD_DATA_PORT,LCD_DATA_PIN_5,(command&(1<<1))>>1);
-	MCAL_GPIO_WritePin(LCD_DATA_PORT,LCD_DATA_PIN_6,(command&(1<<2))>>2);
-	MCAL_GPIO_WritePin(LCD_DATA_PORT,LCD_DATA_PIN_7,(command&(1<<3))>>3);
+	MCAL_GPIO_WritePin(&g_LCD_D4,(command&(1<<0))>>0);
+	MCAL_GPIO_WritePin(&g_LCD_D5,(command&(1<<1))>>1);
+	MCAL_GPIO_WritePin(&g_LCD_D6,(command&(1<<2))>>2);
+	MCAL_GPIO_WritePin(&g_LCD_D7,(command&(1<<3))>>3);
 	LCD_Kick();
-	
+
+	#endif
+
 	//Check if DATA_BITS_NO configured as EIGHT_BIT_MODE
-	#elif DATA_BITS_NO == EIGHT_BIT_MODE
-	
-	MCAL_GPIO_WritePort(LCD_DATA_PORT,command);
+	#ifdef EIGHT_BIT_MODE
+
+	//Send whole bit data.
+	MCAL_GPIO_WritePin(&g_LCD_D0,(command&(1<<0))>>0);
+	MCAL_GPIO_WritePin(&g_LCD_D1,(command&(1<<1))>>1);
+	MCAL_GPIO_WritePin(&g_LCD_D2,(command&(1<<2))>>2);
+	MCAL_GPIO_WritePin(&g_LCD_D3,(command&(1<<3))>>3);
+	MCAL_GPIO_WritePin(&g_LCD_D4,(command&(1<<4))>>4);
+	MCAL_GPIO_WritePin(&g_LCD_D5,(command&(1<<5))>>5);
+	MCAL_GPIO_WritePin(&g_LCD_D6,(command&(1<<6))>>6);
+	MCAL_GPIO_WritePin(&g_LCD_D7,(command&(1<<7))>>7);
 	LCD_Kick();
-	
+
 	#endif
 	
 }

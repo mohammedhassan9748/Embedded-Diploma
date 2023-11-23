@@ -15,23 +15,34 @@
 //									Global Variables
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
-static GPIO_PinConfig_t g_PinConfig;
-static const uint8_t g_KeypadRows[4]    = {KEYPAD_ROW_0,KEYPAD_ROW_1,KEYPAD_ROW_2,KEYPAD_ROW_3};
-static const uint8_t g_KeypadColumns[4] = {KEYPAD_COLUMN_0,KEYPAD_COLUMN_1,KEYPAD_COLUMN_2,KEYPAD_COLUMN_3};
+static GPIO_PinConfig_t g_KEYPAD_R0 = {KEYPAD_R0_PORT,KEYPAD_R0_PIN,GPIO_MODE_INPUT_PU};
+static GPIO_PinConfig_t g_KEYPAD_R1 = {KEYPAD_R1_PORT,KEYPAD_R1_PIN,GPIO_MODE_INPUT_PU};
+static GPIO_PinConfig_t g_KEYPAD_R2 = {KEYPAD_R2_PORT,KEYPAD_R2_PIN,GPIO_MODE_INPUT_PU};
+static GPIO_PinConfig_t g_KEYPAD_R3 = {KEYPAD_R3_PORT,KEYPAD_R3_PIN,GPIO_MODE_INPUT_PU};
+static GPIO_PinConfig_t g_KEYPAD_C0 = {KEYPAD_C0_PORT,KEYPAD_C0_PIN,GPIO_MODE_OUTPUT};
+static GPIO_PinConfig_t g_KEYPAD_C1 = {KEYPAD_C1_PORT,KEYPAD_C1_PIN,GPIO_MODE_OUTPUT};
+static GPIO_PinConfig_t g_KEYPAD_C2 = {KEYPAD_C2_PORT,KEYPAD_C2_PIN,GPIO_MODE_OUTPUT};
+static GPIO_PinConfig_t g_KEYPAD_C3 = {KEYPAD_C3_PORT,KEYPAD_C3_PIN,GPIO_MODE_OUTPUT};
+
 static const uint8_t g_KeypadData[4][4] = {'7','8','9','/','4','5','6','*','1','2','3','-','?','0','=','+'};
+
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //									Private Functions Definitions
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
+/*================================================================
+ * Description :
+ * Initialize columns as VCC (Has Output High) at first, i.e: each column data pin = 1
+ */
 static void KEYPAD_Set_Columns_VCC(void){
-	
+
 	//Initialize columns as VCC at first, i.e: each column data pin = 1
-	MCAL_GPIO_WritePin(KEYPAD_PORT,KEYPAD_COLUMN_0,GPIO_PIN_SET);
-	MCAL_GPIO_WritePin(KEYPAD_PORT,KEYPAD_COLUMN_1,GPIO_PIN_SET);
-	MCAL_GPIO_WritePin(KEYPAD_PORT,KEYPAD_COLUMN_2,GPIO_PIN_SET);
-	MCAL_GPIO_WritePin(KEYPAD_PORT,KEYPAD_COLUMN_3,GPIO_PIN_SET);
-	
+	MCAL_GPIO_WritePin(&g_KEYPAD_C0,GPIO_PIN_SET);
+	MCAL_GPIO_WritePin(&g_KEYPAD_C1,GPIO_PIN_SET);
+	MCAL_GPIO_WritePin(&g_KEYPAD_C2,GPIO_PIN_SET);
+	MCAL_GPIO_WritePin(&g_KEYPAD_C3,GPIO_PIN_SET);
+
 }
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
@@ -51,40 +62,22 @@ static void KEYPAD_Set_Columns_VCC(void){
 *
 */
 void HAL_KEYPAD_Init(void){
-	
-	//Configure Rows pins as input pull-up
-	g_PinConfig.GPIO_Mode = GPIO_MODE_INPUT_PU;
+
 	//Initialize Rows pins
-	g_PinConfig.GPIO_PinNo = KEYPAD_ROW_0;
-	MCAL_GPIO_Init(KEYPAD_PORT,&g_PinConfig);
-	
-	g_PinConfig.GPIO_PinNo = KEYPAD_ROW_1;
-	MCAL_GPIO_Init(KEYPAD_PORT,&g_PinConfig);
-	
-	g_PinConfig.GPIO_PinNo = KEYPAD_ROW_2;
-	MCAL_GPIO_Init(KEYPAD_PORT,&g_PinConfig);
-	
-	g_PinConfig.GPIO_PinNo = KEYPAD_ROW_3;
-	MCAL_GPIO_Init(KEYPAD_PORT,&g_PinConfig);
-	
-	//Configure Columns pins as output
-	g_PinConfig.GPIO_Mode = GPIO_MODE_OUTPUT;
-	
+	MCAL_GPIO_Init(&g_KEYPAD_R0);
+	MCAL_GPIO_Init(&g_KEYPAD_R1);
+	MCAL_GPIO_Init(&g_KEYPAD_R2);
+	MCAL_GPIO_Init(&g_KEYPAD_R3);
+
 	//Initialize Columns pins
-	g_PinConfig.GPIO_PinNo = KEYPAD_COLUMN_0;
-	MCAL_GPIO_Init(KEYPAD_PORT,&g_PinConfig);
-	
-	g_PinConfig.GPIO_PinNo = KEYPAD_COLUMN_1;
-	MCAL_GPIO_Init(KEYPAD_PORT,&g_PinConfig);
-	
-	g_PinConfig.GPIO_PinNo = KEYPAD_COLUMN_2;
-	MCAL_GPIO_Init(KEYPAD_PORT,&g_PinConfig);
-	
-	g_PinConfig.GPIO_PinNo = KEYPAD_COLUMN_3;
-	MCAL_GPIO_Init(KEYPAD_PORT,&g_PinConfig);
-	
-	
+	MCAL_GPIO_Init(&g_KEYPAD_C0);
+	MCAL_GPIO_Init(&g_KEYPAD_C1);
+	MCAL_GPIO_Init(&g_KEYPAD_C2);
+	MCAL_GPIO_Init(&g_KEYPAD_C3);
+
+	//Initialize columns as VCC at first
 	KEYPAD_Set_Columns_VCC();
+
 }
 
 /**================================================================
@@ -94,29 +87,33 @@ void HAL_KEYPAD_Init(void){
 *
 * @param [in] 		- None.
 *
-* @retval 			- Data on the button pressed or BUTTON_NOT_PRESSED according to @ref KEYPAD_Button_State_Define 
+* @retval 			- Data on the button pressed or BUTTON_NOT_PRESSED according to @ref KEYPAD_Button_State_Define
 *					  if no button pressed.
 *
-* Note				- 
+* Note				-
 *
 */
 uint8_t HAL_KEYPAD_GetButtonPressed(void){
-	
+
+	GPIO_PinConfig_t g_KeypadRows[4] = {g_KEYPAD_R0,g_KEYPAD_R1,g_KEYPAD_R2,g_KEYPAD_R3};
+	GPIO_PinConfig_t g_KeypadColumns[4] = {g_KEYPAD_C0,g_KEYPAD_C1,g_KEYPAD_C2,g_KEYPAD_C3};
+
 	for(int i=0;i<4;i++)
 	{
 		KEYPAD_Set_Columns_VCC();
-		
-		MCAL_GPIO_WritePin(KEYPAD_PORT,g_KeypadColumns[i],GPIO_PIN_CLEAR);
-		
+
+		MCAL_GPIO_WritePin(&g_KeypadColumns[i],GPIO_PIN_CLEAR);
+
 		for(int j=0;j<4;j++)
 		{
-			if(MCAL_GPIO_ReadPin(KEYPAD_PORT,g_KeypadRows[j])==GPIO_PIN_CLEAR)
+			if(MCAL_GPIO_ReadPin(&g_KeypadRows[j])==GPIO_PIN_CLEAR)
 			{
-				while(MCAL_GPIO_ReadPin(KEYPAD_PORT,g_KeypadRows[j])==GPIO_PIN_CLEAR);
+				while(MCAL_GPIO_ReadPin(&g_KeypadRows[j])==GPIO_PIN_CLEAR);
 				return g_KeypadData[j][i];
 			}
 		}
 	}
+
 	return KEYPAD_BUTTON_NOT_PRESSED;
-	
+
 }
