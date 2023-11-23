@@ -89,6 +89,38 @@ static void EXTI_NVIC_DIS(const uint8_t Input_Line_Number){
 	}
 }
 
+/*================================================================
+ * Description :
+ * Private Function used to disable the required EXTI Input Line in the NVIC Interrupt Controller.
+ * It takes the EXTI Input Line required to disable.
+ */
+static uint8_t EXTI_AFIO_EXTICR_shift(const uint8_t Input_Line_Number){
+
+	uint8_t shift;
+	switch(Input_Line_Number)
+	{
+		case 0:
+		case 4:
+		case 8:
+		case 12: shift = 0;	 break;
+
+		case 1:
+		case 5:
+		case 9:
+		case 13: shift = 4;	 break;
+
+		case 2:
+		case 6:
+		case 10:
+		case 14: shift = 8;  break;
+
+		case 3:
+		case 7:
+		case 11:
+		case 15: shift = 12; break;
+	}
+	return shift;
+}
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //									APIs Definitions
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
@@ -117,7 +149,7 @@ void MCAL_EXTI_Init(EXTI_PinConfig_t* EXTI_PinConfigPtr){
 	 * 2) Update AFIO to Route between EXTI Line With Port A,B,C,D,E
 	 */
 	uint8_t AFIO_EXTICR_index = EXTI_PinConfigPtr->EXTI_Pin.EXTI_Input_Line / 4;
-	uint8_t AFIO_EXTICR_shift = (EXTI_PinConfigPtr->EXTI_Pin.EXTI_Input_Line / 4) * 4;
+	uint8_t AFIO_EXTICR_shift = EXTI_AFIO_EXTICR_shift(EXTI_PinConfigPtr->EXTI_Pin.EXTI_Input_Line);
 	AFIO->EXTICR[AFIO_EXTICR_index] &= ~(0x0F<<AFIO_EXTICR_shift);
 	AFIO->EXTICR[AFIO_EXTICR_index] |= (EXTI_AFIO_PortValue(EXTI_PinConfigPtr->EXTI_Pin.EXTI_GPIO_PinConfig.GPIO_Port)<<AFIO_EXTICR_shift);
 
