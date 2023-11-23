@@ -1,5 +1,6 @@
 "HAL/EEPROM.o"
 "HAL/LCD.o"
+"HAL/Servo.o"
 "HAL/SevenSegment.o"
 "HAL/keypad.o"
 "MCAL/EXTI.o"

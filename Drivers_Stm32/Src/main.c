@@ -30,18 +30,46 @@
 #include "../HAL/Inc/keypad.h"
 #include "../HAL/Inc/EEPROM.h"
 #include "../HAL/Inc/SevenSegment.h"
+#include "../HAL/Inc/Servo.h"
 
-//uint8_t BufferSend[5] = {'C','F','A','7','A'};
-uint8_t BufferRec[5];
-
-GPIO_PinConfig_t led = {GPIOC,GPIO_PIN_13,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
 
 int main(void)
 {
+	GPIO_PinConfig_t led = {GPIOC,GPIO_PIN_13,GPIO_MODE_OUTPUT_PP,GPIO_OUTPUT_SPEED_10MHZ};
+	GPIO_PinConfig_t IR1 = {GPIOB,GPIO_PIN_9,GPIO_MODE_INPUT_FLO,GPIO_OUTPUT_SPEED_NONE};
+
 	MCAL_GPIO_Init(&led);
-	HAL_EEPROM_Init();
-	while (1)
+	MCAL_GPIO_TogglePin(&led);
+
+	MCAL_GPIO_Init(&IR1);
+	SERVO_Config_t ServoMotor1;
+	ServoMotor1.SERVO_TimerPeripheral = TIM2;
+	ServoMotor1.SERVO_Angle = SERVO_0;
+	ServoMotor1.SERVO_ChannelIndex = CHANNEL_1_INDEX;
+
+	HAL_SERVO_Init(&ServoMotor1);
+
+	while(1)
 	{
-		HAL_EEPROM_ReadNbytes(0x50, BufferRec, 5);
+		if(MCAL_GPIO_ReadPin(&IR1) == GPIO_PIN_CLEAR)
+		{
+			MCAL_GPIO_WritePin(&led, GPIO_PIN_CLEAR);
+			HAL_SERVO_WriteAngle(&ServoMotor1, SERVO_90);
+		}
+		else if(MCAL_GPIO_ReadPin(&IR1) == GPIO_PIN_SET)
+		{
+			MCAL_GPIO_WritePin(&led, GPIO_PIN_SET);
+			HAL_SERVO_WriteAngle(&ServoMotor1, SERVO_0);
+		}
+//		HAL_SERVO_WriteAngle(&ServoMotor1, SERVO_45);
+//		for(uint32_t i=0;i<500000;i++);
+//		HAL_SERVO_WriteAngle(&ServoMotor1, SERVO_90);
+//		for(uint32_t i=0;i<500000;i++);
+//		HAL_SERVO_WriteAngle(&ServoMotor1, SERVO_135);
+//		for(uint32_t i=0;i<500000;i++);
+//		HAL_SERVO_WriteAngle(&ServoMotor1, SERVO_180);
+//		for(uint32_t i=0;i<500000;i++);
+//		HAL_SERVO_WriteAngle(&ServoMotor1, SERVO_0);
+//		for(uint32_t i=0;i<500000;i++);
 	}
 }

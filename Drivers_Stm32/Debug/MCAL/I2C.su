@@ -13,7 +13,8 @@ I2C.c:547:6:MCAL_I2C_MasterTxPolling	32	static
 I2C.c:641:6:MCAL_I2C_MasterRxPolling	32	static
 I2C.c:686:6:MCAL_I2C_Slave_TX	16	static
 I2C.c:705:9:MCAL_I2C_Slave_RX	16	static
-I2C.c:716:6:I2C1_EV_IRQHandler	24	static
-I2C.c:809:6:I2C1_ER_IRQHandler	16	static
-I2C.c:886:6:I2C2_EV_IRQHandler	24	static
-I2C.c:981:6:I2C2_ER_IRQHandler	16	static
+I2C.c:710:6:I2C_ACKConfig	16	static
+I2C.c:730:6:I2C1_EV_IRQHandler	24	static
+I2C.c:823:6:I2C1_ER_IRQHandler	16	static
+I2C.c:900:6:I2C2_EV_IRQHandler	24	static
+I2C.c:995:6:I2C2_ER_IRQHandler	16	static

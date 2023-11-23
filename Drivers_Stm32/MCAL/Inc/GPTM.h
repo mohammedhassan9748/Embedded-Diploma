@@ -16,6 +16,7 @@
 
 #include "../../Services/Platform_Types.h"
 #include "../../Services/stm32f103c6.h"
+#include "GPIO.h"
 
 /*======================================================================================================
 -*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -584,21 +585,21 @@ typedef struct{
 #define GPTM_AUTO_RELOAD_UPDATE_PERMENANT					((uint16_t)(0<<7))
 #define GPTM_AUTO_RELOAD_UPDATE_ON_UPDATE_EVENT				((uint16_t)(1<<7))
 
-			/* @ref GPTM_AligneModeSelection_Define */
+								/* @ref GPTM_CounterMode_Define */
 #define GPTM_EDGE_ALIGNED_MODE								((uint16_t)(0<<5))
 #define GPTM_CENTER_ALIGNED_MODE_1							((uint16_t)(1<<5))
 #define GPTM_CENTER_ALIGNED_MODE_2							((uint16_t)(2<<5))
 #define GPTM_CENTER_ALIGNED_MODE_3							((uint16_t)(3<<5))
 
-			/* @ref GPTM_CounterDirection_Define */
+							/* @ref GPTM_CounterDirection_Define */
 #define GPTM_COUNTER_DIR_UP									((uint16_t)(0<<4))
 #define GPTM_COUNTER_DIR_DOWN								((uint16_t)(1<<4))
 
-			/* @ref GPTM_UpdateEvent_Define */
+							/* @ref GPTM_UpdateEvent_Define */
 #define GPTM_UPDATE_EVENT_ENABLE							((uint16_t)(0<<1))
 #define GPTM_UPDATE_EVENT_DISABLE							((uint16_t)(1<<1))
 
-			/* @ref GPTM_UEselectionSrc_Define */
+							/* @ref GPTM_UEselectionSrc_Define */
 #define GPTM_UPDATE_EVENT_ON_ALL							((uint16_t)(0<<2))
 #define GPTM_UPDATE_EVENT_ON_OVF							((uint16_t)(1<<2))
 
@@ -624,24 +625,29 @@ typedef struct{
 
 
 
-//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
-//											APIS
-//-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
+/*======================================================================================================
+-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+												APIs
+-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+======================================================================================================*/
 
 //Initialization & DeInitialization APIs
 void MCAL_GPTM_Init(GPTM_Config_t* GPTM_PinConfigPtr);
 void MCAL_GPTM_DeInit(GPTM_Config_t* GPTM_PinConfigPtr);
 
-void MCAL_GPTM_StartCounter(GPTM_Config_t* GPTM_PinConfigPtr);
-void MCAL_GPTM_GenerateSoftUpdated(GPTM_Config_t* GPTM_PinConfigPtr);
+//Setting GPIO Pins (GPTM Channel) API
+void MCAL_GPTM_GPIO_SetPins(GPTM_Config_t* GPTM_ConfigPtr);
 
-void MCAL_GPTM_SetAutoReload(GPTM_Config_t* GPTM_PinConfigPtr,uint16_t Value);
-uint16_t MCAL_GPTM_GetAutoReload(GPTM_Config_t* GPTM_PinConfigPtr);
+void MCAL_GPTM_StartCounter(GPTM_Typedef* TimX);
+void MCAL_GPTM_GenerateSoftUpdated(GPTM_Typedef* TimX);
 
-void MCAL_GPTM_SetPreScaler(GPTM_Config_t* GPTM_PinConfigPtr,uint16_t Value);
-uint16_t MCAL_GPTM_GetPreScaler(GPTM_Config_t* GPTM_PinConfigPtr);
+void MCAL_GPTM_SetAutoReload(GPTM_Typedef* TimX,uint16_t Value);
+uint16_t MCAL_GPTM_GetAutoReload(GPTM_Typedef* TimX);
 
-void MCAL_GPTM_SetCCRx(GPTM_Config_t* GPTM_PinConfigPtr, uint8_t CCRxIndex, uint16_t CCRxValue);
-uint16_t MCAL_GPTM_GetCCRx(GPTM_Config_t* GPTM_PinConfigPtr, uint8_t CCRxIndex);
+void MCAL_GPTM_SetPreScaler(GPTM_Typedef* TimX,uint16_t Value);
+uint16_t MCAL_GPTM_GetPreScaler(GPTM_Typedef* TimX);
+
+void MCAL_GPTM_SetCCRx(GPTM_Typedef* TimX, uint8_t CCRxIndex, uint16_t CCRxValue);
+uint16_t MCAL_GPTM_GetCCRx(GPTM_Typedef* TimX, uint8_t CCRxIndex);
 
 #endif /* MCAL_INC_GPTM_H_ */

@@ -286,45 +286,184 @@ void MCAL_GPTM_DeInit(GPTM_Config_t* GPTM_ConfigPtr){
 }
 
 
-void MCAL_GPTM_StartCounter(GPTM_Config_t* GPTM_ConfigPtr){
+/**================================================================
+* @Fn				- MCAL_UART_GPIO_SetPins
+*
+* @brief 			- Set the TX,RX,CTS & RTS of the required peripheral in GPIO.
+*
+* @param [in] 		- UART_ConfigPtr: Pointer to the UART_Config_t structure that holds
+* 					  the configuration information for the UARTx of the desired peripheral.
+*
+* @retval 			- None.
+*
+* Note				- Supports for now Asynchronous Mode only with 8Mhz Clock
+*
+*/
+void MCAL_GPTM_GPIO_SetPins(GPTM_Config_t* GPTM_ConfigPtr){
+
+	//Check if TIMx is TIM2
+	if(GPTM_ConfigPtr->TIMx == TIM2){
+
+		for(uint8_t i=0;i<4;i++)
+		{
+			if(GPTM_ConfigPtr->GPTM_InputChannelX[i].CH_Enable || GPTM_ConfigPtr->GPTM_ExternalTrigger.EXTTRIG_Enable)
+			{
+				// GPIO Configuration: Alternate function push-pull
+				GPIO_PinConfig_t Tim2ChannelX = {GPIOA, i, GPIO_MODE_AF_INPUT, GPIO_OUTPUT_SPEED_NONE};
+				MCAL_GPIO_Init(&Tim2ChannelX);
+			}
+			else if(GPTM_ConfigPtr->GPTM_OutputChannelX[i].CH_Enable)
+			{
+				GPIO_PinConfig_t Tim2ChannelX = {GPIOA, i, GPIO_MODE_AF_OUTPUT_PP, GPIO_OUTPUT_SPEED_10MHZ};
+				MCAL_GPIO_Init(&Tim2ChannelX);
+			}
+		}
+
+	}
+	//Else if TIMx is TIM3
+	else if(GPTM_ConfigPtr->TIMx == TIM3){
+
+		if(GPTM_ConfigPtr->GPTM_InputChannelX[CHANNEL_1_INDEX].CH_Enable)
+		{
+			// GPIO Configuration: Alternate function push-pull
+			GPIO_PinConfig_t Tim3Channel1 = {GPIOA, GPIO_PIN_6, GPIO_MODE_AF_INPUT, GPIO_OUTPUT_SPEED_NONE};
+			MCAL_GPIO_Init(&Tim3Channel1);
+		}
+		else if(GPTM_ConfigPtr->GPTM_OutputChannelX[CHANNEL_1_INDEX].CH_Enable)
+		{
+			GPIO_PinConfig_t Tim3Channel1 = {GPIOA, GPIO_PIN_6, GPIO_MODE_AF_OUTPUT_PP, GPIO_OUTPUT_SPEED_10MHZ};
+			MCAL_GPIO_Init(&Tim3Channel1);
+		}
+
+		if(GPTM_ConfigPtr->GPTM_InputChannelX[CHANNEL_2_INDEX].CH_Enable)
+		{
+			// GPIO Configuration: Alternate function push-pull
+			GPIO_PinConfig_t Tim3Channel2 = {GPIOA, GPIO_PIN_7, GPIO_MODE_AF_INPUT, GPIO_OUTPUT_SPEED_NONE};
+			MCAL_GPIO_Init(&Tim3Channel2);
+		}
+		else if(GPTM_ConfigPtr->GPTM_OutputChannelX[CHANNEL_2_INDEX].CH_Enable)
+		{
+			GPIO_PinConfig_t Tim3Channel2 = {GPIOA, GPIO_PIN_7, GPIO_MODE_AF_OUTPUT_PP, GPIO_OUTPUT_SPEED_10MHZ};
+			MCAL_GPIO_Init(&Tim3Channel2);
+		}
+
+		if(GPTM_ConfigPtr->GPTM_InputChannelX[CHANNEL_3_INDEX].CH_Enable)
+		{
+			// GPIO Configuration: Alternate function push-pull
+			GPIO_PinConfig_t Tim3Channel3 = {GPIOB, GPIO_PIN_0, GPIO_MODE_AF_INPUT, GPIO_OUTPUT_SPEED_NONE};
+			MCAL_GPIO_Init(&Tim3Channel3);
+		}
+		else if(GPTM_ConfigPtr->GPTM_OutputChannelX[CHANNEL_3_INDEX].CH_Enable)
+		{
+			GPIO_PinConfig_t Tim3Channel3 = {GPIOB, GPIO_PIN_0, GPIO_MODE_AF_OUTPUT_PP, GPIO_OUTPUT_SPEED_10MHZ};
+			MCAL_GPIO_Init(&Tim3Channel3);
+		}
+
+		if(GPTM_ConfigPtr->GPTM_InputChannelX[CHANNEL_4_INDEX].CH_Enable)
+		{
+			// GPIO Configuration: Alternate function push-pull
+			GPIO_PinConfig_t Tim3Channel4 = {GPIOB, GPIO_PIN_1, GPIO_MODE_AF_INPUT, GPIO_OUTPUT_SPEED_NONE};
+			MCAL_GPIO_Init(&Tim3Channel4);
+		}
+		else if(GPTM_ConfigPtr->GPTM_OutputChannelX[CHANNEL_4_INDEX].CH_Enable)
+		{
+			GPIO_PinConfig_t Tim3Channel4 = {GPIOB, GPIO_PIN_1, GPIO_MODE_AF_OUTPUT_PP, GPIO_OUTPUT_SPEED_10MHZ};
+			MCAL_GPIO_Init(&Tim3Channel4);
+		}
+	}
+	//Else if TIMx is TIM4
+	else if(GPTM_ConfigPtr->TIMx == TIM4){
+
+		if(GPTM_ConfigPtr->GPTM_InputChannelX[CHANNEL_1_INDEX].CH_Enable)
+		{
+			// GPIO Configuration: Alternate function push-pull
+			GPIO_PinConfig_t Tim4Channel1 = {GPIOB, GPIO_PIN_6, GPIO_MODE_AF_INPUT, GPIO_OUTPUT_SPEED_NONE};
+			MCAL_GPIO_Init(&Tim4Channel1);
+		}
+		else if(GPTM_ConfigPtr->GPTM_OutputChannelX[CHANNEL_1_INDEX].CH_Enable)
+		{
+			GPIO_PinConfig_t Tim4Channel1 = {GPIOB, GPIO_PIN_6, GPIO_MODE_AF_OUTPUT_PP, GPIO_OUTPUT_SPEED_10MHZ};
+			MCAL_GPIO_Init(&Tim4Channel1);
+		}
+
+		if(GPTM_ConfigPtr->GPTM_InputChannelX[CHANNEL_2_INDEX].CH_Enable)
+		{
+			// GPIO Configuration: Alternate function push-pull
+			GPIO_PinConfig_t Tim4Channel2 = {GPIOB, GPIO_PIN_7, GPIO_MODE_AF_INPUT, GPIO_OUTPUT_SPEED_NONE};
+			MCAL_GPIO_Init(&Tim4Channel2);
+		}
+		else if(GPTM_ConfigPtr->GPTM_OutputChannelX[CHANNEL_2_INDEX].CH_Enable)
+		{
+			GPIO_PinConfig_t Tim4Channel2 = {GPIOB, GPIO_PIN_7, GPIO_MODE_AF_OUTPUT_PP, GPIO_OUTPUT_SPEED_10MHZ};
+			MCAL_GPIO_Init(&Tim4Channel2);
+		}
+
+		if(GPTM_ConfigPtr->GPTM_InputChannelX[CHANNEL_3_INDEX].CH_Enable)
+		{
+			// GPIO Configuration: Alternate function push-pull
+			GPIO_PinConfig_t Tim4Channel3 = {GPIOB, GPIO_PIN_8, GPIO_MODE_AF_INPUT, GPIO_OUTPUT_SPEED_NONE};
+			MCAL_GPIO_Init(&Tim4Channel3);
+		}
+		else if(GPTM_ConfigPtr->GPTM_OutputChannelX[CHANNEL_3_INDEX].CH_Enable)
+		{
+			GPIO_PinConfig_t Tim4Channel3 = {GPIOB, GPIO_PIN_8, GPIO_MODE_AF_OUTPUT_PP, GPIO_OUTPUT_SPEED_10MHZ};
+			MCAL_GPIO_Init(&Tim4Channel3);
+		}
+
+		if(GPTM_ConfigPtr->GPTM_InputChannelX[CHANNEL_4_INDEX].CH_Enable)
+		{
+			// GPIO Configuration: Alternate function push-pull
+			GPIO_PinConfig_t Tim4Channel4 = {GPIOB, GPIO_PIN_9, GPIO_MODE_AF_INPUT, GPIO_OUTPUT_SPEED_NONE};
+			MCAL_GPIO_Init(&Tim4Channel4);
+		}
+		else if(GPTM_ConfigPtr->GPTM_OutputChannelX[CHANNEL_4_INDEX].CH_Enable)
+		{
+			GPIO_PinConfig_t Tim4Channel4 = {GPIOB, GPIO_PIN_9, GPIO_MODE_AF_OUTPUT_PP, GPIO_OUTPUT_SPEED_10MHZ};
+			MCAL_GPIO_Init(&Tim4Channel4);
+		}
+	}
+}
+
+
+void MCAL_GPTM_StartCounter(GPTM_Typedef* TimX){
 	/*
 	 * Enable the counter to enable the Timer Clock
 	 */
-	GPTM_ConfigPtr->TIMx->CR1 |= GPTM_COUNTER_ENABLE;
+	TimX->CR1 |= GPTM_COUNTER_ENABLE;
 }
 
-void MCAL_GPTM_GenerateSoftUpdated(GPTM_Config_t* GPTM_ConfigPtr){
+void MCAL_GPTM_GenerateSoftUpdated(GPTM_Typedef* TimX){
 	/*
 	 * Make an update software generation
 	 */
-	GPTM_ConfigPtr->TIMx->EGR |= GPTM_UPDATE_GENERATION;
+	TimX->EGR |= GPTM_UPDATE_GENERATION;
 }
 
-void MCAL_GPTM_SetAutoReload(GPTM_Config_t* GPTM_ConfigPtr,uint16_t Value){
-	GPTM_ConfigPtr->TIMx->ARR = Value;
+void MCAL_GPTM_SetAutoReload(GPTM_Typedef* TimX,uint16_t Value){
+	TimX->ARR = Value;
 }
-uint16_t MCAL_GPTM_GetAutoReload(GPTM_Config_t* GPTM_ConfigPtr){
-	uint32_t Value = GPTM_ConfigPtr->TIMx->ARR;
-	return ((uint16_t)Value);
-}
-
-void MCAL_GPTM_SetPreScaler(GPTM_Config_t* GPTM_ConfigPtr,uint16_t Value){
-	GPTM_ConfigPtr->TIMx->PSC = Value;
-}
-uint16_t MCAL_GPTM_GetPreScaler(GPTM_Config_t* GPTM_ConfigPtr){
-	uint32_t Value = GPTM_ConfigPtr->TIMx->PSC;
-	return ((uint16_t)Value);
+uint16_t MCAL_GPTM_GetAutoReload(GPTM_Typedef* TimX){
+	uint32_t Value = TimX->ARR;
+	return (uint16_t)Value;
 }
 
-void MCAL_GPTM_SetCCRx(GPTM_Config_t* GPTM_PinConfigPtr, uint8_t CCRxIndex, uint16_t CCRxValue)
+void MCAL_GPTM_SetPreScaler(GPTM_Typedef* TimX,uint16_t Value){
+	TimX->PSC = Value-1;
+}
+uint16_t MCAL_GPTM_GetPreScaler(GPTM_Typedef* TimX){
+	uint32_t Value = TimX->PSC;
+	return ((uint16_t)(Value+1));
+}
+
+void MCAL_GPTM_SetCCRx(GPTM_Typedef* TimX, uint8_t CCRxIndex, uint16_t CCRxValue)
 {
 	if(CCRxIndex >= 0 || CCRxIndex < 4)
-		GPTM_PinConfigPtr->TIMx->CCR[CCRxIndex] = CCRxValue;
+		TimX->CCR[CCRxIndex] = CCRxValue;
 }
-uint16_t MCAL_GPTM_GetCCRx(GPTM_Config_t* GPTM_PinConfigPtr, uint8_t CCRxIndex)
+uint16_t MCAL_GPTM_GetCCRx(GPTM_Typedef* TimX, uint8_t CCRxIndex)
 {
 	if(CCRxIndex >= 0 || CCRxIndex < 4)
-		return (GPTM_PinConfigPtr->TIMx->CCR[CCRxIndex]);
+		return (TimX->CCR[CCRxIndex]);
 }
 
 void TIM2_IRQHandler(void)

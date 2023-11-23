@@ -10,7 +10,8 @@ Src/main.o: ../Src/main.c ../Src/../Services/Platform_Types.h \
  ../Src/../HAL/Inc/../../Services/Platform_Types.h \
  ../Src/../HAL/Inc/../../MCAL/Inc/GPIO.h ../Src/../HAL/Inc/keypad.h \
  ../Src/../HAL/Inc/EEPROM.h ../Src/../HAL/Inc/../../MCAL/Inc/I2C.h \
- ../Src/../HAL/Inc/SevenSegment.h
+ ../Src/../HAL/Inc/SevenSegment.h ../Src/../HAL/Inc/Servo.h \
+ ../Src/../HAL/Inc/../../MCAL/Inc/GPTM.h
 
 ../Src/../Services/Platform_Types.h:
 
@@ -53,3 +54,7 @@ Src/main.o: ../Src/main.c ../Src/../Services/Platform_Types.h \
 ../Src/../HAL/Inc/../../MCAL/Inc/I2C.h:
 
 ../Src/../HAL/Inc/SevenSegment.h:
+
+../Src/../HAL/Inc/Servo.h:
+
+../Src/../HAL/Inc/../../MCAL/Inc/GPTM.h:
