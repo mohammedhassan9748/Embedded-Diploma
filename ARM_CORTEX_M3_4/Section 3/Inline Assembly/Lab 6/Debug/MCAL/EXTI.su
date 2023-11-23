@@ -1,0 +1,12 @@
+EXTI.c:41:13:EXTI_NVIC_EN	16	static
+EXTI.c:69:13:EXTI_NVIC_DIS	16	static
+EXTI.c:97:16:EXTI_AFIO_EXTICR_shift	24	static
+EXTI.c:141:6:MCAL_EXTI_Init	24	static
+EXTI.c:213:6:MCAL_EXTI_DeInit	4	static
+EXTI.c:238:6:EXTI0_IRQHandler	8	static
+EXTI.c:248:6:EXTI1_IRQHandler	8	static
+EXTI.c:258:6:EXTI2_IRQHandler	8	static
+EXTI.c:268:6:EXTI3_IRQHandler	8	static
+EXTI.c:278:6:EXTI4_IRQHandler	8	static
+EXTI.c:288:6:EXTI9_5_IRQHandler	8	static
+EXTI.c:298:6:EXTI15_10_IRQHandler	8	static

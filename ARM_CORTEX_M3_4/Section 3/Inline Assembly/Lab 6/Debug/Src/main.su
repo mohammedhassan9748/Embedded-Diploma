@@ -1,0 +1,2 @@
+main.c:40:6:CallBackFunction	4	static,ignoring_inline_asm
+main.c:63:5:main	32	static,ignoring_inline_asm
