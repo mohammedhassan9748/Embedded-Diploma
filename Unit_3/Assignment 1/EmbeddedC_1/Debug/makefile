@@ -37,6 +37,9 @@ default.size.stdout \
 OBJDUMP_LIST += \
 EmbeddedC_1.list \
 
+OBJCOPY_HEX += \
+EmbeddedC_1.hex \
+
 OBJCOPY_BIN += \
 EmbeddedC_1.bin \
 
@@ -45,8 +48,8 @@ EmbeddedC_1.bin \
 all: EmbeddedC_1.elf secondary-outputs
 
 # Tool invocations
-EmbeddedC_1.elf: $(OBJS) $(USER_OBJS) C:\Users\hp\stm32workspace\EmbeddedC_1\STM32F103C6TX_FLASH.ld
-	arm-none-eabi-gcc -o "EmbeddedC_1.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\hp\stm32workspace\EmbeddedC_1\STM32F103C6TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="EmbeddedC_1.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+EmbeddedC_1.elf: $(OBJS) $(USER_OBJS) C:\Users\hp\Desktop\Mastring\ Embedded\ Online\ Diploma\Embedded-Diploma\Unit_3\Assignment\ 1\EmbeddedC_1\STM32F103C6TX_FLASH.ld
+	arm-none-eabi-gcc -o "EmbeddedC_1.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\hp\Desktop\Mastring Embedded Online Diploma\Embedded-Diploma\Unit_3\Assignment 1\EmbeddedC_1\STM32F103C6TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="EmbeddedC_1.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -60,6 +63,11 @@ EmbeddedC_1.list: $(EXECUTABLES)
 	@echo 'Finished building: $@'
 	@echo ' '
 
+EmbeddedC_1.hex: $(EXECUTABLES)
+	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "EmbeddedC_1.hex"
+	@echo 'Finished building: $@'
+	@echo ' '
+
 EmbeddedC_1.bin: $(EXECUTABLES)
 	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "EmbeddedC_1.bin"
 	@echo 'Finished building: $@'
@@ -70,7 +78,7 @@ clean:
 	-$(RM) *
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_BIN)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_HEX) $(OBJCOPY_BIN)
 
 .PHONY: all clean dependents
 .SECONDARY:

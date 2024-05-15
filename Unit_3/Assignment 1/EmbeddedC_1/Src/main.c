@@ -49,12 +49,12 @@ int main(void)
 	while(1)
 	{
 //		GPIOA_ODR |= GPIOA_Pin13 ; // Set port a pin 13
-		R_ODR->pin.p_13 = 1;
-		for(int i = 0 ;i < 500 ; i++);
+		R_ODR->pin.p_13 = 0;
+		for(int i = 0 ;i < 90000 ; i++);
 
 //		GPIOA_ODR &= ~(GPIOA_Pin13) ; // Clear port a pin 13
-		R_ODR->pin.p_13 = 0;
-		for(int i = 0 ;i < 500 ; i++);
+		R_ODR->pin.p_13 = 1;
+		for(int i = 0 ;i < 90000 ; i++);
 	}
 
 	return 0;

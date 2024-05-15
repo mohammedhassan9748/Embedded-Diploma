@@ -2,7 +2,7 @@
 Allocating common symbols
 Common symbol       size              file
 
-arr1                0x4               app.o
+arr1                0x10              app.o
 
 Memory Configuration
 
@@ -50,36 +50,39 @@ Linker script and memory map
 .rel.dyn        0x08000114        0x0
  .rel.iplt      0x08000114        0x0 app.o
 
-.data           0x20000000        0x7 load address 0x08000114
+.data           0x20000000        0x8 load address 0x08000114
                 0x20000000                _S_DATA = .
  *(.data)
  .data          0x20000000        0x7 app.o
                 0x20000000                R_ODR
                 0x20000004                arr2
  .data          0x20000007        0x0 startup.o
-                0x20000007                _E_DATA = .
+                0x20000008                . = ALIGN (0x4)
+ *fill*         0x20000007        0x1 
+                0x20000008                _E_DATA = .
 
-.igot.plt       0x20000008        0x0 load address 0x0800011b
+.igot.plt       0x20000008        0x0 load address 0x0800011c
  .igot.plt      0x20000008        0x0 app.o
 
-.bss            0x20000008        0x4 load address 0x0800011b
+.bss            0x20000008       0x10
                 0x20000008                _S_BSS = .
  *(.bss)
  .bss           0x20000008        0x0 app.o
  .bss           0x20000008        0x0 startup.o
-                0x20000008                . = ALIGN (0x4)
-                0x20000008                _E_BSS = .
- COMMON         0x20000008        0x4 app.o
+ *(COMMON)
+ COMMON         0x20000008       0x10 app.o
                 0x20000008                arr1
-                0x2000100c                . = (. + 0x1000)
-                0x2000100c                stack_top = .
+                0x20000018                . = ALIGN (0x4)
+                0x20000018                _E_BSS = .
+                0x20001018                . = (. + 0x1000)
+                0x20001018                stack_top = .
 LOAD app.o
 LOAD startup.o
 OUTPUT(Toggle_Led.elf elf32-littlearm)
 
-.debug_info     0x00000000      0x305
- .debug_info    0x00000000      0x196 app.o
- .debug_info    0x00000196      0x16f startup.o
+.debug_info     0x00000000      0x324
+ .debug_info    0x00000000      0x1b5 app.o
+ .debug_info    0x000001b5      0x16f startup.o
 
 .debug_abbrev   0x00000000      0x1a5
  .debug_abbrev  0x00000000       0xf0 app.o
@@ -99,11 +102,11 @@ OUTPUT(Toggle_Led.elf elf32-littlearm)
  .debug_line    0x00000000       0x69 app.o
  .debug_line    0x00000069       0x5d startup.o
 
-.debug_str      0x00000000      0x1f5
- .debug_str     0x00000000      0x176 app.o
-                                0x194 (size before relaxing)
- .debug_str     0x00000176       0x7f startup.o
-                                0x1d6 (size before relaxing)
+.debug_str      0x00000000      0x1f8
+ .debug_str     0x00000000      0x179 app.o
+                                0x1a0 (size before relaxing)
+ .debug_str     0x00000179       0x7f startup.o
+                                0x1d9 (size before relaxing)
 
 .comment        0x00000000       0x7e
  .comment       0x00000000       0x7e app.o

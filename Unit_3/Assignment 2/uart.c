@@ -11,7 +11,7 @@
 
 void UART_Send_String(uint8_t* P_tx_String){
 	while(*P_tx_String != '\0'){
-		UART0DR = *P_tx_String;
+		UART0DR = (uint32_t)(*P_tx_String);
 		P_tx_String++;
 	}
 }

@@ -37,8 +37,8 @@ typedef union {
 
 volatile R_ODR_t* R_ODR = (volatile R_ODR_t*)(GPIOA_BASE + 0x0C);
 
-uint8_t arr1[4];
-uint8_t arr2[3]={1,2,3};
+volatile uint32_t arr1[4];
+volatile uint8_t arr2[3] = {1,2,3};
 
 #define RCC_IOPAEN	(1<<2)
 #define GPIOA_Pin13	(1UL<<13)

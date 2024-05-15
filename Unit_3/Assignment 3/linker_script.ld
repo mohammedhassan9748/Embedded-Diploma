@@ -2,7 +2,8 @@
 File: Unit_3_lesson_3_lab_2 : linker_script.ld
 Author: Mohamed Ahmed Hassan Mohamed
 @copy-right: moahmedhassan_
-Processor: Cortex-M3*/
+Processor: Cortex-M3
+*/
 
 MEMORY
 {
@@ -24,7 +25,7 @@ SECTIONS
 	{
 		_S_DATA = .;
 		*(.data)
-		/*. = ALIGN(4);*/
+		. = ALIGN(4);
 		_E_DATA = .;
 	}> SRAM AT> FLASH
 
@@ -32,9 +33,10 @@ SECTIONS
 	{
 		_S_BSS = .;
 		*(.bss)
+		*(COMMON)
 		. = ALIGN(4);
 		_E_BSS = .;
-	}> SRAM
+	}> SRAM AT> SRAM
 
 	. = . + 0x1000;
 	stack_top = . ;

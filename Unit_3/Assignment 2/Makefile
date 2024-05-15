@@ -15,7 +15,7 @@ all: $(PROJ_NAME).bin
 %.o: %.s 
 	$(CC)as $(CFLAGS) $< -o $@
 	
-%.o:  %.c
+%.o: %.c
 	$(CC)gcc -c $(CFLAGS) $(INCS) $< -o $@
 
 $(PROJ_NAME).elf: $(ASSOBJ) $(OBJ)
