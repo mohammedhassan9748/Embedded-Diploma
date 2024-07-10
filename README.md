@@ -31,7 +31,7 @@ cd Embedded-Diploma
 
 ## Contributions
 
-Contributions are welcome! If you have any improvements or additional resources, feel free to submit a pull request.
+This repo is being incremented by my personal work through it.
 
 ## License
 
