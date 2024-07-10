@@ -38,23 +38,24 @@ static void (*g_IRQ_CallBackPtr[3])(void);
 void MCAL_UART_Init(UART_Config_t* UART_ConfigPtr){
 
 	/*
-	* 1) Enable the USART Clock according to the Channel Selected & get Clock Frequencies.
+	* 1) Enable the UART Clock according to the Channel Selected & get Clock Frequencies.
 	*/
 	uint32_t PCLKx;
-	if(UART_ConfigPtr->USARTx == USART1)
-	{
+	if(UART_ConfigPtr->USARTx == USART1){
 		RCC_USART1_CLK_EN();
 		PCLKx = MCAL_RCC_PCLK2();
 	}
-	else if (UART_ConfigPtr->USARTx == USART2)
-	{
+	else if (UART_ConfigPtr->USARTx == USART2){
 		RCC_USART2_CLK_EN();
 		PCLKx = MCAL_RCC_PCLK1();
 	}
-	else
-	{
+	else if (UART_ConfigPtr->USARTx == USART2){
 		RCC_USART3_CLK_EN();
 		PCLKx = MCAL_RCC_PCLK1();
+	}
+	else{
+		//error in the giver UART peripheral address.
+		return;
 	}
 
 	/*

@@ -31,27 +31,27 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-stm32f103x8.elf \
+STM32.elf \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-stm32f103x8.list \
+STM32.list \
 
 OBJCOPY_HEX += \
-stm32f103x8.hex \
+STM32.hex \
 
 OBJCOPY_BIN += \
-stm32f103x8.bin \
+STM32.bin \
 
 
 # All Target
-all: stm32f103x8.elf secondary-outputs
+all: STM32.elf secondary-outputs
 
 # Tool invocations
-stm32f103x8.elf: $(OBJS) $(USER_OBJS) C:\Users\hp\stm32workspace\stm32f103x8\STM32F103C8TX_FLASH.ld
-	arm-none-eabi-gcc -gdwarf-2 -o "stm32f103x8.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\hp\stm32workspace\stm32f103x8\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="stm32f103x8.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+STM32.elf: $(OBJS) $(USER_OBJS) C:\Users\hp\stm32workspace\STM32\STM32F103C6TX_FLASH.ld
+	arm-none-eabi-gcc -gdwarf-2 -o "STM32.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\hp\stm32workspace\STM32\STM32F103C6TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -60,18 +60,18 @@ default.size.stdout: $(EXECUTABLES)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-stm32f103x8.list: $(EXECUTABLES)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "stm32f103x8.list"
+STM32.list: $(EXECUTABLES)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "STM32.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-stm32f103x8.hex: $(EXECUTABLES)
-	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "stm32f103x8.hex"
+STM32.hex: $(EXECUTABLES)
+	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "STM32.hex"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-stm32f103x8.bin: $(EXECUTABLES)
-	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "stm32f103x8.bin"
+STM32.bin: $(EXECUTABLES)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "STM32.bin"
 	@echo 'Finished building: $@'
 	@echo ' '
 

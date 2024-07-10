@@ -2,7 +2,7 @@
  * GPIO.c
  *
  *  Created on: Sep 14, 2023
- *      Author: hp
+ *      Author: Mohamed Ahmed Hassan
  */
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
@@ -22,7 +22,7 @@
  * of the specified GPIO_PinConfigPtr
  */
 static uint8_t Get_CRx_Position(uint16_t PinNumber){
-	//Case PinNumber < GPIO_PIN_8
+	//Case PinNumber <= GPIO_PIN_7
 	switch(PinNumber){
 		case GPIO_PIN_0:
 			return 0;
@@ -81,32 +81,29 @@ static uint8_t Get_CRx_Position(uint16_t PinNumber){
 *
 */
 void MCAL_GPIO_Init(GPIO_PinConfig_t* GPIO_PinConfigPtr){
+
 	static uint8_t GPIO_CLK_InitFlag[6] = {0,0,0,0,0,0};
+
 	//Check port selected to enable it's clock
-	if((GPIO_PinConfigPtr->GPIO_Port == GPIOA) && (GPIO_CLK_InitFlag[0] != 1))
-	{
+	if((GPIO_PinConfigPtr->GPIO_Port == GPIOA) && (GPIO_CLK_InitFlag[0] != 1)){
 		RCC_GPIOA_CLK_EN();
-		GPIO_CLK_InitFlag[0] = 1;
+		GPIO_CLK_InitFlag[0] = 1; //Clock for this port is enabled
 	}
-	else if((GPIO_PinConfigPtr->GPIO_Port == GPIOB) && (GPIO_CLK_InitFlag[1] != 1))
-	{
+	else if((GPIO_PinConfigPtr->GPIO_Port == GPIOB) && (GPIO_CLK_InitFlag[1] != 1)){
 		RCC_GPIOB_CLK_EN();
-		GPIO_CLK_InitFlag[1] = 1;
+		GPIO_CLK_InitFlag[1] = 1; //Clock for this port is enabled
 	}
-	else if((GPIO_PinConfigPtr->GPIO_Port == GPIOC) && (GPIO_CLK_InitFlag[2] != 1))
-	{
+	else if((GPIO_PinConfigPtr->GPIO_Port == GPIOC) && (GPIO_CLK_InitFlag[2] != 1)){
 		RCC_GPIOC_CLK_EN();
-		GPIO_CLK_InitFlag[2] = 1;
+		GPIO_CLK_InitFlag[2] = 1; //Clock for this port is enabled
 	}
-	else if((GPIO_PinConfigPtr->GPIO_Port == GPIOD) && (GPIO_CLK_InitFlag[3] != 1))
-	{
+	else if((GPIO_PinConfigPtr->GPIO_Port == GPIOD) && (GPIO_CLK_InitFlag[3] != 1)){
 		RCC_GPIOD_CLK_EN();
-		GPIO_CLK_InitFlag[3] = 1;
+		GPIO_CLK_InitFlag[3] = 1; //Clock for this port is enabled
 	}
-	else if((GPIO_PinConfigPtr->GPIO_Port == GPIOE) && (GPIO_CLK_InitFlag[4] != 1))
-	{
+	else if((GPIO_PinConfigPtr->GPIO_Port == GPIOE) && (GPIO_CLK_InitFlag[4] != 1)){
 		RCC_GPIOE_CLK_EN();
-		GPIO_CLK_InitFlag[4] = 1;
+		GPIO_CLK_InitFlag[4] = 1; //Clock for this port is enabled
 	}
 
 	//Check for alternate function mode (Input or Output) to enable it's clock
@@ -121,26 +118,16 @@ void MCAL_GPIO_Init(GPIO_PinConfig_t* GPIO_PinConfigPtr){
 	GPIO_CRx = ((GPIO_PinConfigPtr->GPIO_PinNo < GPIO_PIN_8)?&(GPIO_PinConfigPtr->GPIO_Port->CRL):&(GPIO_PinConfigPtr->GPIO_Port->CRH));
 
 	//MODE & CNF Variable (Initialized by it's default reset value)
-	uint8_t PinConfig_Value = 0x4;
-
-	//Clear MODE & CNF
-	(*GPIO_CRx) &= ~(0xF<<Get_CRx_Position(GPIO_PinConfigPtr->GPIO_PinNo));
+	uint8_t PinConfig_Value = 0;
 
 	//Check if pin is output
-	if(GPIO_PinConfigPtr->GPIO_Mode > GPIO_MODE_INPUT_PD && GPIO_PinConfigPtr->GPIO_Mode < GPIO_MODE_AF_INPUT)
-	{
-		//Clear PinConfig_Value
-		PinConfig_Value = 0;
+	if(GPIO_PinConfigPtr->GPIO_Mode > GPIO_MODE_INPUT_PD && GPIO_PinConfigPtr->GPIO_Mode < GPIO_MODE_AF_INPUT){
 		//Set MODE & CNF
 		PinConfig_Value = (((GPIO_PinConfigPtr->GPIO_Mode-4)<<2) | (GPIO_PinConfigPtr->GPIO_Output_Speed)) & 0x0F;
 	}
 
 	//Else pin is input
-	else //MODE = 00: Input mode (reset state)
-	{
-		//Clear PinConfig_Value
-		PinConfig_Value = 0;
-
+	else{
 		//Check if Input Analog mode or Input Floating
 		if(GPIO_PinConfigPtr->GPIO_Mode == GPIO_MODE_INPUT_ANALOG || GPIO_PinConfigPtr->GPIO_Mode == GPIO_MODE_INPUT_FLO)
 		{	//Set MODE & CNF
@@ -148,34 +135,30 @@ void MCAL_GPIO_Init(GPIO_PinConfig_t* GPIO_PinConfigPtr){
 		}
 
 		//Check if Input with pull-up or Input with pull-down
-		else if(GPIO_PinConfigPtr->GPIO_Mode == GPIO_MODE_INPUT_PU || GPIO_PinConfigPtr->GPIO_Mode == GPIO_MODE_INPUT_PD)
-		{
+		else if(GPIO_PinConfigPtr->GPIO_Mode == GPIO_MODE_INPUT_PU || GPIO_PinConfigPtr->GPIO_Mode == GPIO_MODE_INPUT_PD){
 			//Set MODE & CNF
 			PinConfig_Value = ((GPIO_MODE_INPUT_PU<<2) | GPIO_OUTPUT_SPEED_NONE) & 0x0F;
 
 			//Check if Input with pull-up
-			if(GPIO_PinConfigPtr->GPIO_Mode == GPIO_MODE_INPUT_PU)
-			{
+			if(GPIO_PinConfigPtr->GPIO_Mode == GPIO_MODE_INPUT_PU){
 				//Set output data register ODR because pull up specified
 				GPIO_PinConfigPtr->GPIO_Port->ODR |= (GPIO_PinConfigPtr->GPIO_PinNo);
 			}
 
 			//Check if Input with pull-down
-			else
-			{
+			else{
 				//Clear output data register ODR because pull down specified
-				GPIO_PinConfigPtr->GPIO_Port->ODR |= (GPIO_PinConfigPtr->GPIO_PinNo);
+				GPIO_PinConfigPtr->GPIO_Port->ODR &= ~(GPIO_PinConfigPtr->GPIO_PinNo);
 			}
 		}
-
 		//Else Alternate function input
-		else
-		{
+		else{
 			PinConfig_Value = ((GPIO_MODE_INPUT_FLO<<2) | GPIO_OUTPUT_SPEED_NONE) & 0x0F;
 		}
-
 	}
 
+	//Clear MODE & CNF
+	(*GPIO_CRx) &= ~(0xF<<Get_CRx_Position(GPIO_PinConfigPtr->GPIO_PinNo));
 	//Write on CRx register to configure pin -> x is (H or L)
 	(*GPIO_CRx) &= ~(PinConfig_Value<<Get_CRx_Position(GPIO_PinConfigPtr->GPIO_PinNo));
 	(*GPIO_CRx) |= (PinConfig_Value<<Get_CRx_Position(GPIO_PinConfigPtr->GPIO_PinNo));
@@ -250,10 +233,8 @@ uint8_t MCAL_GPIO_ReadPin(GPIO_PinConfig_t* GPIO_PinConfigPtr){
 	if(GPIO_PinConfigPtr->GPIO_Port->IDR & GPIO_PinConfigPtr->GPIO_PinNo){
 		return (uint8_t)GPIO_PIN_SET;
 	}
-
 	//Else pin state is zero.
-	else
-	{
+	else{
 		return (uint8_t)GPIO_PIN_CLEAR;
 	}
 
@@ -320,7 +301,7 @@ void MCAL_GPIO_WritePin(GPIO_PinConfig_t* GPIO_PinConfigPtr, uint8_t PinValue){
 * @param [in] 		- GPIOx_Ptr: Pointer to GPIO_Typedef structure that holds the port registers and
 * 					  x can be (A->E) to select GPIO peripheral desired.
 *
-* @param [in] 		- PortValue: To write the desired port value
+* @param [in] 		- PortValue: To write the desired port value composed of 16 bits.
 
 * @retval 			- None.
 *
@@ -398,6 +379,5 @@ uint8_t MCAL_GPIO_LockPin(GPIO_PinConfig_t* GPIO_PinConfigPtr){
 	{
 		return (uint8_t)GPIO_PINCCONFIG_UNLOCKED;
 	}
-
 }
 

@@ -21,7 +21,7 @@
 //										Generic Macros
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
-#define SPI_ENABLE			 			(uint16_t)(1<<6)
+#define SPI_ENABLE			 			(1<<6)
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //								Macros Configuration References
@@ -41,15 +41,12 @@
 /*
  * OPTIONS:
  * --------
-1:  SPI_FULL_DUPLEX						Data Wires: 2 wires - one for transmit and one for receive
+1:  SPI_FULL_DUPLEX						Data Wires: 2 wires - one for transmit and one for receive.
 2:  SPI_HALF_DUPLEX						Data Wires: 1 bidirectional wire used for both transmitting and receiving
-3:  SPI_SIMPLEX_MASTER_TX_SLAVE_RX		Data Wires: 1 unidirectional wire used by master for transmitting only - by slave for receiving only
-4:  SPI_SIMPLEX_MASTER_RX_SLAVE_TX		Data Wires: 1 unidirectional wire used by master for receiving only - by slave for transmitting only
+4:  SPI_SIMPLEX_RX_ONLY					Data Wires: 1 unidirectional wire used by master/slave for receiving only.
 */
-#define SPI_FULL_DUPLEX					(uint16_t)((0<<15) | (0<<10) | (1<<1))
-#define SPI_HALF_DUPLEX_TX				(uint16_t)((1<<15) | (1<<14))
-#define SPI_HALF_DUPLEX_RX				(uint16_t)((1<<15) | (0<<14))
-#define SPI_SIMPLEX_TX_ONLY				(uint16_t)((0<<15) | (0<<10) | (1<<2))
+#define SPI_FULL_DUPLEX					(uint16_t)((0<<15) | (0<<10))
+#define SPI_HALF_DUPLEX					(uint16_t) (1<<15)
 #define SPI_SIMPLEX_RX_ONLY				(uint16_t)((0<<15) | (1<<10))
 
 			/* @ref SPI_FrameFormat_Define */
@@ -93,21 +90,23 @@
 #define SPI_2ND_EDGE_CAPTURE_STROBE		(uint16_t)(1<<0)
 
 
-			/* @ref SPI_SlaveSelect_Define */
+			/* @ref SPI_PreScaler_Define */
 /*
  * OPTIONS:
  * --------
-1: SPI_SS_HARDWARE_SLAVE				Software slave management is disabled and slave is now managed by hardware
-2: SPI_SS_HARDWARE_MASTER_OE			Output enabled in master mode and when the cell is enabled, Cell can't work in multimaster environment
-3: SPI_SS_HARDWARE_MASTER_OD			Output is disabled in master mode and the cell can work in multimaster configuration
-4: SPI_SS_SOFTWARE_RESET				Software slave management enabled and slave is now managed by software -- SSI bit forced NSS to 0
-4: SPI_SS_SOFTWARE_SET					Software slave management enabled and slave is now managed by software -- SSI bit forced NSS to 1
+1: SPI_SS_SOFTWARE_NSS					The slave select information is driven internally by the value of the SSI bit in the
+										SPI_CR1 register. The external NSS pin remains free for other application uses.
+
+2: SPI_SS_HARDWARE_NSS_OE				This configuration is used only when the device operates in master mode. The NSS signal
+										is driven low when the master starts communication & kept low until the SPI is disabled.
+
+3: SPI_SS_HARDWARE_NSS_OD				This configuration allows multimaster capability for devices operating in master mode.
+										For devices set as slave, the NSS pin acts as a classical NSS input: the slave is
+										selected when NSS is low and deselected when NSS high.
 */
-#define SPI_SS_HARDWARE_SLAVE			(uint16_t)(0<<9)
-#define SPI_SS_HARDWARE_MASTER_OE		(uint16_t)(1<<2)
-#define SPI_SS_HARDWARE_MASTER_OD		(uint16_t)(0<<2)
-#define SPI_SS_SOFTWARE_RESET			(uint16_t)(1<<9)
-#define SPI_SS_SOFTWARE_SET				(uint16_t)((1<<9) | (1<<8))
+#define SPI_SS_SOFTWARE_NSS				(uint16_t)(1<<9)
+#define SPI_SS_HARDWARE_NSS_OE			(uint16_t)(1<<2)
+#define SPI_SS_HARDWARE_NSS_OD			(uint16_t)(0<<2)
 
 			/* @ref SPI_PreScaler_Define */
 /*
@@ -195,6 +194,16 @@ typedef enum{
 	SPI_Polling_Enable
 }SPI_Polling_Mechanism_t;
 
+typedef enum{
+	SPI_Point_to_Point,
+	SPI_MultiSlave
+}SPI_Slaves_t;
+
+typedef enum{
+	SPI_NSS_Drive_Low,
+	SPI_NSS_Drive_High
+}SPI_NSS_Drive_State_t;
+
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //											APIS
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
@@ -204,20 +213,16 @@ void MCAL_SPI_Init(SPI_Config_t* SPI_ConfigPtr);
 void MCAL_SPI_DeInit(SPI_Config_t* SPI_ConfigPtr);
 
 //Setting GPIO Pins (SPI Channel) API
-void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr);
+void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr, SPI_Slaves_t Managed_Slaves);
 
-// General Sending & Receiving APIs
+// Driving NSS Pins for master initiation and communication APIs.
+void MCAL_SPI_DRIVE_NSS(SPI_Config_t* SPI_ConfigPtr, SPI_NSS_Drive_State_t Drive_State);
+
+//Sending & Receiving APIs
 void MCAL_SPI_Transmit(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Polling_Mechanism_t Polling_Status);
 void MCAL_SPI_Receive (SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Polling_Mechanism_t Polling_Status);
 
-//Full Duplex Transmitting and Receiving & Used by both master and slave
-void MCAL_SPI_FULLDUPLEX_TX_RX(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Polling_Mechanism_t Polling_Status);
-
-//Send String
-void MCAL_SPI_sendString(SPI_Config_t* SPI_ConfigPtr, uint8_t* Str);
-
-//Receive String
-void MCAL_SPI_receiveString(SPI_Config_t* SPI_ConfigPtr, uint8_t* Str);
-
+//Wait For All Transmission Complete API
+void MCAL_SPI_TX_RX(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Polling_Mechanism_t Polling_Status);
 
 #endif /* INC_SPI_H_ */

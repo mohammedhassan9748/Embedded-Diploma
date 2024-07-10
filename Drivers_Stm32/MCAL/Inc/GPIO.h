@@ -93,6 +93,7 @@
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
 typedef struct{
+
 	GPIO_Typedef* GPIO_Port;  		// Specifies the GPIO Port of the pin being initialized
 							  	  	// This parameter must be a value of GPIO Peripheral Instants in stm32f103c6.h.
 
@@ -105,27 +106,153 @@ typedef struct{
 	uint8_t  GPIO_Output_Speed;   	// Specifies the speed for the selected pins
 								    // This parameter must be a value of @ref GPIO_OutputSpeed_Define
 
-
 }GPIO_PinConfig_t;
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //											APIS
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
-//Initialization & DeInitialization APIs
+
+/**================================================================
+* @Fn				- MCAL_GPIO_Init
+*
+* @brief 			- Initializes GPIOx PINy according to the specified parameters in GPIO_PinConfig_t.
+*
+* @param [in] 		- GPIO_PinConfigPtr: Pointer to the GPIO_PinConfig_t structure that holds
+* 					  the configuration information for the pin of the desired peripheral.
+*
+* @retval 			- None.
+*
+* Note				-
+*/
 void MCAL_GPIO_Init(GPIO_PinConfig_t* GPIO_PinConfigPtr);
+/**================================================================*/
+
+
+/**================================================================
+* @Fn				- MCAL_GPIO_DeInit
+*
+* @brief 			- DeInitializes GPIOx (Reset specified GPIO port x)
+*
+* @param [in] 		- GPIOx_Ptr: Pointer to GPIO_Typedef structure that holds the port registers and
+* 					  x can be (A->E) to select GPIO peripheral desired.
+*
+* @retval 			- None.
+*
+* Note				-
+*
+*/
 void MCAL_GPIO_DeInit(GPIO_Typedef* GPIOx_Ptr);
+/**================================================================*/
 
-//Read APIs
+
+/**================================================================
+* @Fn				- MCAL_GPIO_ReadPin
+*
+* @brief 			- Read specific Pin
+*
+* @param [in] 		- GPIO_PinConfigPtr: Pointer to the GPIO_PinConfig_t structure that holds
+* 					  the configuration information for the pin of the desired peripheral.
+*
+* @retval 			- The input pin value (two values based on @ref GPIO_PinState_Define).
+*
+* Note				-
+*
+*/
 uint8_t MCAL_GPIO_ReadPin(GPIO_PinConfig_t* GPIO_PinConfigPtr);
+/**================================================================*/
+
+
+/**================================================================
+* @Fn				- MCAL_GPIO_ReadPort
+*
+* @brief 			- Read specific port
+*
+* @param [in] 		- GPIOx_Ptr: Pointer to GPIO_Typedef structure that holds the port registers and
+* 					  x can be (A->E) to select GPIO peripheral desired.
+*
+* @retval 			- The whole input port value.
+*
+* Note				-
+*
+*/
 uint16_t MCAL_GPIO_ReadPort(GPIO_Typedef* GPIOx_Ptr);
+/**================================================================*/
 
-//Write APIs
+
+/**================================================================
+* @Fn				- MCAL_GPIO_WritePin
+*
+* @brief 			- Write on specific pin in the specified port
+*
+* @param [in] 		- GPIO_PinConfigPtr: Pointer to the GPIO_PinConfig_t structure that holds
+* 					  the configuration information for the pin of the desired peripheral.
+*
+* @param [in] 		- PinValue: To write the desired pin value
+* 					  (two values based on @ref GPIO_PinState_Define).
+
+* @retval 			- None.
+*
+* Note				-
+*
+*/
 void MCAL_GPIO_WritePin(GPIO_PinConfig_t* GPIO_PinConfigPtr, uint8_t PinValue);
+/**================================================================*/
+
+
+/**================================================================
+* @Fn				- MCAL_GPIO_WritePort
+*
+* @brief 			- Write on the whole output port specified
+*
+* @param [in] 		- GPIOx_Ptr: Pointer to GPIO_Typedef structure that holds the port registers and
+* 					  x can be (A->E) to select GPIO peripheral desired.
+*
+* @param [in] 		- PortValue: To write the desired port value composed of 16 bits.
+
+* @retval 			- None.
+*
+* Note				-
+*
+*/
 void MCAL_GPIO_WritePort(GPIO_Typedef* GPIOx_Ptr, uint16_t PortValue);
+/**================================================================*/
 
+
+/**================================================================
+* @Fn				- MCAL_GPIO_TogglePin
+*
+* @brief 			- Toggle specific pin in the specified port
+*
+* @param [in] 		- GPIO_PinConfigPtr: Pointer to the GPIO_PinConfig_t structure that holds
+* 					  the configuration information for the pin of the desired peripheral.
+*
+* @retval 			- None.
+*
+* Note				-
+*
+*/
 void MCAL_GPIO_TogglePin(GPIO_PinConfig_t* GPIO_PinConfigPtr);
+/**================================================================*/
 
+
+/**================================================================
+* @Fn				- MCAL_GPIO_LockPin
+*
+* @brief 			- Lock specific pin in the specified port (Allow the IO configuration to be frozen)
+*
+* @param [in] 		- GPIO_PinConfigPtr: Pointer to the GPIO_PinConfig_t structure that holds
+* 					  the configuration information for the pin of the desired peripheral.
+*
+* @retval 			- Ok flag if pin configuration is locked or error if pin configuration is not locked
+*					  (two values based on @ref GPIO_LockState_Define)..
+*
+* Note				- When the LOCK sequence has been applied on a port bit it is no longer
+* 					  possible to modify the value of the port bit until the next reset
+*
+*/
 uint8_t MCAL_GPIO_LockPin(GPIO_PinConfig_t* GPIO_PinConfigPtr);
+/**================================================================*/
+
 
 #endif /* MCAL_INC_GPIO_H_ */

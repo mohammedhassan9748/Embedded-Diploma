@@ -18,11 +18,11 @@
 //								Base addresses for Memories
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
-#define FLASH_MEMORY_BASE					0x08000000
-#define SYSTEM_MEMORY_BASE					0x1FFFF000
-#define SRAM_MEMORY_BASE					0x20000000
-#define PERIPHERALS_BASE					0x40000000
-#define CORTEXM3_INTERNAL_PERIPHERALS_BASE 	0xE0100000
+#define FLASH_MEMORY_BASE					0x08000000UL
+#define SYSTEM_MEMORY_BASE					0x1FFFF000UL
+#define SRAM_MEMORY_BASE					0x20000000UL
+#define PERIPHERALS_BASE					0x40000000UL
+#define CORTEXM3_INTERNAL_PERIPHERALS_BASE 	0xE0000000UL
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //								Cortex-M3 Core Peripherals
@@ -182,7 +182,7 @@ typedef struct{
 	vuint32_t PSC; 			// 0x28
 	vuint32_t ARR;			// 0x2C
 	vuint32_t RESERVED1;	// 0x30
-	vuint32_t CCR[4];			// 0x34 - 0x40
+	vuint32_t CCR[4];		// 0x34 - 0x40
 	vuint32_t RESERVED2;	// 0x44
 	vuint32_t DCR;			// 0x48
 	vuint32_t DMAR;			// 0x4C

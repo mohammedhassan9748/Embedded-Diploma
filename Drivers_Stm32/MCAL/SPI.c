@@ -16,7 +16,8 @@
 //									Global Variables
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 
-static void (*g_IRQ_CallBackPtr[4])(void);
+static GPIO_PinConfig_t SPI_NSS_Config[2];
+static void (*g_IRQ_CallBackPtr[2])(void);
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //									APIs Definitions
@@ -55,16 +56,15 @@ void MCAL_SPI_Init(SPI_Config_t* SPI_ConfigPtr){
 	SPIx_CR1_temp |= SPI_ConfigPtr->SPI_Mode;
 
 	/*
-	* 3) Set the device communication node (FullDuplex - HalfDuplex - Simplex).
-	* NOTE: We aim only for bits 15, 14 & 10. Therefore we masked them since they contain another bits
-	* in the definition for discrimination.
+	* 3) Set the device communication node (FullDuplex - HafDuplex - Simplex).
 	*/
-	SPIx_CR1_temp |= (SPI_ConfigPtr->SPI_CommMode & 0xC400);
+	SPIx_CR1_temp |= (SPI_ConfigPtr->SPI_CommMode & 0x8400);
 
 	/*
 	* 4) Check if Master Mode is Selected to define the serial clock baud rate.
 	*/
-	SPIx_CR1_temp |= SPI_ConfigPtr->SPI_PreScaler;
+	if(SPI_ConfigPtr->SPI_Mode == SPI_MODE_MASTER)
+		SPIx_CR1_temp |= SPI_ConfigPtr->SPI_PreScaler;
 
 	/*
 	* 5) Set the DFF bit to define 8- or 16-bit data frame format.
@@ -81,7 +81,7 @@ void MCAL_SPI_Init(SPI_Config_t* SPI_ConfigPtr){
 	*/
 	SPIx_CR1_temp |= SPI_ConfigPtr->SPI_FrameFormat;
 
-	if(SPI_ConfigPtr->SPI_SlaveSelect == SPI_SS_HARDWARE_MASTER_OD || SPI_ConfigPtr->SPI_SlaveSelect == SPI_SS_HARDWARE_MASTER_OE)
+	if(SPI_ConfigPtr->SPI_SlaveSelect == SPI_SS_HARDWARE_NSS_OD || SPI_ConfigPtr->SPI_SlaveSelect == SPI_SS_HARDWARE_NSS_OE)
 		SPIx_CR2_temp |= SPI_ConfigPtr->SPI_SlaveSelect;
 	else
 		SPIx_CR1_temp |= SPI_ConfigPtr->SPI_SlaveSelect;
@@ -108,14 +108,15 @@ void MCAL_SPI_Init(SPI_Config_t* SPI_ConfigPtr){
 	}
 
 	/*
-	* 9) Set the real registers values with the safety templates.
+	* 9) Enable the SPI peripheral by setting the SPE bit to 1.
 	*/
-	SPI_ConfigPtr->SPIx->CR2 = SPIx_CR2_temp;
-	SPI_ConfigPtr->SPIx->CR1 = SPIx_CR1_temp;
+	SPIx_CR1_temp |= SPI_ENABLE;
 
 	/*
-	* 10) Enable the SPI peripheral by setting the SPE bit to 1.
+	* 10) Set the real registers values with the safety templates.
 	*/
+	SPI_ConfigPtr->SPIx->CR1 = SPIx_CR1_temp;
+	SPI_ConfigPtr->SPIx->CR2 = SPIx_CR2_temp;
 
 }
 
@@ -161,6 +162,7 @@ void MCAL_SPI_DeInit(SPI_Config_t* SPI_ConfigPtr){
 		//Null the global ptr to function
 		g_IRQ_CallBackPtr[1] = NULL_PTR;
 	}
+
 }
 
 /**================================================================
@@ -176,17 +178,19 @@ void MCAL_SPI_DeInit(SPI_Config_t* SPI_ConfigPtr){
 * Note				-
 *
 */
-void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr){
+void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr, SPI_Slaves_t Managed_Slaves){
 
-	GPIO_PinConfig_t MOSI,MISO,SCK,NSS;
+	uint8_t NSS_Index = 0;
+	GPIO_PinConfig_t MOSI,MISO,SCK;
 	/*
-	* 1) Check if SPIx is SPI1 or SPI2.
+	* 0) Check if SPIx is SPI1 or SPI2.
 	*/
 	if(SPI_ConfigPtr->SPIx == SPI1)
 	{
 		//Configure NSS Pin Data
-		NSS.GPIO_Port = GPIOA;
-		NSS.GPIO_PinNo = GPIO_PIN_4;
+		NSS_Index = 0;
+		SPI_NSS_Config[NSS_Index].GPIO_Port = GPIOA;
+		SPI_NSS_Config[NSS_Index].GPIO_PinNo = GPIO_PIN_4;
 
 		//Configure SCK Pin Data
 		SCK.GPIO_Port = GPIOA;
@@ -199,12 +203,14 @@ void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr){
 		//Configure MOSI Pin Data
 		MOSI.GPIO_Port = GPIOA;
 		MOSI.GPIO_PinNo = GPIO_PIN_7;
+
 	}
 	else
 	{
 		//Configure NSS Pin Data
-		NSS.GPIO_Port = GPIOB;
-		NSS.GPIO_PinNo = GPIO_PIN_12;
+		NSS_Index = 1;
+		SPI_NSS_Config[NSS_Index].GPIO_Port = GPIOA;
+		SPI_NSS_Config[NSS_Index].GPIO_PinNo = GPIO_PIN_4;
 
 		//Configure SCK Pin Data
 		SCK.GPIO_Port = GPIOB;
@@ -221,7 +227,8 @@ void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr){
 
 
 	/*
-	* 2) Configure SCK Pin.
+	* Pin (1) (SCK Pin):
+	* Configure SCK Pin.
 	*/
 	if(SPI_ConfigPtr->SPI_Mode == SPI_MODE_MASTER)
 	{
@@ -236,34 +243,18 @@ void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr){
 	MCAL_GPIO_Init(&SCK);
 
 	/*
-	* 2) Configure MOSI Pin.
+	* Pin (2) (MOSI Pin):
+	* Configure MOSI Pin.
 	*/
-	//Check if the MOSI on the Master or Slave Device won't be configured at all first and if not, configure it as it
-	//should be.
-	if(SPI_ConfigPtr->SPI_Mode == SPI_MODE_MASTER)
-	{
-		if(SPI_ConfigPtr->SPI_CommMode == SPI_SIMPLEX_RX_ONLY)
-		{
-			//Do Nothing
-			//MOSI on the Master Device won't be configured at all.
-		}
-		else
-		{
+	if(SPI_ConfigPtr->SPI_Mode == SPI_MODE_MASTER){
+		if(SPI_ConfigPtr->SPI_CommMode != SPI_SIMPLEX_RX_ONLY){
 			MOSI.GPIO_Mode = GPIO_MODE_AF_OUTPUT_PP;
 			MOSI.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_10MHZ;
 			MCAL_GPIO_Init(&MOSI);
 		}
 	}
-	else
-	{
-		if(SPI_ConfigPtr->SPI_CommMode == SPI_HALF_DUPLEX_TX || SPI_ConfigPtr->SPI_CommMode == SPI_HALF_DUPLEX_RX
-				|| SPI_ConfigPtr->SPI_CommMode == SPI_SIMPLEX_TX_ONLY)
-		{
-			//Do Nothing
-			//MOSI on the Slave Device won't be configured at all.
-		}
-		else
-		{
+	else{
+		if(SPI_ConfigPtr->SPI_CommMode != SPI_HALF_DUPLEX){
 			MOSI.GPIO_Mode = GPIO_MODE_INPUT_FLO;
 			MOSI.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_NONE;
 			MCAL_GPIO_Init(&MOSI);
@@ -271,68 +262,78 @@ void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr){
 	}
 
 	/*
-	* 3) Configure MISO Pin.
-	* Check if the MISO on the Master or Slave Device won't be configured at all first and if not,
-	* configure it as it should be.
+	* Pin (3) (MISO Pin):
+	* Configure MISO Pin.
 	*/
-	if(SPI_ConfigPtr->SPI_Mode == SPI_MODE_MASTER)
-	{
-		if(SPI_ConfigPtr->SPI_CommMode == SPI_HALF_DUPLEX_TX || SPI_ConfigPtr->SPI_CommMode == SPI_HALF_DUPLEX_RX
-				|| SPI_ConfigPtr->SPI_CommMode == SPI_SIMPLEX_TX_ONLY)
-		{
-			//Do Nothing
-			//MISO on the Master Device won't be configured at all.
-		}
-		else
-		{
+	if(SPI_ConfigPtr->SPI_Mode == SPI_MODE_MASTER){
+		if(SPI_ConfigPtr->SPI_CommMode != SPI_HALF_DUPLEX){
 			MISO.GPIO_Mode = GPIO_MODE_INPUT_FLO;
 			MISO.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_NONE;
 			MCAL_GPIO_Init(&MISO);
 		}
 	}
-	else
-	{
-		if(SPI_ConfigPtr->SPI_CommMode == SPI_SIMPLEX_RX_ONLY)
-		{
-			//Do Nothing
-			//MISO on the Slave Device won't be configured at all.
-		}
-		else
-		{
-			MISO.GPIO_Mode = GPIO_MODE_AF_OUTPUT_PP;
-			MISO.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_10MHZ;
-			MCAL_GPIO_Init(&MISO);
-		}
+	else{
+		if(SPI_ConfigPtr->SPI_CommMode != SPI_SIMPLEX_RX_ONLY){
+			if(Managed_Slaves == SPI_Point_to_Point){
+				MISO.GPIO_Mode = GPIO_MODE_AF_OUTPUT_PP;
+				MISO.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_10MHZ;
+				MCAL_GPIO_Init(&MISO);
+			}
+			else if (Managed_Slaves == SPI_MultiSlave){
+				MISO.GPIO_Mode = GPIO_MODE_AF_OUTPUT_OD;
+				MISO.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_10MHZ;
+				MCAL_GPIO_Init(&MISO);
+			}
+			else{
+				return;
+			}
 
+		}
 	}
 
 	/*
-	* 4) Configure NSS Pin.
+	* Pin (4) (NSS Pin):
+	* Configure NSS Pin.
 	*/
-	if(SPI_ConfigPtr->SPI_Mode == SPI_MODE_MASTER)
-	{
-		if(SPI_ConfigPtr->SPI_SlaveSelect == SPI_SS_HARDWARE_MASTER_OE)
-		{
-			NSS.GPIO_Mode = GPIO_MODE_AF_OUTPUT_PP;
-			NSS.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_10MHZ;
-			MCAL_GPIO_Init(&NSS);
-		}
-		else if(SPI_ConfigPtr->SPI_SlaveSelect == SPI_SS_HARDWARE_MASTER_OD)
-		{
-			NSS.GPIO_Mode = GPIO_MODE_INPUT_FLO;
-			NSS.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_NONE;
-			MCAL_GPIO_Init(&NSS);
-		}
+	if(SPI_ConfigPtr->SPI_SlaveSelect == SPI_SS_HARDWARE_NSS_OD){
+		SPI_NSS_Config[NSS_Index].GPIO_Mode = GPIO_MODE_INPUT_FLO;
+		SPI_NSS_Config[NSS_Index].GPIO_Output_Speed = GPIO_OUTPUT_SPEED_NONE;
+		MCAL_GPIO_Init(&SPI_NSS_Config[NSS_Index]);
+	}else if(SPI_ConfigPtr->SPI_SlaveSelect == SPI_SS_HARDWARE_NSS_OE){
+		SPI_NSS_Config[NSS_Index].GPIO_Mode = GPIO_MODE_AF_OUTPUT_PP;
+		SPI_NSS_Config[NSS_Index].GPIO_Output_Speed = GPIO_OUTPUT_SPEED_10MHZ;
+		MCAL_GPIO_Init(&SPI_NSS_Config[NSS_Index]);
 	}
+	else{return;}
+
+}
+
+/**================================================================
+* @Fn				- MCAL_SPI_DRIVE_NSS
+*
+* @brief 			- Drive the NSS Pin Low or High based in master mode based on the drive state given. And used if onlt the
+* 					  NSS pin option in "SPI_PreScaler" is choosen as -> "SPI_SS_HARDWARE_NSS_OE".
+*
+* @param [in] 		- SPI_ConfigPtr: Pointer to the SPI_Config_t structure that holds
+* 					  the configuration information for the SPIx of the desired peripheral.
+*
+* @param [in] 		- Drive_State: SPI_NSS_Drive_State_t type to determine the state of the NSS Output pin.
+*
+*
+* @retval 			- None.
+*
+* Note				- Thus is used if only the NSS pin option in "SPI_PreScaler" is choosen as -> "SPI_SS_HARDWARE_NSS_OE".
+*
+*/
+void MCAL_SPI_DRIVE_NSS(SPI_Config_t* SPI_ConfigPtr, SPI_NSS_Drive_State_t Drive_State){
+	uint8_t NSS_Index = 0;
+
+	if(SPI_ConfigPtr->SPIx == SPI1)
+		NSS_Index = 0;
 	else
-	{
-		if(SPI_ConfigPtr->SPI_SlaveSelect == SPI_SS_HARDWARE_SLAVE)
-		{
-			NSS.GPIO_Mode = GPIO_MODE_INPUT_FLO;
-			NSS.GPIO_Output_Speed = GPIO_OUTPUT_SPEED_NONE;
-			MCAL_GPIO_Init(&NSS);
-		}
-	}
+		NSS_Index = 1;
+
+	MCAL_GPIO_WritePin(&SPI_NSS_Config[NSS_Index], Drive_State);
 }
 
 /**================================================================
@@ -360,10 +361,16 @@ void MCAL_SPI_Transmit(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Pol
 		//wait for transmit data register to be empty
 		while( ! ( (SPI_ConfigPtr->SPIx->SR) & (1<<1) ) );
 
+	//Check if Half-Duplex Mode was configured
+	if (SPI_ConfigPtr->SPI_CommMode == SPI_HALF_DUPLEX)
+	{
+		while(READ_BIT(SPI_ConfigPtr->SPIx->SR,7));
+		CLEAR_BIT(SPI_ConfigPtr->SPIx->CR1,6);
+		SET_BIT(SPI_ConfigPtr->SPIx->CR1,14);
+		SET_BIT(SPI_ConfigPtr->SPIx->CR1,6);
+	}
 	//Send the data to the Tx Buffer
 	SPI_ConfigPtr->SPIx->DR = (*pTxBuffer);
-
-	while( (SPI_ConfigPtr->SPIx->SR) & (1<<7) );
 
 }
 
@@ -392,13 +399,21 @@ void MCAL_SPI_Receive(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Poll
 		//wait for receive data register to be empty
 		while( ! ( (SPI_ConfigPtr->SPIx->SR) & (1<<0) ) );
 
+	//Check if Half-Duplex Mode was configured
+	if (SPI_ConfigPtr->SPI_CommMode == SPI_HALF_DUPLEX)
+	{
+		while(READ_BIT(SPI_ConfigPtr->SPIx->SR,7));
+		CLEAR_BIT(SPI_ConfigPtr->SPIx->CR1,6);
+		CLEAR_BIT(SPI_ConfigPtr->SPIx->CR1,14);
+		SET_BIT(SPI_ConfigPtr->SPIx->CR1,6);
+	}
 	//Send the data to the Tx Buffer
 	(*pTxBuffer) = (uint16_t)SPI_ConfigPtr->SPIx->DR;
 
 }
 
 /**================================================================
-* @Fn				- MCAL_SPI_WAIT_TC
+* @Fn				- MCAL_SPI_TX_RX
 *
 * @brief 			- Wait for all data to be completely transmitted.
 *
@@ -410,7 +425,7 @@ void MCAL_SPI_Receive(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Poll
 * Note				- Supports for now Asynchronous Mode only with 8Mhz Clock.
 *
 */
-void MCAL_SPI_FULLDUPLEX_TX_RX(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Polling_Mechanism_t Polling_Status){
+void MCAL_SPI_TX_RX(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Polling_Mechanism_t Polling_Status){
 
 	//Transmit Data
 	MCAL_SPI_Transmit(SPI_ConfigPtr,pTxBuffer,Polling_Status);
@@ -419,66 +434,6 @@ void MCAL_SPI_FULLDUPLEX_TX_RX(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer,
 
 }
 
-/**================================================================
-* @Fn				- MCAL_SPI_sendString
-*
-* @brief 			- This API is used for sending a string using polling technique.
-*
-* @param [in] 		- SPI_ConfigPtr: Pointer to the SPI_Config_t structure that holds
-* 					  the configuration information for the SPIx of the desired peripheral.
-*
-* @param [in] 		- Str: Pointer to the data neded to be sent to other device.
-*
-* @retval 			- None.
-*
-* Note				- Supports polling technique only - cannot be used with interrupts.
-*
-*/
-void MCAL_SPI_sendString(SPI_Config_t* SPI_ConfigPtr, uint8_t* Str)
-{
-
-	uint8_t i = 0;
-	uint16_t DataTemp;
-	while(Str[i] != '\0')
-	{
-		DataTemp = Str[i];
-		MCAL_SPI_TX_RX(SPI_ConfigPtr,&DataTemp,SPI_Polling_Enable);
-		i++;
-	}
-	return;
-
-}
-
-/**================================================================
-* @Fn				- MCAL_SPI_receiveString
-*
-* @brief 			- This API is used for receiving a string using polling technique.
-*
-* @param [in] 		- SPI_ConfigPtr: Pointer to the SPI_Config_t structure that holds
-* 					  the configuration information for the SPIx of the desired peripheral.
-*
-* @param [in] 		- Str: Pointer to the data neded to be received to the device device.
-*
-* @retval 			- None.
-*
-* Note				- Supports polling technique only - cannot be used with interrupts.
-*
-*/
-void MCAL_SPI_receiveString(SPI_Config_t* SPI_ConfigPtr, uint8_t* Str)
-{
-
-	uint8_t i = 0;
-	uint16_t DataTemp;
-	MCAL_SPI_TX_RX(SPI_ConfigPtr,&DataTemp,SPI_Polling_Enable);
-	while(DataTemp != '#')
-	{
-		Str[i] = DataTemp;
-		MCAL_SPI_TX_RX(SPI_ConfigPtr,&DataTemp,SPI_Polling_Enable);
-		i++;
-	}
-	Str[i] = '\0';
-
-}
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //										ISRs Definitions

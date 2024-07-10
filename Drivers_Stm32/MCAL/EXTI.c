@@ -89,38 +89,7 @@ static void EXTI_NVIC_DIS(const uint8_t Input_Line_Number){
 	}
 }
 
-/*================================================================
- * Description :
- * Private Function used to disable the required EXTI Input Line in the NVIC Interrupt Controller.
- * It takes the EXTI Input Line required to disable.
- */
-static uint8_t EXTI_AFIO_EXTICR_shift(const uint8_t Input_Line_Number){
 
-	uint8_t shift;
-	switch(Input_Line_Number)
-	{
-		case 0:
-		case 4:
-		case 8:
-		case 12: shift = 0;	 break;
-
-		case 1:
-		case 5:
-		case 9:
-		case 13: shift = 4;	 break;
-
-		case 2:
-		case 6:
-		case 10:
-		case 14: shift = 8;  break;
-
-		case 3:
-		case 7:
-		case 11:
-		case 15: shift = 12; break;
-	}
-	return shift;
-}
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //									APIs Definitions
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
@@ -143,36 +112,37 @@ void MCAL_EXTI_Init(EXTI_PinConfig_t* EXTI_PinConfigPtr){
 	/*
 	* 1) Configure GPIO To Be Alternative Function Input (Floating Input)
 	*/
-	MCAL_GPIO_Init(&(EXTI_PinConfigPtr->EXTI_Pin.EXTI_GPIO_PinConfig));
+	GPIO_PinConfig_t EXTI_GPIO_Config = {EXTI_PinConfigPtr->EXTI_GPIO_Port,(uint16_t)(1<<EXTI_PinConfigPtr->EXTI_Input_Line),GPIO_MODE_AF_INPUT,GPIO_OUTPUT_SPEED_NONE};
+	MCAL_GPIO_Init(&EXTI_GPIO_Config);
 
 	/*
 	 * 2) Update AFIO to Route between EXTI Line With Port A,B,C,D,E
 	 */
-	uint8_t AFIO_EXTICR_index = EXTI_PinConfigPtr->EXTI_Pin.EXTI_Input_Line / 4;
-	uint8_t AFIO_EXTICR_shift = EXTI_AFIO_EXTICR_shift(EXTI_PinConfigPtr->EXTI_Pin.EXTI_Input_Line);
+	uint8_t AFIO_EXTICR_index = EXTI_PinConfigPtr->EXTI_Input_Line / 4;
+	uint8_t AFIO_EXTICR_shift = (EXTI_PinConfigPtr->EXTI_Input_Line % 4) * 4;
 	AFIO->EXTICR[AFIO_EXTICR_index] &= ~(0x0F<<AFIO_EXTICR_shift);
-	AFIO->EXTICR[AFIO_EXTICR_index] |= (EXTI_AFIO_PortValue(EXTI_PinConfigPtr->EXTI_Pin.EXTI_GPIO_PinConfig.GPIO_Port)<<AFIO_EXTICR_shift);
+	AFIO->EXTICR[AFIO_EXTICR_index] |= (EXTI_AFIO_PortValue(EXTI_PinConfigPtr->EXTI_GPIO_Port)<<AFIO_EXTICR_shift);
 
 	/*
 	* 3) Update Rising / Falling Edge Register
 	*/
 
 	//Reset Falling and Rising Registers before updating
-	EXTI->RTSR &= ~(1<<EXTI_PinConfigPtr->EXTI_Pin.EXTI_Input_Line);
-	EXTI->FTSR &= ~(1<<EXTI_PinConfigPtr->EXTI_Pin.EXTI_Input_Line);
+	EXTI->RTSR &= ~(1<<EXTI_PinConfigPtr->EXTI_Input_Line);
+	EXTI->FTSR &= ~(1<<EXTI_PinConfigPtr->EXTI_Input_Line);
 	//Set the required trigger specified in the configuration
 	switch(EXTI_PinConfigPtr->EXTI_Trigger){
 		case EXTI_TRIGGER_RISING:
-			EXTI->RTSR |=  (1<<EXTI_PinConfigPtr->EXTI_Pin.EXTI_Input_Line);
+			EXTI->RTSR |=  (1<<EXTI_PinConfigPtr->EXTI_Input_Line);
 			break;
 
 		case EXTI_TRIGGER_FALLING:
-			EXTI->FTSR |=  (1<<EXTI_PinConfigPtr->EXTI_Pin.EXTI_Input_Line);
+			EXTI->FTSR |=  (1<<EXTI_PinConfigPtr->EXTI_Input_Line);
 			break;
 
 		case EXTI_TRIGGER_RISING_FALLING:
-			EXTI->RTSR |= (1<<EXTI_PinConfigPtr->EXTI_Pin.EXTI_Input_Line);
-			EXTI->FTSR |= (1<<EXTI_PinConfigPtr->EXTI_Pin.EXTI_Input_Line);
+			EXTI->RTSR |= (1<<EXTI_PinConfigPtr->EXTI_Input_Line);
+			EXTI->FTSR |= (1<<EXTI_PinConfigPtr->EXTI_Input_Line);
 			break;
 
 	}
@@ -180,20 +150,20 @@ void MCAL_EXTI_Init(EXTI_PinConfig_t* EXTI_PinConfigPtr){
 	/*
 	 * 4) Update Interrupt Handling CallBack
 	 */
-	g_IRQ_CallBackPtr[EXTI_PinConfigPtr->EXTI_Pin.EXTI_Input_Line] = EXTI_PinConfigPtr->IRQ_CallBackPtr;
+	g_IRQ_CallBackPtr[EXTI_PinConfigPtr->EXTI_Input_Line] = EXTI_PinConfigPtr->IRQ_CallBackPtr;
 
 	/*
 	 * 5) Enable/Disable IRQ EXTI & NVIC
 	 */
 	if(EXTI_PinConfigPtr->EXTI_Enable == EXTI_IRQ_ENABLE)
 	{
-		EXTI->IMR |= (1<<EXTI_PinConfigPtr->EXTI_Pin.EXTI_Input_Line);
-		EXTI_NVIC_EN(EXTI_PinConfigPtr->EXTI_Pin.EXTI_Input_Line);
+		EXTI->IMR |= (1<<EXTI_PinConfigPtr->EXTI_Input_Line);
+		EXTI_NVIC_EN(EXTI_PinConfigPtr->EXTI_Input_Line);
 	}
 	else
 	{
-		EXTI->IMR &= ~(1<<EXTI_PinConfigPtr->EXTI_Pin.EXTI_Input_Line);
-		EXTI_NVIC_DIS(EXTI_PinConfigPtr->EXTI_Pin.EXTI_Input_Line);
+		EXTI->IMR &= ~(1<<EXTI_PinConfigPtr->EXTI_Input_Line);
+		EXTI_NVIC_DIS(EXTI_PinConfigPtr->EXTI_Input_Line);
 	}
 
 }

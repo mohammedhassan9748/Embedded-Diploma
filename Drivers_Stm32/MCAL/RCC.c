@@ -69,7 +69,7 @@ const static uint8_t g_AHB_Prescaler_Table[16] = {0,0,0,0,0,0,0,0,1,2,3,4,6,7,8,
 *
 * @retval 			- SYSCLK Frequency.
 *
-* Note				-
+* Note				- HSE is configured by the user. The PLL frequency is returned unchecked by 16MHz and to be done later.
 *
 */
 uint32_t MCAL_RCC_SYSCLK(void){
