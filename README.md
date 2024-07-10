@@ -31,7 +31,7 @@ cd Embedded-Diploma
 
 ## Contributions
 
-This repo is being incremented by my personal work through it.
+This repo is being incremented by my personal work throughout the diploma.
 
 ## License
 
