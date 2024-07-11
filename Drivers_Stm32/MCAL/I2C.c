@@ -182,7 +182,7 @@ void MCAL_I2C_Init(I2C_Config_t* I2C_ConfigPtr){
 		I2C_ConfigPtr->I2Cx->OAR2 	= I2Cx_temp[3];
 		I2C_ConfigPtr->I2Cx->CCR 	= I2Cx_temp[4];
 		I2C_ConfigPtr->I2Cx->TRISE 	= I2Cx_temp[5];
-		I2C_ConfigPtr->I2Cx->CR1 = I2Cx_temp[0];
+		I2C_ConfigPtr->I2Cx->CR1 	= I2Cx_temp[0];
 
 		I2C_GPIO_SetPins(I2C_ConfigPtr);
 
@@ -478,11 +478,7 @@ void MCAL_I2C_MasterRecDataPolling (I2C_Config_t* I2C_ConfigPtr, uint8_t* pRxBuf
 
 		for(int i=0;i<dataLength;i++)
 		{
-
-			// Poll on RXNE, wait for data register to be full for reading it.
-			while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_RXNE) == I2C_Flag_Reset);
-
-			if(i == dataLength-2)
+			if(i == dataLength-1)
 			{
 				// • Clear ACK bit
 				I2C_ConfigPtr->I2Cx->CR1 &= ~(1<<10);
@@ -491,6 +487,9 @@ void MCAL_I2C_MasterRecDataPolling (I2C_Config_t* I2C_ConfigPtr, uint8_t* pRxBuf
 				if(stopCondition == I2C_Stop)
 					MCAL_I2C_GenerateStop(I2C_ConfigPtr, I2C_Stop_Enable);
 			}
+
+			// Poll on RXNE, wait for data register to be full for reading it.
+			while(MCAL_I2C_GetFlagStatus(I2C_ConfigPtr,I2C_Flag_RXNE) == I2C_Flag_Reset);
 
 			// • Read Data in DR
 			pRxBuffer[i] = I2C_ConfigPtr->I2Cx->DR;
@@ -522,7 +521,7 @@ void MCAL_I2C_MasterRecDataPolling (I2C_Config_t* I2C_ConfigPtr, uint8_t* pRxBuf
 
 
 /**================================================================
- * @Fn				- MCAL_I2C_MasterTX
+ * @Fn				- MCAL_I2C_MasterTxPolling
  *
  * @brief 			- Transmit data required to send from master device.
  *
@@ -616,7 +615,7 @@ void MCAL_I2C_MasterTxPolling(I2C_Config_t* I2C_ConfigPtr, uint16_t devAddress, 
 }
 
 /**================================================================
- * @Fn				- MCAL_I2C_MasterRX
+ * @Fn				- MCAL_I2C_MasterRxPolling
  *
  * @brief 			- Receive data required to be sent to the master device.
  *

@@ -200,9 +200,9 @@ typedef enum{
 }SPI_Slaves_t;
 
 typedef enum{
-	SPI_NSS_Drive_Low,
-	SPI_NSS_Drive_High
-}SPI_NSS_Drive_State_t;
+	SPI_Disable,
+	SPI_Enable
+}SPI_Activation_t;
 
 //-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-
 //											APIS
@@ -216,7 +216,7 @@ void MCAL_SPI_DeInit(SPI_Config_t* SPI_ConfigPtr);
 void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr, SPI_Slaves_t Managed_Slaves);
 
 // Driving NSS Pins for master initiation and communication APIs.
-void MCAL_SPI_DRIVE_NSS(SPI_Config_t* SPI_ConfigPtr, SPI_NSS_Drive_State_t Drive_State);
+void MCAL_SPI_Activation(SPI_Config_t* SPI_ConfigPtr, SPI_Activation_t State);
 
 //Sending & Receiving APIs
 void MCAL_SPI_Transmit(SPI_Config_t* SPI_ConfigPtr, uint16_t* pTxBuffer, SPI_Polling_Mechanism_t Polling_Status);

@@ -8,7 +8,12 @@ Src/main.o: ../Src/main.c ../Src/../Services/Platform_Types.h \
  ../Src/../MCAL/Inc/SPI.h ../Src/../HAL/Inc/LCD.h \
  ../Src/../HAL/Inc/../../Services/Platform_Types.h \
  ../Src/../HAL/Inc/../../MCAL/Inc/GPIO.h ../Src/../HAL/Inc/keypad.h \
- ../Src/../HAL/Inc/SevenSegment.h
+ ../Src/../HAL/Inc/SevenSegment.h ../Src/../HAL/Inc/EEPROM.h \
+ ../Src/../HAL/Inc/../../MCAL/Inc/I2C.h \
+ c:\users\hp\stm32workspace\stm32\services\platform_types.h \
+ c:\users\hp\stm32workspace\stm32\services\stm32f103c6.h \
+ ../Src/../HAL/Inc/../../MCAL/Inc/GPIO.h \
+ ../Src/../HAL/Inc/../../MCAL/Inc/RCC.h
 
 ../Src/../Services/Platform_Types.h:
 
@@ -41,3 +46,15 @@ Src/main.o: ../Src/main.c ../Src/../Services/Platform_Types.h \
 ../Src/../HAL/Inc/keypad.h:
 
 ../Src/../HAL/Inc/SevenSegment.h:
+
+../Src/../HAL/Inc/EEPROM.h:
+
+../Src/../HAL/Inc/../../MCAL/Inc/I2C.h:
+
+c:\users\hp\stm32workspace\stm32\services\platform_types.h:
+
+c:\users\hp\stm32workspace\stm32\services\stm32f103c6.h:
+
+../Src/../HAL/Inc/../../MCAL/Inc/GPIO.h:
+
+../Src/../HAL/Inc/../../MCAL/Inc/RCC.h:

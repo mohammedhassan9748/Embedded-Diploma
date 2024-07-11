@@ -309,31 +309,29 @@ void MCAL_SPI_GPIO_SetPins(SPI_Config_t* SPI_ConfigPtr, SPI_Slaves_t Managed_Sla
 }
 
 /**================================================================
-* @Fn				- MCAL_SPI_DRIVE_NSS
+* @Fn				- MCAL_SPI_Activation
 *
-* @brief 			- Drive the NSS Pin Low or High based in master mode based on the drive state given. And used if onlt the
-* 					  NSS pin option in "SPI_PreScaler" is choosen as -> "SPI_SS_HARDWARE_NSS_OE".
+* @brief 			- An API used to control the enable/disable SPE bit of the SPIx peripheral to control the transmission of
+* 					  data of certain modes
 *
-* @param [in] 		- SPI_ConfigPtr: Pointer to the SPI_Config_t structure that holds
-* 					  the configuration information for the SPIx of the desired peripheral.
+* @param [in] 		- SPI_ConfigPtr: Pointer to the SPI_Config_t structure that holds the configuration information for the
+* 									 SPIx of the desired peripheral.
 *
-* @param [in] 		- Drive_State: SPI_NSS_Drive_State_t type to determine the state of the NSS Output pin.
-*
+* @param [in] 		- State: SPI_Activation_t type to determine the state of the SPIx peripheral Enabled/Disabled.
 *
 * @retval 			- None.
 *
-* Note				- Thus is used if only the NSS pin option in "SPI_PreScaler" is choosen as -> "SPI_SS_HARDWARE_NSS_OE".
+* Note				- Used when communicating via the Master device and alse the need of controling sending/receiving operations.
 *
 */
-void MCAL_SPI_DRIVE_NSS(SPI_Config_t* SPI_ConfigPtr, SPI_NSS_Drive_State_t Drive_State){
-	uint8_t NSS_Index = 0;
-
-	if(SPI_ConfigPtr->SPIx == SPI1)
-		NSS_Index = 0;
+void MCAL_SPI_Activation(SPI_Config_t* SPI_ConfigPtr, SPI_Activation_t State){
+	if(State == SPI_Enable)
+		SET_BIT(SPI_ConfigPtr->SPIx->CR1,6);
+	else if(State == SPI_Disable)
+		CLEAR_BIT(SPI_ConfigPtr->SPIx->CR1,6);
 	else
-		NSS_Index = 1;
-
-	MCAL_GPIO_WritePin(&SPI_NSS_Config[NSS_Index], Drive_State);
+		// Invalid State
+		return;
 }
 
 /**================================================================
