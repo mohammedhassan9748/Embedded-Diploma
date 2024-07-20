@@ -1,0 +1,56 @@
+﻿/*@!Encoding:65001*/
+includes
+{
+  
+}
+
+variables
+{
+  // This used to do the delay of 1 sec, we will declare timer from type msTimer in the variables scope.
+  msTimer send_timer;
+  const int timer_period = 100;    // Constant Timer Period is 1000 ms.
+  message ACC_CMD_message my_ACC_CMD;  // The message ACC_CMD is from type message of type ACC_CMD_message that was formed in the database.
+  int variable_ACC = 0;
+}
+
+on start {
+ 
+  // write here like printf in C.
+  write("Eng. Mohamed Ahmed: Case Study 4 CANoe");
+  // This is function call for setting the timer duration to the msTimer variable type.
+  // And it produce the delay required then enters the function callback "on timer send_timer".
+  setTimer(send_timer,timer_period);
+  
+}
+
+/*
+ * When ECU1 receive message it will enter this function.
+ * It takes the type of the message it will receive after it's name (on message) -> parameter (i.e SpeedSensor_message).
+ */
+on message SpeedSensor_message
+{
+  write("ECU1: Received from ECU2");
+}
+
+/*
+ * Callback of the timer
+ * It takes the type of msTimer variable.
+ */
+on timer send_timer{
+  
+  write("Eng. Mohamed Ahmed: Case Study 4 CANoe");
+  
+  // Check of the "ACC_System_Variable" Created in the enviroment system variables.
+  // This variable is controlled via the pedal button as a state of one or zero. And using this variable for check.
+  // Each 1 sec we check the value of the pedal.
+  variable_ACC = @sysvar::ACC_System_Variable;
+  
+  // Setting the physical signal value of the variable my_ACC_CMD of type message ACC_CMD_message.
+  my_ACC_CMD.ACC_ON.phys = variable_ACC;
+  
+  // output means "CAN Send Data" and takes the variable of the message type (i.e my_ACC_CMD of type message ACC_CMD_message).
+  output(my_ACC_CMD);           
+  
+  // To delay again and then enter "on timer send_timer" function again.
+  setTimer(send_timer,timer_period);
+}

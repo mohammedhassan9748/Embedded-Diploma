@@ -1,0 +1,51 @@
+﻿/*@!Encoding:65001*/
+includes
+{
+  
+}
+
+variables
+{
+  message SpeedSensor_message my_SpeedSensorMsg;
+  int variable_Speed = 0;
+}
+
+on start {
+ 
+  // write here like printf in C.
+  write("####### ECU2 #########");
+  
+}
+
+/*
+ * When ECU2 receive message it will enter this function.
+ * It takes the type of the message it will receive after it's name (on message) -> parameter (i.e SpeedSensor_message).
+ */
+on message ACC_CMD_message
+{
+  write("ECU2: Received from ECU1");
+
+  if(this.ACC_ON.phys == 1)
+  {
+    if(variable_Speed == 255)
+      variable_Speed = 255;
+    else
+     variable_Speed++;
+  }
+  else{
+     if(variable_Speed == 0)
+      variable_Speed = 0;
+    else
+     variable_Speed--;
+  }
+  
+  // Setting the physical signal value of the variable my_SpeedSensorMsg of type message SpeedSensor_message.
+  my_SpeedSensorMsg.Speed.phys = variable_Speed;
+  
+  // Setting the SpeedSensor Measurment in the panel.
+  @sysvar::Speed_System_Variable = variable_Speed;
+  
+  // output means "CAN Send Data" and takes the variable of the message type (i.e my_SpeedSensorMsg of type message SpeedSensor_message).
+  output(my_SpeedSensorMsg);   
+  
+}

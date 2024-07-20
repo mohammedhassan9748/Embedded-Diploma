@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Panel Type="Vector.CANalyzer.Panels.PanelSerializer, Vector.CANalyzer.Panels.Serializer, Version=18.0.150.0, Culture=neutral, PublicKeyToken=null">
+  <Object Type="Vector.CANalyzer.Panels.Runtime.Panel, Vector.CANalyzer.Panels.Common, Version=18.0.150.0, Culture=neutral, PublicKeyToken=null" Name="Panel" ControlName="Panel">
+    <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=18.0.150.0, Culture=neutral, PublicKeyToken=null" Name="X8ec0d29be8d28e4703eb5c4e2fb6b42d9e4e" ControlName="Static Text 3">
+      <Property Name="Name">X8ec0d29be8d28e4703eb5c4e2fb6b42d9e4e</Property>
+      <Property Name="Size">112, 21</Property>
+      <Property Name="Location">191, 261</Property>
+      <Property Name="BackColor">Black</Property>
+      <Property Name="ForeColor">White</Property>
+      <Property Name="Font">Franklin Gothic Heavy, 12pt, style=Bold, Underline</Property>
+      <Property Name="Text">Speed Sensor</Property>
+    </Object>
+    <Object Type="Vector.CANalyzer.Panels.Design.MeterControl, Vector.CANalyzer.Panels.CommonControls, Version=18.0.150.0, Culture=neutral, PublicKeyToken=null" Name="Xc7bd284fe953ee4888e95dce3a052a75f448" ControlName="Meter 1">
+      <Property Name="Name">Xc7bd284fe953ee4888e95dce3a052a75f448</Property>
+      <Property Name="Size">189, 143</Property>
+      <Property Name="Location">155, 112</Property>
+      <Property Name="SymbolConfiguration">8;16;;;;Speed_System_Variable;1;;;-1;;;Value;;;0</Property>
+      <Property Name="AlarmLowerLimit">10</Property>
+      <Property Name="AlarmUpperLimit">10</Property>
+      <Property Name="ScaleMax">255</Property>
+    </Object>
+    <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=18.0.150.0, Culture=neutral, PublicKeyToken=null" Name="Xbefe86f9e699ae4855e8e03e41aaf051a240" ControlName="Static Text 2">
+      <Property Name="Name">Xbefe86f9e699ae4855e8e03e41aaf051a240</Property>
+      <Property Name="Size">151, 21</Property>
+      <Property Name="Location">488, 261</Property>
+      <Property Name="BackColor">255, 229, 117, 114</Property>
+      <Property Name="ForeColor">White</Property>
+      <Property Name="Font">Franklin Gothic Heavy, 12pt, style=Bold, Underline</Property>
+      <Property Name="Text">Accelaration Pedal</Property>
+    </Object>
+    <Object Type="Vector.CANalyzer.Panels.Design.SwitchControl, Vector.CANalyzer.Panels.CommonControls, Version=18.0.150.0, Culture=neutral, PublicKeyToken=null" Name="X04d2d164ed8ebe4b32e870eefa1698f3a2b5" ControlName="Switch / Indicator 1">
+      <Property Name="Name">X04d2d164ed8ebe4b32e870eefa1698f3a2b5</Property>
+      <Property Name="Size">68, 89</Property>
+      <Property Name="Location">527, 141</Property>
+      <Property Name="SymbolConfiguration">8;16;;;;ACC_System_Variable;1;;;-1;;;Value;;;0</Property>
+      <Property Name="TabIndex">0</Property>
+      <Property Name="Activation">Left</Property>
+      <Property Name="Epsilon">0</Property>
+      <Property Name="Increment">1</Property>
+      <Property Name="StartValue">0</Property>
+      <Property Name="SwitchValuesVTXml">&lt;Version&gt;2&lt;/Version&gt;&lt;Count&gt;2&lt;/Count&gt;&lt;RxValue&gt;0&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;0&lt;/TxValue&gt;&lt;RxValue&gt;1&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;1&lt;/TxValue&gt;</Property>
+      <Property Name="SwitchValuesVT">1;2;0/Lower/0;1/Lower/1</Property>
+      <Property Name="SwitchValues">1;2;0;1</Property>
+      <Property Name="SwitchValuesRx">1;2;0;1</Property>
+    </Object>
+    <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=18.0.150.0, Culture=neutral, PublicKeyToken=null" Name="X285881cfe472fe412ce9d4ee1655bfca4085" ControlName="Static Text 1">
+      <Property Name="Name">X285881cfe472fe412ce9d4ee1655bfca4085</Property>
+      <Property Name="Size">339, 21</Property>
+      <Property Name="Location">241, 52</Property>
+      <Property Name="BackColor">255, 31, 73, 125</Property>
+      <Property Name="ForeColor">White</Property>
+      <Property Name="Font">Franklin Gothic Heavy, 12pt, style=Bold, Underline</Property>
+      <Property Name="Text">CANoe Case Study 4 - Eng. Mohamed Ahmed</Property>
+    </Object>
+    <Property Name="Name">Panel</Property>
+    <Property Name="Size">825, 397</Property>
+    <Property Name="Location">0, 0</Property>
+    <Property Name="BackColor">White</Property>
+  </Object>
+</Panel>
