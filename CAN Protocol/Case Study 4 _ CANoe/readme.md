@@ -1,7 +1,3 @@
-Sure, here is the updated README file without the scripts.
-
----
-
 # CANoe Case Study 4
 
 This project demonstrates the use of the CAN protocol for communication between two ECUs using the CANoe tool. The first ECU (ECU1) sends an acceleration command every 100 ms, while the second ECU (ECU2) receives this command and increments the speed accordingly from 0 to 255.
@@ -40,7 +36,7 @@ This project demonstrates the use of the CAN protocol for communication between 
 ![Tracing When Accelaration CMD is Off](./Screenshots/Trace_Deceleration.png)
 
 ### Graph Tracing
-![Graph Tracing](./path_to_your_image/Graph_Indicator.png)
+![Graph Tracing](./Screenshots/Graph_Indicator.png)
 
 ## How to Run
 
