@@ -34,6 +34,7 @@
 
 uint8_t IRQ_Flag = 0;
 
+// For the labs (1 -> 5)
 uint8_t VAL1 = 3;
 uint8_t VAL2 = 7;
 uint8_t VAL3 = 0;
@@ -46,51 +47,57 @@ void CallBackFunction(void)
 int main(void)
 {
 	EXTI_PinConfig_t EXTIConfig;
+	EXTIConfig.EXTI_GPIO_Port   = GPIOB;
+	EXTIConfig.EXTI_Input_Line 	= EXTI_9;
 	EXTIConfig.EXTI_Enable 		= EXTI_IRQ_ENABLE;
-	EXTIConfig.EXTI_Pin 		= EXTIPB9;
 	EXTIConfig.EXTI_Trigger		= EXTI_TRIGGER_RISING;
 	EXTIConfig.IRQ_CallBackPtr 	= CallBackFunction;
 	MCAL_EXTI_Init(&EXTIConfig);
 
 	//Lab 1 - Using no input or output
+	// no operation
 	__asm("nop \n\t"
-		  "nop \n\t"
-		  "nop \n\t"
-		);
+			"nop \n\t"
+			"nop \n\t"
+	);
 
-	//Lab 2 - Using output only with no input
-	__asm("mov %0,0xff"
-		:"=r" 	(VAL3)							//Fisrt:  Output parameters
-		 );
+	//Lab 2 - Using output only with no input (mov VAL3,0xff)
+	// moving '255' to VAL3 C variable
+	__asm("mov %0,#0xff"
+			:"=r" 	(VAL3)							//Fisrt:  Output parameters
+	);
 
 	//Lab 3 - Using input only with no output
+	// moving VAL3 C variable to register r0
 	__asm("mov r0,%0"
-		:										//Fisrt:  Output parameters
-		:"r" 	(VAL3)							//Second: Input  parameters
-		 );
+			:										//Fisrt:  Output parameters
+			:"r" 	(VAL3)							//Second: Input  parameters
+	);
 
 	//Lab 4 - Using both input and output
+	// adding VAL1 and VAL2 into VAL3 -> all of them are C variables
 	__asm("add %[out],%[in1],%[in2]"
-		:[out] "=r" (VAL3)						//Fisrt:  Output parameters
-		:[in1] "r" 	(VAL1),						//Second: Input  parameters
-		 [in2] "r" 	(VAL2)
-		 );
+			:[out] "=r" (VAL3)						//Fisrt:  Output parameters
+			 :[in1] "r" 	(VAL1),					//Second: Input  parameters
+			  [in2] "r" 	(VAL2)
+	);
 
-	//Lab 5 - Same as Lab 4 but with reserving r3 and r2
+	//Lab 5 - Same as Lab 4 but
+	// adding VAL1 and VAL2 into VAL3 -> all of them are C variables but with reserving r3 and r2
 	__asm("add %[out],%[in1],%[in2]"
-		:[out] "=r" (VAL3)						//Fisrt:  Output parameters
-		:[in1] "r" 	(VAL1),						//Second: Input  parameters
-		 [in2] "r" 	(VAL2)
-		: "r3","r2"								//Third:  Reserve these register for another purposes
-		  	  	  	  	  	  	  	  	  	  	//Note: if the compiler didn't find an alternative for this register
-		  	  	  	  	  	  	  	  	  	  	// 	required to be reserved, it won't reserve it and will use it.
-		 );
+			:[out] "=r" (VAL3)						//Fisrt:  Output parameters
+			 :[in1] "r" 	(VAL1),					//Second: Input  parameters
+			  [in2] "r" 	(VAL2)
+			  : "r3","r2"								//Third:  Reserve these register for another purposes
+				//Note: if the compiler didn't find an alternative for this register
+				// 	required to be reserved, it won't reserve it and will use it.
+	);
 
 	//End
 	__asm("nop \n\t"
-		  "nop \n\t"
-		  "nop \n\t"
-		);
+			"nop \n\t"
+			"nop \n\t"
+	);
 
 
 	while(1)

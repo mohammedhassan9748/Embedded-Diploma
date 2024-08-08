@@ -1,21 +1,24 @@
-RESET	;CPU entry point
+RESET		; CPU Entry Point
 			mov		r0,#5
 			bl		main
 			
+main 		;main function
+			mov		r2,#0x100 	;move the address of the required value in r2 register
+			str		r0,[r2]		;store the value of r0 in the address held by r2: [r2]->0x100
+			ldr		r3,[r2]		;load the value existing in the address helded by r2: [r2]->0x100 in r3
 			
-main
-			mov		r2,#0x100
-			str		r0,[r2]
-			ldr		r3,[r2]
-			strb		r0,[r2,#0x1]	;store r0 in r2 "base offset" + 0x1
-			strb		r0,[r2,#0x2]	;store r0 in r2 "base offset" + 0x2
-			strb		r0,[r2,#0x3]	;store r0 in r2 "base offset" + 0x3
-			strb		r0,[r2,#0x4]	;store r0 in r2 "base offset" + 0x3
+			strb		r0,[r2,#0x1]	;store the value of r0 in the first  byte in the address held by r2: [r2]->0x100
+			strb		r0,[r2,#0x2]	;store the value of r0 in the second byte in the address held by r2: [r2]->0x100
+			strb		r0,[r2,#0x3]	;store the value of r0 in the third  byte in the address held by r2: [r2]->0x100t
+			
+			bl 		subtract
 			bl		termination
-subtract
-			sub		r0,r0,#1
-			cmp		r0, #0
-			bne		subtract
-			mov		pc,lr
+			
+			
+subtract		;subtract function
+			sub		r0, r0,#1 	;subtract r0 by 1 and put in r0.
+			cmp		r0, #0 		;compare to check if r0 is equal zero.
+			bne		subtract		;branch to subtract if r0 is NOT equal zero.
+			mov		pc,lr		;meaning: bx lr, but not supported here.
 			
 termination
