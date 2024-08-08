@@ -33,8 +33,4 @@ cd Embedded-Diploma
 
 This repo is being incremented by my personal work throughout the diploma.
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ---
