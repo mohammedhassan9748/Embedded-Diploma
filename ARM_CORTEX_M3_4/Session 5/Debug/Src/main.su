@@ -1,0 +1,6 @@
+main.c:114:6:SVC_Handler	4	static,ignoring_inline_asm
+main.c:119:6:CallBackFunction	4	static
+main.c:134:5:main	24	static
+main.c:152:6:MainOS	8	static,ignoring_inline_asm
+main.c:213:6:TaskA	24	static
+main.c:221:6:TaskB	24	static
