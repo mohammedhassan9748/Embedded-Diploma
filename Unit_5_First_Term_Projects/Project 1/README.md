@@ -91,9 +91,9 @@ The **Waterfall model** was selected for this project due to its structured and 
 ## Simulation
 
 1. **Pressure = 15 < 20**
-   ![Simulation 1](ScreenShots/Simulation\1.png)
+   ![Simulation 1]("ScreenShots/Simulation 1.png")
 2. **Pressure = 31 > 20**
-   ![Simulation 2](ScreenShots/Simulation\2.png)
+   ![Simulation 2]("ScreenShots/Simulation 2.png")
 
 ## Conclusion
 This project report outlines the rationale behind the chosen approach for the pressure controller project, aligning with the project's specific requirements and ensuring a systematic and well-structured development process.
