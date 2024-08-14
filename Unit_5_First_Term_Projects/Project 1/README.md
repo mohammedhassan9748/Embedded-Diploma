@@ -69,12 +69,15 @@ The **Waterfall model** was selected for this project due to its structured and 
    ![Pressure Sensor State Machine](ScreenShots/Design_Analysis_Pressure_Sensor.png)
 
 2. **Pressure Controller**
+
    ![Pressure Controller State Machine](ScreenShots/Design_Analysis_Pressure_Controller.png)
 
 3. **LED Alarm**
+
    ![LED Alarm State Machine](ScreenShots/Design_Analysis_LED_Alarm.png)
 
 4. **LED Alarm Driver**
+
    ![LED Alarm Driver State Machine](ScreenShots/Design_Analysis_LED_Alarm_Driver.png)
 
 ## Code Data
@@ -85,17 +88,21 @@ The **Waterfall model** was selected for this project due to its structured and 
 ### Symbol Table
 
 - **Symbol Table 1**
+
   ![Symbol Table 1](ScreenShots/SymbolTable%201.png)
 
 - **Symbol Table 2**
+
   ![Symbol Table 2](ScreenShots/SymbolTable%202.png)
 
 ## Simulation
 
 1. **Pressure = 15 < 20**
+ 
    ![Simulation 1](ScreenShots/Simulation%201.png)
 
 2. **Pressure = 31 > 20**
+
    ![Simulation 2](ScreenShots/Simulation%202.png)
 
 ## Conclusion
