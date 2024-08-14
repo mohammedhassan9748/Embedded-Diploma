@@ -65,6 +65,7 @@ The **Waterfall model** was selected for this project due to its structured and 
 ### State Machine Diagrams
 
 1. **Pressure Sensor**
+
    ![Pressure Sensor State Machine](ScreenShots/Design_Analysis_Pressure_Sensor.png)
 
 2. **Pressure Controller**
