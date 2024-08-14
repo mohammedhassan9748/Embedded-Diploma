@@ -7,7 +7,6 @@ This project implements a pressure controller system designed to alert the cabin
 - [Case Study](#case-study)
   - [Description](#description)
   - [Assumptions](#assumptions)
-  - [Versioning](#versioning)
 - [Methodology](#methodology)
 - [System Analysis](#system-analysis)
   - [Requirements Diagram](#requirements-diagram)
@@ -41,9 +40,6 @@ This pressure controller system is part of a study to explore a design that aler
 4. The alarm is assumed to function without failure.
 5. The controller is always powered and will periodically check the pressure sensor driver every second to optimize processor time usage.
 
-### Versioning
-- The initial version of the design does not include the option to keep track of the measured values.
-
 ## Methodology
 The **Waterfall model** was selected for this project due to its structured and sequential phases, aligning with the client's well-defined requirements and minimal post-requirements customer involvement. This method provides a clear framework for risk management, regulatory compliance, and quality assurance.
 
@@ -68,7 +64,7 @@ The **Waterfall model** was selected for this project due to its structured and 
 
 ### State Machine Diagrams
 
-1. **Pressure Sensor**
+1. ***Pressure Sensor***
    ![Pressure Sensor State Machine](ScreenShots/Design_Analysis_Pressure_Sensor.png)
 2. **Pressure Controller**
    ![Pressure Controller State Machine](ScreenShots/Design_Analysis_Pressure_Controller.png)
