@@ -1,0 +1,14 @@
+GPTM.c:52:6:MCAL_GPTM_Init	40	static
+GPTM.c:267:6:MCAL_GPTM_DeInit	16	static
+GPTM.c:302:6:MCAL_GPTM_GPIO_SetPins	168	static
+GPTM.c:428:6:MCAL_GPTM_StartCounter	16	static
+GPTM.c:435:6:MCAL_GPTM_GenerateSoftUpdated	16	static
+GPTM.c:442:6:MCAL_GPTM_SetAutoReload	16	static
+GPTM.c:445:10:MCAL_GPTM_GetAutoReload	24	static
+GPTM.c:450:6:MCAL_GPTM_SetPreScaler	16	static
+GPTM.c:453:10:MCAL_GPTM_GetPreScaler	24	static
+GPTM.c:458:6:MCAL_GPTM_SetCCRx	16	static
+GPTM.c:463:10:MCAL_GPTM_GetCCRx	16	static
+GPTM.c:469:6:TIM2_IRQHandler	8	static
+GPTM.c:500:6:TIM3_IRQHandler	8	static
+GPTM.c:531:6:TIM4_IRQHandler	8	static
