@@ -1,8 +1,5 @@
 # Student Management System
 
-**Author:** Mohamed Ahmed Hassan Mohamed Ali  
-**Date:** 6th of Sep 2023
-
 ## Overview
 The Student Management System is a software application developed in C to efficiently manage student records using a First-In-First-Out (FIFO) data structure. This project includes functions for adding, searching, updating, and deleting student information.
 
