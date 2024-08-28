@@ -35,13 +35,13 @@ The RTOS manages multiple tasks, each with specific priorities and timing requir
 
 The RTOS uses a preemption mechanism, allowing higher-priority tasks to interrupt lower-priority ones, ensuring critical operations are not delayed. For example, `Task_4` may interrupt `Task_3` when it becomes ready to run, demonstrating the RTOS's ability to handle dynamic task priorities effectively.
 
-![Preemption and Task Switching](screenshots/Screenshot1)
+![Preemption and Task Switching](screenshots/Screenshot1.png)
 
 ### Mutex and Task Synchronization
 
 Tasks interact with mutexes to ensure safe access to shared resources. For instance, `Task_2` and `Task_3` may need to wait for a mutex to be released by another task before proceeding, ensuring that only one task can access a critical section at a time. This prevents race conditions and ensures data integrity within the system.
 
-![Mutex and Task Synchronization](screenshots/Screenshot2)
+![Mutex and Task Synchronization](screenshots/Screenshot2.png)
 
 ## Features
 
