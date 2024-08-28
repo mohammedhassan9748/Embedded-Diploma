@@ -1,0 +1,3 @@
+EEPROM.c:39:6:HAL_EEPROM_Init	8	static
+EEPROM.c:64:9:HAL_EEPROM_WriteNbytes	1064	static
+EEPROM.c:91:9:HAL_EEPROM_ReadNbytes	40	static

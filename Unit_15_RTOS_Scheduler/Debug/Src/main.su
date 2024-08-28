@@ -1,0 +1,5 @@
+main.c:34:6:Task_1	8	static
+main.c:55:6:Task_2	8	static
+main.c:75:6:Task_3	8	static
+main.c:94:6:Task_4	8	static
+main.c:116:5:main	24	static
