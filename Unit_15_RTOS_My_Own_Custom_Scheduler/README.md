@@ -26,7 +26,7 @@ The core of this RTOS is its **Scheduler**, implemented to provide efficient tas
 
 ## Task State Transition Diagram
 
-![Task State Transition Diagram](Diagram.PNG)
+![Task State Transition Diagram](screenshots/Diagram.PNG)
 
 The above diagram illustrates the various states a task can be in within the RTOS and the transitions between these states:
 
@@ -73,10 +73,10 @@ This RTOS example includes a scenario demonstrating **priority inversion**. Prio
 
 Refer to the screenshots for a detailed visual explanation:
 
-- ![Task Scheduling and Priority Inversion](screenshot/Screenshot1)  
+- ![Task Scheduling and Priority Inversion](screenshots/Screenshot1.png)  
   **Screenshot1**: Shows the timeline of task execution, indicating when each task is scheduled, preempted, or blocked. It illustrates the priority inversion scenario where **Task4** (High Priority) is blocked by **Task1** (Low Priority) holding a resource.
 
-- ![Tasks CPU Utilization](screenshot/Screenshot2)  
+- ![Tasks CPU Utilization](screenshots/Screenshot2.png)  
   **Screenshot2**: Displays the CPU utilization percentage for each task, providing insights into how much processing time each task consumes during the execution period.
 
 ## Conclusion
